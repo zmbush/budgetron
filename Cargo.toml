@@ -1,0 +1,4 @@
+[package]
+name = "budgetron"
+version = "0.1.0"
+authors = ["Zachary Bush <zach@zmbush.com>"]
