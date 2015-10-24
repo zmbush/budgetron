@@ -42,9 +42,9 @@ struct Args {
     flag_output_dir: String
 }
 
-fn write_pivot_table(d: &Path, time_frame: &str, transactions: &Transactions) {
-    let start = Date::ago(time_frame);
-    let end = Date::today();
+fn write_pivot_table_range(d: &Path, start_s: &str, end_s: &str, transactions: &Transactions) {
+    let start = Date::ago(start_s);
+    let end = Date::ago(end_s);
     let mut amounts = HashMap::new();
     for t in transactions.iter() {
         if t.transaction_type == TransactionType::Debit &&
@@ -53,10 +53,36 @@ fn write_pivot_table(d: &Path, time_frame: &str, transactions: &Transactions) {
         }
     }
     let mut out = csv::Writer::from_file(
-        d.join(format!("by_categories_{}_{:#}_{:#}.csv", time_frame, start, end))).unwrap();
+        d.join(format!("by_categories_{}-{}_{:#}_{:#}.csv", start_s, end_s, start, end))).unwrap();
     out.write(["category", "amount"].iter());
     for key in amounts.keys() {
         out.write([key.clone(), &amounts[key].to_string()].iter());
+    }
+}
+
+fn write_pivot_table(d: &Path, time_frame: &str, transactions: &Transactions) {
+    write_pivot_table_range(d, time_frame, "0d", transactions);
+}
+
+fn print_tpm_report(tt: TransactionType, categories: Vec<&str>, transactions: &Transactions) {
+    let mut months = HashMap::new();
+    for t in transactions.iter() {
+        if t.transaction_type == tt {
+            for c in &categories {
+                if &t.category == c {
+                    *months.entry((t.date.year, t.date.month)).or_insert(0.0) += t.amount;
+                }
+            }
+        }
+    }
+    let ms = {
+        let mut tmp: Vec<(i32, i32)> = months.keys().cloned().collect();
+        tmp.sort();
+        tmp
+    };
+
+    for (year, month) in ms {
+        println!("{}/{}: ${:.2}", month, year, months[&(year, month)]);
     }
 }
 
@@ -120,4 +146,14 @@ fn main() {
     write_pivot_table(d, "6m", &transactions);
     write_pivot_table(d, "1q", &transactions);
     write_pivot_table(d, "2q", &transactions);
+
+
+    write_pivot_table_range(d, "3m", "2m", &transactions);
+    write_pivot_table_range(d, "2m", "1m", &transactions);
+
+
+
+    print_tpm_report(TransactionType::Credit, vec!["Income"], &transactions);
+    // print_tpm_report(TransactionType::Debit, vec!["Bills", "Insurance"], &transactions);
+    //print_tpm_report(TransactionType::Debit, vec!["Groceries"], &transactions);
 }

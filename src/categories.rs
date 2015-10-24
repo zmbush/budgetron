@@ -32,7 +32,8 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Legal" => phf_set![],
     "Personal Care" => phf_set!["PersonalCare", "Hair", "Spa & Massage"],
     "Crowdfunding" => phf_set!["Kickstarter"],
-    "Shopping" => phf_set!["Clothing", "Sporting Goods", "Sports", "Costco", "Warehouse Clubs"],
+    "Shopping" => phf_set![
+        "Amazon", "Clothing", "Sporting Goods", "Sports", "Costco", "Warehouse Clubs"],
     "Taxes" => phf_set!["State Tax", "Federal Tax"],
     "Technology" => phf_set!["Computer/Video Games", "Electronics & Software", "VPS Hosting"],
     "Television" => phf_set![],
