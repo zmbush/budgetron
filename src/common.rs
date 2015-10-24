@@ -1,12 +1,57 @@
 use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
 use error::BResult;
 use csv;
+use std::collections::HashMap;
+use std::cmp::min;
+use time;
+use std::fmt;
 
-#[derive(Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Date {
-    pub year: i16,
-    pub month: i8,
-    pub day: i8
+    pub year: i32,
+    pub month: i32,
+    pub day: i32
+}
+
+impl Date {
+    pub fn from_tm(n: time::Tm) -> Date {
+        Date {
+            year: n.tm_year + 1900,
+            month: n.tm_mon + 1,
+            day: n.tm_mday,
+        }
+    }
+
+    pub fn today() -> Date {
+        Date::ago("0d")
+    }
+
+    pub fn ago(time_frame: &str) -> Date {
+        let mut tf = time_frame.to_owned();
+        let mut tm = time::now() - time::Duration::weeks(1);
+        if let Some(c) = tf.pop() {
+            let num = tf.parse().unwrap();
+            tm = tm - match c {
+                'w' => time::Duration::weeks(num),
+                'd' => time::Duration::days(num),
+                'm' => time::Duration::days(num * 28),
+                'q' => time::Duration::weeks(num * 13),
+                'y' => time::Duration::days(num * 365),
+                _ => time::Duration::days(0)
+            };
+        }
+        Date::from_tm(tm)
+    }
+}
+
+impl fmt::Display for Date {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if f.alternate() {
+            write!(f, "{:04}{:02}{:02}", self.year, self.month, self.day)
+        } else {
+            write!(f, "{}/{}/{}", self.month, self.day, self.year)
+        }
+    }
 }
 
 impl Decodable for Date {
@@ -37,11 +82,11 @@ impl Decodable for Date {
 
 impl Encodable for Date {
     fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.emit_str(&format!("{}/{}/{}", self.month, self.day, self.year))
+        s.emit_str(&format!("{}", self))
     }
 }
 
-#[derive(Debug, RustcEncodable)]
+#[derive(Debug, RustcEncodable, PartialEq)]
 pub enum TransactionType { Credit, Debit }
 
 impl Decodable for TransactionType {
@@ -98,8 +143,26 @@ impl Transactions {
         Ok(count)
     }
 
-    pub fn sort(&mut self) {
+    pub fn collate(&mut self) {
         self.transactions.sort_by(|a, b| a.date.cmp(&b.date));
+
+        let mut to_delete = Vec::new();
+        for (i, t) in self.transactions.iter().enumerate() {
+            for j in i..min(self.transactions.len(), i + 50) {
+                let ref tn = self.transactions[j];
+                if tn.amount == t.amount && tn.transaction_type != t.transaction_type {
+                    to_delete.push(i);
+                    to_delete.push(j);
+                }
+            }
+        }
+
+        to_delete.sort();
+        to_delete.reverse();
+
+        for i in to_delete {
+            self.transactions.remove(i);
+        }
     }
 
     pub fn iter(&self) -> ::std::slice::Iter<Transaction> {
