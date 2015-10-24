@@ -1,6 +1,7 @@
 use common::{Date, Genericize, Person, TransactionType, Transaction};
 use std::str::FromStr;
 use rustc_serialize::{Decoder, Decodable};
+use categories::find_category;
 
 #[derive(Debug)]
 struct TransactionAmount {
@@ -88,7 +89,8 @@ impl Genericize for LogixExport {
             } else {
                 TransactionType::Credit
             },
-            category: self.category,
+            category: find_category(&self.category).unwrap().to_owned(),
+            original_category: self.category,
             account_name: self.account,
             labels: self.memo,
             notes: self.notes
@@ -118,7 +120,8 @@ impl Genericize for MintExport {
             original_description: self.original_description,
             amount: self.amount,
             transaction_type: self.transaction_type,
-            category: self.category,
+            category: find_category(&self.category).unwrap().to_owned(),
+            original_category: self.category,
             account_name: self.account_name,
             labels: self.labels,
             notes: self.notes
