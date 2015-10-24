@@ -4,8 +4,9 @@ version = "0.1.0"
 authors = ["Zachary Bush <zach@zmbush.com>"]
 
 [dependencies]
-rustc-serialize = "*"
 csv = "*"
 docopt = "*"
 phf = "*"
 phf_macros = "*"
+rustc-serialize = "*"
+time = "*"
