@@ -1,5 +1,8 @@
+#![feature(plugin)]
+#![plugin(phf_macros)]
 #![deny(unused)]
 
+extern crate phf;
 extern crate csv;
 extern crate rustc_serialize;
 extern crate docopt;
@@ -7,11 +10,11 @@ extern crate docopt;
 mod common;
 mod exports;
 mod error;
+mod categories;
 
-use common::{TransactionType, Genericize, Transaction};
+use common::Transactions;
 use exports::{MintExport, LogixExport};
 use rustc_serialize::Decodable;
-use error::BResult;
 use docopt::Docopt;
 
 const USAGE: &'static str = "
@@ -33,53 +36,28 @@ struct Args {
     flag_mint_file: Vec<String>
 }
 
-fn load_records<ExportType>(filename: &str, transactions: &mut Vec<Transaction>) -> BResult<i32>
-        where ExportType: Genericize + Decodable {
-    let mut rdr = try!(csv::Reader::from_file(filename));
-    let mut count = 0;
-    for record in rdr.decode() {
-        let record: ExportType = try!(record);
-        transactions.push(record.genericize());
-        count += 1;
-    }
-    Ok(count)
-}
-
 fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
 
-    let mut transactions = Vec::new();
+    let mut transactions = Transactions::new();
 
     for file in args.flag_logix_file {
-        load_records::<LogixExport>(&file, &mut transactions).unwrap();
+        transactions.load_records::<LogixExport>(&file).unwrap();
     }
 
     for file in args.flag_mint_file {
-        load_records::<MintExport>(&file, &mut transactions).unwrap();
+        transactions.load_records::<MintExport>(&file).unwrap();
     }
 
-    transactions.sort_by(|a, b| a.date.cmp(&b.date));
+    transactions.sort();
 
-    let mut income = 0.0;
-    let mut expense = 0.0;
-    for transaction in transactions {
-        if transaction.date.year == 2015 && transaction.date.month == 9 {
-            match transaction.transaction_type {
-                TransactionType::Debit => expense += transaction.amount,
-                TransactionType::Credit => income += transaction.amount
-            }
-            println!("{:?} {} ({:?} / {}) {}",
-                     transaction.person,
-                     transaction.amount,
-                     transaction.transaction_type,
-                     transaction.category,
-                     transaction.description);
-        }
+    let mut out = csv::Writer::from_file("data/out.csv").unwrap();
+    out.write(["date", "person", "description", "original description",
+                "amount", "type", "category", "original category",
+                "account", "labels", "notes"].iter()).unwrap();
+    for transaction in transactions.iter() {
+        out.encode(transaction).unwrap();
     }
-
-    println!("");
-    println!("Income: {}", income);
-    println!("Expense: {}", expense);
 }

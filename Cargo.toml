@@ -7,3 +7,5 @@ authors = ["Zachary Bush <zach@zmbush.com>"]
 rustc-serialize = "*"
 csv = "*"
 docopt = "*"
+phf = "*"
+phf_macros = "*"
