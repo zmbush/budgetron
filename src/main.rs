@@ -1,4 +1,4 @@
-#![feature(plugin, fmt_flags)]
+#![feature(plugin)]
 #![plugin(phf_macros)]
 // #![deny(unused)]
 
@@ -153,7 +153,7 @@ fn main() {
 
 
 
-    print_tpm_report(TransactionType::Credit, vec!["Income"], &transactions);
-    // print_tpm_report(TransactionType::Debit, vec!["Bills", "Insurance"], &transactions);
+    // print_tpm_report(TransactionType::Credit, vec!["Income"], &transactions);
+    print_tpm_report(TransactionType::Debit, vec!["Bills", "Insurance"], &transactions);
     //print_tpm_report(TransactionType::Debit, vec!["Groceries"], &transactions);
 }
