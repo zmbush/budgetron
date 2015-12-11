@@ -23,11 +23,11 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Hobbies" => phf_set!["Books", "Books & Magazines", "Conventions"],
     "Household" => phf_set![
         "Furnishings", "Home Improvement", "Home Services", "Lawn & Garden", "Pets",
-        "Home Supplies"],
+        "Home Supplies", "Home"],
     "Income" => phf_set!["Wages", "Paycheck", "Rental Income"],
     "Insurance" => phf_set!["Auto Insurance", "BillsInsurance"],
     "Interest" => phf_set!["Interest Income", "Dividends"],
-    "Investments" => phf_set![],
+    "Investments" => phf_set!["Trade Commissions"],
     "Kids" => phf_set!["Toys"],
     "Legal" => phf_set![],
     "Personal Care" => phf_set!["PersonalCare", "Hair", "Spa & Massage"],

@@ -1,10 +1,9 @@
-use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
-use error::BResult;
 use csv;
-use std::collections::HashMap;
+use error::BResult;
+use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
 use std::cmp::min;
-use time;
 use std::fmt;
+use time;
 
 #[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Date {
