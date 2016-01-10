@@ -2,88 +2,8 @@ use csv;
 use error::BResult;
 use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
 use std::cmp::min;
-use std::fmt;
-use time;
-
-#[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
-pub struct Date {
-    pub year: i32,
-    pub month: i32,
-    pub day: i32
-}
-
-impl Date {
-    pub fn from_tm(n: time::Tm) -> Date {
-        Date {
-            year: n.tm_year + 1900,
-            month: n.tm_mon + 1,
-            day: n.tm_mday,
-        }
-    }
-
-    pub fn today() -> Date {
-        Date::ago("0d")
-    }
-
-    pub fn ago(time_frame: &str) -> Date {
-        let mut tf = time_frame.to_owned();
-        let mut tm = time::now() - time::Duration::weeks(1);
-        if let Some(c) = tf.pop() {
-            let num = tf.parse().unwrap();
-            tm = tm - match c {
-                'w' => time::Duration::weeks(num),
-                'd' => time::Duration::days(num),
-                'm' => time::Duration::days(num * 28),
-                'q' => time::Duration::weeks(num * 13),
-                'y' => time::Duration::days(num * 365),
-                _ => time::Duration::days(0)
-            };
-        }
-        Date::from_tm(tm)
-    }
-}
-
-impl fmt::Display for Date {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if f.alternate() {
-            write!(f, "{:04}{:02}{:02}", self.year, self.month, self.day)
-        } else {
-            write!(f, "{}/{}/{}", self.month, self.day, self.year)
-        }
-    }
-}
-
-impl Decodable for Date {
-    fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        let s = try!(d.read_str());
-        let error = Err(d.error(&format!("Bad date format '{}'", s)));
-
-        macro_rules! get_num {
-            ($d:ident) => {
-                match $d.next() {
-                    Some(s) => match s.parse() {
-                        Ok(i) => i,
-                        Err(_) => return error
-                    },
-                    None => return error
-                }
-            }
-        }
-
-        let mut parts = s.split("/");
-        Ok(Date {
-            month: get_num!(parts),
-            day: get_num!(parts),
-            year: get_num!(parts)
-        })
-    }
-}
-
-impl Encodable for Date {
-    fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.emit_str(&format!("{}", self))
-    }
-}
+use std::{fmt, ops};
+use fintime::Date;
 
 #[derive(Debug, RustcEncodable, PartialEq)]
 pub enum TransactionType { Credit, Debit }
@@ -121,7 +41,7 @@ pub struct Transaction {
 }
 
 pub struct Transactions {
-    transactions: Vec<Transaction>
+    pub transactions: Vec<Transaction>
 }
 
 impl Transactions {

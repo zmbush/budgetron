@@ -1,4 +1,5 @@
-use common::{Date, Genericize, Person, TransactionType, Transaction};
+use common::{Genericize, Person, TransactionType, Transaction};
+use fintime::Date;
 use std::str::FromStr;
 use rustc_serialize::{Decoder, Decodable};
 use categories::find_category;

@@ -1,4 +1,4 @@
-#![feature(plugin)]
+#![feature(plugin, op_assign_traits, augmented_assignments)]
 #![plugin(phf_macros)]
 // #![deny(unused)]
 
@@ -6,14 +6,17 @@ extern crate csv;
 extern crate docopt;
 extern crate phf;
 extern crate rustc_serialize;
-extern crate time;
+extern crate chrono;
 
 mod categories;
 mod common;
 mod error;
 mod exports;
+mod fintime;
 
-use common::{Transactions, TransactionType, Date};
+use common::{Transactions, TransactionType};
+use fintime::{Date, Timeframe};
+use fintime::Timeframe::*;
 use exports::{MintExport, LogixExport};
 use rustc_serialize::Decodable;
 use docopt::Docopt;
@@ -25,7 +28,7 @@ const USAGE: &'static str = "
 Parse export csvs from Molly and Zach's tools
 
 Usage:
-    budgetron [--logix-file=<file> ...] [--mint-file=<file> ...] --output-dir=<directory>
+    budgetron [--logix-file=<file> ...] [--mint-file=<file> ...] --output-dir=<directory> [options]
     budgetron (-h | --help)
 
 Options:
@@ -33,35 +36,50 @@ Options:
     --logix-file=<file>
     --mint-file=<file>
     --output-dir=<directory>
+    --week-starts-on=<weekday>  Day that week starts on (e.g. Monday) [Default: Monday]
 ";
 
 #[derive(Debug, RustcDecodable)]
 struct Args {
     flag_logix_file: Vec<String>,
     flag_mint_file: Vec<String>,
-    flag_output_dir: String
+    flag_output_dir: String,
+    flag_week_starts_on: String
 }
 
-fn write_pivot_table_range(d: &Path, start_s: &str, end_s: &str, transactions: &Transactions) {
-    let start = Date::ago(start_s);
-    let end = Date::ago(end_s);
+fn write_aligned_pivot_table(d: &Path, duration: &Timeframe,
+                             end_ago: &Timeframe,
+                             transactions: &Transactions) {
+    let now = transactions.transactions.last().unwrap().date;
+    let end_ago_approx = now - end_ago;
+    let mut start_date = end_ago_approx - duration;
+    match *duration {
+        Weeks(_) => start_date.align_to_week(),
+        Months(_) => start_date.align_to_month(),
+        Quarters(_) => start_date.align_to_quarter(),
+        Years(_) => start_date.align_to_year(),
+        Days(_) => {}
+    }
+    let end_date = start_date + duration - Days(1);
+
     let mut amounts = HashMap::new();
     for t in transactions.iter() {
         if t.transaction_type == TransactionType::Debit &&
-                t.date >= start && t.date < end {
+                t.date >= start_date && t.date < end_date {
             *amounts.entry(&t.category).or_insert(0.0) += t.amount;
         }
     }
     let mut out = csv::Writer::from_file(
-        d.join(format!("by_categories_{}-{}_{:#}_{:#}.csv", start_s, end_s, start, end))).unwrap();
+        d.join(format!("by_categories_{}_{}_{:#}_{:#}.csv", duration, end_ago, start_date, end_date))).unwrap();
     out.write(["category", "amount"].iter());
     for key in amounts.keys() {
         out.write([key.clone(), &amounts[key].to_string()].iter());
     }
 }
 
-fn write_pivot_table(d: &Path, time_frame: &str, transactions: &Transactions) {
-    write_pivot_table_range(d, time_frame, "0d", transactions);
+fn write_pivot_table(d: &Path, time_frame: &Timeframe,
+                     transactions: &Transactions) {
+    write_aligned_pivot_table(d, time_frame, &Days(0), transactions);
 }
 
 fn print_tpm_report(tt: TransactionType, categories: Vec<&str>, transactions: &Transactions) {
@@ -70,13 +88,13 @@ fn print_tpm_report(tt: TransactionType, categories: Vec<&str>, transactions: &T
         if t.transaction_type == tt {
             for c in &categories {
                 if &t.category == c {
-                    *months.entry((t.date.year, t.date.month)).or_insert(0.0) += t.amount;
+                    *months.entry((t.date.year(), t.date.month())).or_insert(0.0) += t.amount;
                 }
             }
         }
     }
     let ms = {
-        let mut tmp: Vec<(i32, i32)> = months.keys().cloned().collect();
+        let mut tmp: Vec<(_, _)> = months.keys().cloned().collect();
         tmp.sort();
         tmp
     };
@@ -91,7 +109,7 @@ fn main() {
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
 
-    println!("{:?}", args.flag_logix_file);
+    println!("{:#?}", args);
 
     let mut transactions = Transactions::new();
 
@@ -141,15 +159,15 @@ fn main() {
         out.encode(transaction).unwrap();
     }
 
-    write_pivot_table(d, "1w", &transactions);
-    write_pivot_table(d, "1m", &transactions);
-    write_pivot_table(d, "6m", &transactions);
-    write_pivot_table(d, "1q", &transactions);
-    write_pivot_table(d, "2q", &transactions);
+    write_pivot_table(d, &Weeks(1), &transactions);
+    write_pivot_table(d, &Months(1), &transactions);
+    write_pivot_table(d, &Months(6), &transactions);
+    write_pivot_table(d, &Quarters(1), &transactions);
+    write_pivot_table(d, &Quarters(2), &transactions);
 
 
-    write_pivot_table_range(d, "3m", "2m", &transactions);
-    write_pivot_table_range(d, "2m", "1m", &transactions);
+    write_aligned_pivot_table(d, &Months(1), &Months(2), &transactions);
+    write_aligned_pivot_table(d, &Months(1), &Months(1), &transactions);
 
 
 
