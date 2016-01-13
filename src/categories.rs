@@ -30,6 +30,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Investments" => phf_set!["Trade Commissions"],
     "Kids" => phf_set!["Toys"],
     "Legal" => phf_set![],
+    "Online Subscriptions" => phf_set![],
     "Personal Care" => phf_set!["PersonalCare", "Hair", "Spa & Massage"],
     "Crowdfunding" => phf_set!["Kickstarter"],
     "Shopping" => phf_set![
