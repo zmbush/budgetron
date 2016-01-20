@@ -46,6 +46,21 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Hide" => phf_set!["Hide from Budgets & Trends", "Pending"]
 };
 
+pub static LIMITS: Map<&'static str, f64> = phf_map! {
+    "Automobile" => 250.0,
+    "Bills" => 2700.0,
+    "Charity" => 34.0,
+    "Entertainment" => 50.0,
+    "Food & Dining" => 300.0,
+    "Groceries" => 400.0,
+    "Health" => 200.0,
+    "Hobbies" => 100.0,
+    "Household" => 50.0,
+    "Insurance" => 260.0,
+    "Online Subscriptions" => 50.0,
+    "Shopping" => 175.0
+};
+
 pub fn find_category(cat: &str) -> Option<&'static str> {
     for (&key, values) in CATEGORIES.entries() {
         if key == cat || (values.len() > 0 && values.contains(cat)) {

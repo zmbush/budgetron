@@ -26,20 +26,29 @@ pub enum Timeframe {
     Weeks(i64),
     Months(i64),
     Quarters(i64),
-    Years(i64)
+    Years(i64),
+
 }
 
 impl fmt::Display for Timeframe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let (d, v) = match *self {
-            Days(num) => ("d", num),
-            Weeks(num) => ("w", num),
-            Months(num) => ("m", num),
-            Quarters(num) => ("q", num),
-            Years(num) => ("y", num)
+        let (d, name, v) = match *self {
+            Days(num) => ("d", "Day", num),
+            Weeks(num) => ("w", "Week", num),
+            Months(num) => ("m", "Month", num),
+            Quarters(num) => ("q", "Quarter", num),
+            Years(num) => ("y", "Year", num)
         };
 
-        write!(f, "{}{}", v, d)
+        if f.alternate() {
+            write!(f, "{}{}", v, d)
+        } else {
+            if v == 1 {
+                write!(f, "{}", name)
+            } else {
+                write!(f, "{} {}s", v, name)
+            }
+        }
     }
 }
 
@@ -220,6 +229,30 @@ impl<'a> ops::AddAssign<&'a Timeframe> for Date {
         self.add_tf(other);
     }
 }
+
+impl ops::Div<Timeframe> for Timeframe {
+    type Output = f64;
+
+    fn div(mut self, other: Timeframe) -> f64 {
+        fn numerize(tf: Timeframe) -> f64 {
+            let ret = match tf {
+                Days(n) => n,
+                Weeks(n) => 7*n,
+                Months(n) => 30*n,
+                Quarters(n) => 30*3*n,
+                Years(n) => 30*12*n
+            };
+
+            ret as f64
+        }
+
+        let numer = numerize(self);
+        let denom = numerize(other);
+
+        numer / denom
+    }
+}
+forward_ref_binop!(impl Div, div for Timeframe, Timeframe);
 
 impl Decodable for Date {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
