@@ -4,3 +4,7 @@ output
 .~lock*
 *.csv
 *.xls
+*.swp
+*.swo
+*.swn
+*.swm

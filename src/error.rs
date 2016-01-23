@@ -3,7 +3,8 @@ use std::convert::From;
 
 #[derive(Debug)]
 pub enum BudgetError {
-    CSVError(csv::Error)
+    CSVError(csv::Error),
+    NoTransactionError,
 }
 
 impl From<csv::Error> for BudgetError {
