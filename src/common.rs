@@ -5,14 +5,17 @@ use std::cmp::min;
 use fintime::Date;
 
 #[derive(Debug, RustcEncodable, PartialEq)]
-pub enum TransactionType { Credit, Debit }
+pub enum TransactionType {
+    Credit,
+    Debit,
+}
 
 impl Decodable for TransactionType {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         match try!(d.read_str()).as_ref() {
             "debit" => Ok(TransactionType::Debit),
             "credit" => Ok(TransactionType::Credit),
-            s => Err(d.error(&format!("'{}' is not one of debit or credit", s)))
+            s => Err(d.error(&format!("'{}' is not one of debit or credit", s))),
         }
     }
 }
@@ -22,7 +25,10 @@ pub trait Genericize {
 }
 
 #[derive(Debug, RustcEncodable)]
-pub enum Person { Barry, Zach }
+pub enum Person {
+    Barry,
+    Zach,
+}
 
 #[derive(Debug, RustcEncodable)]
 pub struct Transaction {
@@ -36,22 +42,21 @@ pub struct Transaction {
     pub original_category: String,
     pub account_name: String,
     pub labels: String,
-    pub notes: String
+    pub notes: String,
 }
 
 pub struct Transactions {
-    pub transactions: Vec<Transaction>
+    pub transactions: Vec<Transaction>,
 }
 
 impl Transactions {
     pub fn new() -> Transactions {
-        Transactions {
-            transactions: Vec::new()
-        }
+        Transactions { transactions: Vec::new() }
     }
 
     pub fn load_records<ExportType>(&mut self, filename: &str) -> BResult<i32>
-            where ExportType: Genericize + Decodable {
+        where ExportType: Genericize + Decodable
+    {
         let mut count = 0;
         for record in try!(csv::Reader::from_file(filename)).decode() {
             let record: ExportType = try!(record);
