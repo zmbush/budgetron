@@ -87,4 +87,8 @@ impl Transactions {
     pub fn iter(&self) -> ::std::slice::Iter<Transaction> {
         self.transactions.iter()
     }
+
+    pub fn date_of_last_transaction(&self) -> Option<Date> {
+        self.transactions.last().map(|t| t.date)
+    }
 }
