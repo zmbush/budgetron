@@ -1,6 +1,6 @@
-#![feature(plugin, op_assign_traits, augmented_assignments, convert)]
+#![feature(plugin, op_assign_traits, augmented_assignments)]
 #![plugin(phf_macros)]
-// #![deny(unused)]
+#![deny(unused)]
 
 extern crate csv;
 extern crate docopt;
@@ -15,15 +15,14 @@ mod error;
 mod exports;
 mod fintime;
 
-use common::{Transactions, TransactionType};
-use fintime::{Date, Timeframe};
+use common::Transactions;
+use fintime::Timeframe;
 use fintime::Timeframe::*;
 use exports::{MintExport, LogixExport};
 use rustc_serialize::Decodable;
 use docopt::Docopt;
 use std::{fs, io};
 use std::path::Path;
-use std::collections::{HashMap, HashSet};
 use budget::Budget;
 use error::BResult;
 
@@ -50,83 +49,27 @@ struct Args {
     flag_week_starts_on: String
 }
 
-fn write_aligned_pivot_table(d: &Path, duration: &Timeframe,
-                             end_ago: &Timeframe,
-                             transactions: &Transactions) {
-    let now = transactions.transactions.last().unwrap().date;
-    let end_ago_approx = now - end_ago;
-    let mut start_date = end_ago_approx - duration;
-    match *duration {
-        Weeks(_) => start_date.align_to_week(),
-        Months(_) => start_date.align_to_month(),
-        Quarters(_) => start_date.align_to_quarter(),
-        Years(_) => start_date.align_to_year(),
-        Days(_) => {}
-    }
-    let end_date = start_date + duration;
-
-    let mut amounts = HashMap::new();
-    for t in transactions.iter() {
-        if t.transaction_type == TransactionType::Debit &&
-                t.date >= start_date && t.date < end_date {
-            *amounts.entry(&t.category).or_insert(0.0) += t.amount;
-        }
-    }
-    let mut out = csv::Writer::from_file(
-        d.join(format!("by_categories_{:#}_{:#}_{:#}_{:#}.csv", duration, end_ago, start_date, end_date))).unwrap();
-    out.write(["category", "amount"].iter());
-    for key in amounts.keys() {
-        out.write([key.clone(), &amounts[key].to_string()].iter());
-    }
-}
-
-fn write_pivot_table(d: &Path, time_frame: &Timeframe,
-                     transactions: &Transactions) {
-    write_aligned_pivot_table(d, time_frame, &Days(0), transactions);
-}
-
-fn cell(col: usize, row: usize) -> String {
-    format!("{}{}", ('A' as usize + col) as u8 as char, row)
-}
-
 fn generate_budget(d: &Path, period: &Timeframe, periods: usize,
                    transactions: &Transactions) -> BResult<bool> {
     let budget = try! {
         Budget::calculate(period, periods, transactions)
     };
-    try!(budget.write_to_file(d.join(format!("budget_{:#}_for_{:#}.csv", period, periods))));
+    let filename = format!("Budget for {} ending on {:#}.csv", if periods == 0 {
+        format!("last {}", period)
+    } else if periods == 1 {
+        format!("1 {} period", period)
+    } else {
+        format!("{} {} periods", periods, period)
+    }, budget.end_date);
+    try!(budget.write_to_file(d.join(filename)));
 
     Ok(true)
-}
-
-fn print_tpm_report(tt: TransactionType, categories: Vec<&str>, transactions: &Transactions) {
-    let mut months = HashMap::new();
-    for t in transactions.iter() {
-        if t.transaction_type == tt {
-            for c in &categories {
-                if &t.category == c {
-                    *months.entry((t.date.year(), t.date.month())).or_insert(0.0) += t.amount;
-                }
-            }
-        }
-    }
-    let ms = {
-        let mut tmp: Vec<(_, _)> = months.keys().cloned().collect();
-        tmp.sort();
-        tmp
-    };
-
-    for (year, month) in ms {
-        println!("{}/{}: ${:.2}", month, year, months[&(year, month)]);
-    }
 }
 
 fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
-
-    println!("{:#?}", args);
 
     let mut transactions = Transactions::new();
 
@@ -168,7 +111,7 @@ fn main() {
         println!("{} exists and is not a directory", d.display());
     }
 
-    let mut out = csv::Writer::from_file(d.join("out.csv")).unwrap();
+    let mut out = csv::Writer::from_file(d.join("All Transactions.csv")).unwrap();
     out.write(["date", "person", "description", "original description",
                 "amount", "type", "category", "original category",
                 "account", "labels", "notes"].iter()).unwrap();
@@ -176,22 +119,6 @@ fn main() {
         out.encode(transaction).unwrap();
     }
 
-    write_pivot_table(d, &Weeks(1), &transactions);
-    write_pivot_table(d, &Months(1), &transactions);
-    write_pivot_table(d, &Months(6), &transactions);
-    write_pivot_table(d, &Quarters(1), &transactions);
-    write_pivot_table(d, &Quarters(2), &transactions);
-
-
-    write_aligned_pivot_table(d, &Months(1), &Months(2), &transactions);
-    write_aligned_pivot_table(d, &Months(1), &Months(1), &transactions);
-
-    generate_budget(d, &Months(1), 3, &transactions);
-    generate_budget(d, &Weeks(2), 6, &transactions);
-
-
-
-    // print_tpm_report(TransactionType::Credit, vec!["Income"], &transactions);
-    print_tpm_report(TransactionType::Debit, vec!["Bills", "Insurance"], &transactions);
-    //print_tpm_report(TransactionType::Debit, vec!["Groceries"], &transactions);
+    let _ = generate_budget(d, &Months(1), 3, &transactions);
+    let _ = generate_budget(d, &Weeks(2), 6, &transactions);
 }

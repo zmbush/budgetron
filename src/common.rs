@@ -2,7 +2,6 @@ use csv;
 use error::BResult;
 use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
 use std::cmp::min;
-use std::{fmt, ops};
 use fintime::Date;
 
 #[derive(Debug, RustcEncodable, PartialEq)]

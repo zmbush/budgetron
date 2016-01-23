@@ -21,6 +21,7 @@ pub fn days_in_month(month: i64, year: i64) -> i64 {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[allow(unused)]
 pub enum Timeframe {
     Days(i64),
     Weeks(i64),
@@ -144,14 +145,6 @@ impl Date {
         }
     }
 
-    pub fn day(&self) -> i32 {
-        self.date.day() as i32
-    }
-
-    pub fn month(&self) -> i32 {
-        self.date.month() as i32
-    }
-
     pub fn year(&self) -> i32 {
         self.date.year() as i32
     }
@@ -233,7 +226,7 @@ impl<'a> ops::AddAssign<&'a Timeframe> for Date {
 impl ops::Div<Timeframe> for Timeframe {
     type Output = f64;
 
-    fn div(mut self, other: Timeframe) -> f64 {
+    fn div(self, other: Timeframe) -> f64 {
         fn numerize(tf: Timeframe) -> f64 {
             let ret = match tf {
                 Days(n) => n,
