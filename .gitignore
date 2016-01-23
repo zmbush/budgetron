@@ -1,3 +1,6 @@
 target
 data
 output
+.~lock*
+*.csv
+*.xls
