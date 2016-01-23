@@ -19,7 +19,8 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
         "Coffee Shops", "Restaurants", "Seamless"],
     "Gifts" => phf_set!["Gift"],
     "Groceries" => phf_set![],
-    "Health" => phf_set!["Pharmacy", "HealthDental", "Health & Fitness", "Dentist", "Doctor", "Gym"],
+    "Health" => phf_set!["Pharmacy", "HealthDental", "Health & Fitness", "Dentist", "Doctor",
+        "Gym"],
     "Hobbies" => phf_set!["Books", "Books & Magazines", "Conventions"],
     "Household" => phf_set![
         "Furnishings", "Home Improvement", "Home Services", "Lawn & Garden", "Pets",

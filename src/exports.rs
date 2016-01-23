@@ -7,7 +7,7 @@ use categories::find_category;
 #[derive(Debug)]
 struct TransactionAmount {
     amount: Money,
-    negative: bool
+    negative: bool,
 }
 
 impl FromStr for TransactionAmount {
@@ -16,11 +16,11 @@ impl FromStr for TransactionAmount {
         let negative = s.starts_with("(") && s.ends_with(")");
         Ok(TransactionAmount {
             amount: try!(if negative {
-                s[1..s.len()-1].parse()
+                s[1..s.len() - 1].parse()
             } else {
                 s.parse()
             }),
-            negative: negative
+            negative: negative,
         })
     }
 }
@@ -30,14 +30,14 @@ impl Decodable for TransactionAmount {
         let s = try!(d.read_str());
         match s.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(d.error(&s))
+            Err(s) => Err(d.error(&s)),
         }
     }
 }
 
 #[derive(Debug)]
 struct Money {
-    amount: f64
+    amount: f64,
 }
 
 impl FromStr for Money {
@@ -60,7 +60,7 @@ impl Decodable for Money {
         let s = try!(d.read_str());
         match s.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(d.error(&s))
+            Err(s) => Err(d.error(&s)),
         }
     }
 }
@@ -74,7 +74,7 @@ pub struct LogixExport {
     category: String,
     description: String,
     memo: String,
-    notes: String
+    notes: String,
 }
 
 impl Genericize for LogixExport {
@@ -94,7 +94,7 @@ impl Genericize for LogixExport {
             original_category: self.category,
             account_name: self.account,
             labels: self.memo,
-            notes: self.notes
+            notes: self.notes,
         }
     }
 }
@@ -109,7 +109,7 @@ pub struct MintExport {
     category: String,
     account_name: String,
     labels: String,
-    notes: String
+    notes: String,
 }
 
 impl Genericize for MintExport {
@@ -125,7 +125,7 @@ impl Genericize for MintExport {
             original_category: self.category,
             account_name: self.account_name,
             labels: self.labels,
-            notes: self.notes
+            notes: self.notes,
         }
     }
 }

@@ -14,7 +14,12 @@ pub fn is_leap_year(year: i64) -> bool {
 
 pub fn days_in_month(month: i64, year: i64) -> i64 {
     if month == 2 {
-        28 + if is_leap_year(year) { 1 } else { 0 }
+        28 +
+        if is_leap_year(year) {
+            1
+        } else {
+            0
+        }
     } else {
         31 - (month - 1) % 7 % 2
     }
@@ -28,7 +33,6 @@ pub enum Timeframe {
     Months(i64),
     Quarters(i64),
     Years(i64),
-
 }
 
 impl fmt::Display for Timeframe {
@@ -38,7 +42,7 @@ impl fmt::Display for Timeframe {
             Weeks(num) => ("w", "Week", num),
             Months(num) => ("m", "Month", num),
             Quarters(num) => ("q", "Quarter", num),
-            Years(num) => ("y", "Year", num)
+            Years(num) => ("y", "Year", num),
         };
 
         if f.alternate() {
@@ -60,14 +64,14 @@ impl Timeframe {
             Weeks(n) => Weeks(-n),
             Months(n) => Months(-n),
             Quarters(n) => Quarters(-n),
-            Years(n) => Years(-n)
+            Years(n) => Years(-n),
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct Date {
-    date: chrono::Date<chrono::UTC>
+    date: chrono::Date<chrono::UTC>,
 }
 
 impl fmt::Display for Date {
@@ -90,9 +94,19 @@ impl Date {
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(self.date.month() as i64 - if forward { 0 } else { 1 },
+        let days = days_in_month(self.date.month() as i64 -
+                                 if forward {
+                                     0
+                                 } else {
+                                     1
+                                 },
                                  self.date.year() as i64);
-        self.move_days(days * if forward { 1 } else { -1 });
+        self.move_days(days *
+                       if forward {
+            1
+        } else {
+            -1
+        });
     }
 
     fn move_months(&mut self, months: i64) {
@@ -105,11 +119,11 @@ impl Date {
 
     fn add_tf(&mut self, time_frame: &Timeframe) {
         match *time_frame {
-            Weeks(num)      => self.move_days(7 * num),
-            Days(num)       => self.move_days(num),
-            Months(num)     => self.move_months(num),
-            Quarters(num)   => self.move_months(3 * num),
-            Years(num)      => self.move_months(12 * num)
+            Weeks(num) => self.move_days(7 * num),
+            Days(num) => self.move_days(num),
+            Months(num) => self.move_months(num),
+            Quarters(num) => self.move_months(3 * num),
+            Years(num) => self.move_months(12 * num),
         }
     }
 
@@ -140,9 +154,7 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date {
-            date: chrono::UTC.ymd(y, m as u32, d as u32)
-        }
+        Date { date: chrono::UTC.ymd(y, m as u32, d as u32) }
     }
 
     pub fn year(&self) -> i32 {
@@ -230,10 +242,10 @@ impl ops::Div<Timeframe> for Timeframe {
         fn numerize(tf: Timeframe) -> f64 {
             let ret = match tf {
                 Days(n) => n,
-                Weeks(n) => 7*n,
-                Months(n) => 30*n,
-                Quarters(n) => 30*3*n,
-                Years(n) => 30*12*n
+                Weeks(n) => 7 * n,
+                Months(n) => 30 * n,
+                Quarters(n) => 30 * 3 * n,
+                Years(n) => 30 * 12 * n,
             };
 
             ret as f64
@@ -363,4 +375,3 @@ mod test {
         }
     }
 }
-

@@ -26,6 +26,7 @@ use std::path::Path;
 use budget::Budget;
 use error::BResult;
 
+#[rustfmt_skip]
 const USAGE: &'static str = "
 Parse export csvs from Molly and Zach's tools
 
@@ -33,7 +34,7 @@ Usage:
     budgetron [--logix-file=<file> ...] [--mint-file=<file> ...] --output-dir=<directory> [options]
     budgetron (-h | --help)
 
-Options:
+    Options:
     -h --help           Show this screen.
     --logix-file=<file>
     --mint-file=<file>
@@ -46,21 +47,26 @@ struct Args {
     flag_logix_file: Vec<String>,
     flag_mint_file: Vec<String>,
     flag_output_dir: String,
-    flag_week_starts_on: String
+    flag_week_starts_on: String,
 }
 
-fn generate_budget(d: &Path, period: &Timeframe, periods: usize,
-                   transactions: &Transactions) -> BResult<bool> {
+fn generate_budget(d: &Path,
+                   period: &Timeframe,
+                   periods: usize,
+                   transactions: &Transactions)
+                   -> BResult<bool> {
     let budget = try! {
-        Budget::calculate(period, periods, transactions)
-    };
-    let filename = format!("Budget for {} ending on {:#}.csv", if periods == 0 {
-        format!("last {}", period)
-    } else if periods == 1 {
-        format!("1 {} period", period)
-    } else {
-        format!("{} {} periods", periods, period)
-    }, budget.end_date);
+            Budget::calculate(period, periods, transactions)
+        };
+    let filename = format!("Budget for {} ending on {:#}.csv",
+                           if periods == 0 {
+                               format!("last {}", period)
+                           } else if periods == 1 {
+                               format!("1 {} period", period)
+                           } else {
+                               format!("{} {} periods", periods, period)
+                           },
+                           budget.end_date);
     try!(budget.write_to_file(d.join(filename)));
 
     Ok(true)
@@ -68,23 +74,19 @@ fn generate_budget(d: &Path, period: &Timeframe, periods: usize,
 
 fn main() {
     let args: Args = Docopt::new(USAGE)
-        .and_then(|d| d.decode())
-        .unwrap_or_else(|e| e.exit());
+                         .and_then(|d| d.decode())
+                         .unwrap_or_else(|e| e.exit());
 
     let mut transactions = Transactions::new();
 
     for file in args.flag_logix_file {
         transactions.load_records::<LogixExport>(&file)
-            .expect(&format!(
-                    "Couldn't load logix transactions from {}",
-                    file));
+                    .expect(&format!("Couldn't load logix transactions from {}", file));
     }
 
     for file in args.flag_mint_file {
         transactions.load_records::<MintExport>(&file)
-            .expect(&format!(
-                    "Couldn't load mint transactions from {}",
-                    file));
+                    .expect(&format!("Couldn't load mint transactions from {}", file));
     }
 
     transactions.collate();
@@ -112,9 +114,19 @@ fn main() {
     }
 
     let mut out = csv::Writer::from_file(d.join("All Transactions.csv")).unwrap();
-    out.write(["date", "person", "description", "original description",
-                "amount", "type", "category", "original category",
-                "account", "labels", "notes"].iter()).unwrap();
+    out.write(["date",
+               "person",
+               "description",
+               "original description",
+               "amount",
+               "type",
+               "category",
+               "original category",
+               "account",
+               "labels",
+               "notes"]
+                  .iter())
+       .unwrap();
     for transaction in transactions.iter() {
         out.encode(transaction).unwrap();
     }

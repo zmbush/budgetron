@@ -15,7 +15,7 @@ fn cell(col: usize, row: usize) -> String {
 struct BudgetPeriodAmount {
     start: Date,
     end: Date,
-    amount: f64
+    amount: f64,
 }
 
 #[derive(Debug)]
@@ -23,7 +23,7 @@ struct BudgetCategory {
     name: String,
     previous_periods: Vec<f64>,
     current_period: f64,
-    goal: f64
+    goal: f64,
 }
 
 #[derive(Debug)]
@@ -33,12 +33,14 @@ pub struct Budget {
     current_period_start_date: Date,
     pub end_date: Date,
     categories: HashMap<String, BudgetCategory>,
-    has_historical: bool
+    has_historical: bool,
 }
 
 impl Budget {
-    pub fn calculate(period: &Timeframe, periods: usize,
-                     transactions: &Transactions) -> BResult<Budget> {
+    pub fn calculate(period: &Timeframe,
+                     periods: usize,
+                     transactions: &Transactions)
+                     -> BResult<Budget> {
         let now = try! {
             transactions.date_of_last_transaction()
                 .ok_or(BudgetError::NoTransactionError)
@@ -64,17 +66,18 @@ impl Budget {
             current_period_start_date: now,
             end_date: now,
             categories: HashMap::new(),
-            has_historical: periods > 0
+            has_historical: periods > 0,
         };
 
         let factor = period / Months(1);
         for limited_category in categories::LIMITS.keys().cloned() {
-            budget.categories.insert(limited_category.to_owned(), BudgetCategory {
-                name: limited_category.to_owned(),
-                previous_periods: vec![0.0; periods],
-                current_period: 0.0,
-                goal: categories::LIMITS[limited_category] * factor
-            });
+            budget.categories.insert(limited_category.to_owned(),
+                                     BudgetCategory {
+                                         name: limited_category.to_owned(),
+                                         previous_periods: vec![0.0; periods],
+                                         current_period: 0.0,
+                                         goal: categories::LIMITS[limited_category] * factor,
+                                     });
         }
 
         for t in transactions.iter() {
@@ -90,19 +93,23 @@ impl Budget {
                 }
             }
 
-            if t.transaction_type == TransactionType::Debit &&
-                    t.date >= start_date && t.date < end_date {
-                let ref mut budget_category = budget.categories.entry(t.category.to_owned())
-                    .or_insert(BudgetCategory {
-                        name: t.category.to_owned(),
-                        previous_periods: vec![0.0; periods],
-                        current_period: 0.0,
-                        goal: 0.0
-                    });
+            if t.transaction_type == TransactionType::Debit && t.date >= start_date &&
+               t.date < end_date {
+                let ref mut budget_category = budget.categories
+                                                    .entry(t.category.to_owned())
+                                                    .or_insert(BudgetCategory {
+                                                        name: t.category.to_owned(),
+                                                        previous_periods: vec![0.0; periods],
+                                                        current_period: 0.0,
+                                                        goal: 0.0,
+                                                    });
 
                 if ix < periods {
-                    *budget_category.previous_periods.get_mut(ix)
-                        .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) += t.amount;
+                    *budget_category.previous_periods
+                                    .get_mut(ix)
+                                    .expect(&format!("Tried to get index {}. Too big {}",
+                                                     ix,
+                                                     periods)) += t.amount;
                 } else if ix == periods {
                     budget_category.current_period += t.amount;
                 }
@@ -112,8 +119,7 @@ impl Budget {
         Ok(budget)
     }
 
-    pub fn write_to_file<P: AsRef<Path>>(&self,
-                                         path: P) -> BResult<usize> {
+    pub fn write_to_file<P: AsRef<Path>>(&self, path: P) -> BResult<usize> {
         let mut keys: Vec<_> = self.categories.keys().collect();
         let mut outfile = try!(csv::Writer::from_file(path));
         keys.sort();
@@ -122,10 +128,9 @@ impl Budget {
         current_row.push("Category".to_owned());
         if self.has_historical {
             for period_start in &self.period_start_dates {
-                current_row.push(
-                    format!("{} - {}", period_start,
-                            period_start + self.period_length
-                            - Days(1)));
+                current_row.push(format!("{} - {}",
+                                         period_start,
+                                         period_start + self.period_length - Days(1)));
             }
             current_row.push("Average".to_owned());
         }
