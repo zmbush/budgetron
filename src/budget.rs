@@ -31,13 +31,13 @@ pub struct Budget {
     period_length: Timeframe,
     period_start_dates: Vec<Date>,
     current_period_start_date: Date,
-    end_date: Date,
+    pub end_date: Date,
     categories: HashMap<String, BudgetCategory>,
     has_historical: bool
 }
 
 impl Budget {
-    pub fn calculate(period: &Timeframe, periods: usize, 
+    pub fn calculate(period: &Timeframe, periods: usize,
                      transactions: &Transactions) -> BResult<Budget> {
         let now = try! {
             transactions.date_of_last_transaction()
@@ -56,8 +56,6 @@ impl Budget {
         }
 
         let mut end_date = start_date + period;
-        let mut sd = start_date;
-        let mut ed = end_date;
         let mut ix = 0;
 
         let mut budget = Budget {
@@ -138,7 +136,7 @@ impl Budget {
         };
         current_row.push(format!("{} - {}", self.current_period_start_date, self.end_date));
         current_row.append(&mut vec!["Target Budget".to_owned(), "Budget Left".to_owned()]);
-        outfile.write(current_row.iter());
+        try!(outfile.write(current_row.iter()));
         for (row, category_name) in keys.iter().enumerate() {
             current_row.clear();
 
@@ -156,11 +154,11 @@ impl Budget {
 
             current_row.push(format!("${:.2}", category.current_period));
             current_row.push(format!("${:.2}", category.goal));
-            current_row.push(format!("= {} - {}",
+            current_row.push(format!("={}-{}",
                                      cell(base_period + 2, row + 2),
                                      cell(base_period + 1, row + 2)));
 
-            outfile.write(current_row.iter());
+            try!(outfile.write(current_row.iter()));
         }
 
         current_row.clear();
@@ -168,7 +166,7 @@ impl Budget {
         for i in 0..base_period + 3 {
             current_row.push(format!("=sum({}:{})", cell(i + 1, 2), cell(i + 1, keys.len() + 1)));
         }
-        outfile.write(current_row.iter());
+        try!(outfile.write(current_row.iter()));
 
         Ok(self.categories.len())
     }
