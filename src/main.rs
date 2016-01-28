@@ -1,4 +1,9 @@
-#![feature(plugin, op_assign_traits, augmented_assignments)]
+#![feature(
+    plugin,
+    op_assign_traits,
+    augmented_assignments,
+    custom_attribute
+    )]
 #![plugin(phf_macros)]
 #![deny(unused)]
 
@@ -26,6 +31,7 @@ use std::path::Path;
 use budget::Budget;
 use error::BResult;
 
+#[allow(unused)]
 #[rustfmt_skip]
 const USAGE: &'static str = "
 Parse export csvs from Molly and Zach's tools
@@ -39,7 +45,6 @@ Usage:
     --logix-file=<file>
     --mint-file=<file>
     --output-dir=<directory>
-    --week-starts-on=<weekday>  Day that week starts on (e.g. Monday) [Default: Monday]
 ";
 
 #[derive(Debug, RustcDecodable)]
@@ -47,7 +52,6 @@ struct Args {
     flag_logix_file: Vec<String>,
     flag_mint_file: Vec<String>,
     flag_output_dir: String,
-    flag_week_starts_on: String,
 }
 
 fn generate_budget(d: &Path,
