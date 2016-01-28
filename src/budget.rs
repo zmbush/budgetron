@@ -6,6 +6,7 @@ use fintime::{Timeframe, Date};
 use std::collections::HashMap;
 use std::path::Path;
 use csv;
+use std::io::Write;
 
 fn cell(col: usize, row: usize) -> String {
     format!("{}{}", ('A' as usize + col) as u8 as char, row)
@@ -26,12 +27,49 @@ struct BudgetCategory {
     goal: f64,
 }
 
+impl BudgetCategory {
+    pub fn write_to_file<W: Write>(&self,
+                                   row: usize,
+                                   writer: &mut csv::Writer<W>)
+                                   -> BResult<usize> {
+        let mut current_row = Vec::new();
+
+        current_row.push(format!("{}", self.name));
+
+        let base_period = if self.previous_periods.len() > 0 {
+            self.previous_periods.len() + 1
+        } else {
+            0
+        };
+
+        if self.previous_periods.len() > 0 {
+            for value in &self.previous_periods {
+                current_row.push(format!("${:.2}", value));
+            }
+            current_row.push(format!("=AVERAGE({}:{})",
+                                     cell(1, row + 2),
+                                     cell(self.previous_periods.len(), row + 2)));
+        }
+
+        current_row.push(format!("${:.2}", self.current_period));
+        current_row.push(format!("${:.2}", self.goal));
+        current_row.push(format!("={}-{}",
+                                 cell(base_period + 2, row + 2),
+                                 cell(base_period + 1, row + 2)));
+
+        try!(writer.write(current_row.iter()));
+
+        Ok(1)
+    }
+}
+
 #[derive(Debug)]
 pub struct Budget {
+    pub end_date: Date,
     period_length: Timeframe,
+
     period_start_dates: Vec<Date>,
     current_period_start_date: Date,
-    pub end_date: Date,
     categories: HashMap<String, BudgetCategory>,
     has_historical: bool,
 }
@@ -42,9 +80,9 @@ impl Budget {
                      transactions: &Transactions)
                      -> BResult<Budget> {
         let now = try! {
-            transactions.date_of_last_transaction()
-                .ok_or(BudgetError::NoTransactionError)
-        };
+                    transactions.date_of_last_transaction()
+                        .ok_or(BudgetError::NoTransactionError)
+                };
         let mut start_date = now;
         for _ in 0..periods {
             start_date -= period;
@@ -145,25 +183,7 @@ impl Budget {
         for (row, category_name) in keys.iter().enumerate() {
             current_row.clear();
 
-            let ref category = self.categories[*category_name];
-            current_row.push(format!("{}", category_name));
-
-            if self.has_historical {
-                for value in &category.previous_periods {
-                    current_row.push(format!("${:.2}", value));
-                }
-                current_row.push(format!("=AVERAGE({}:{})",
-                                         cell(1, row + 2),
-                                         cell(category.previous_periods.len(), row + 2)));
-            }
-
-            current_row.push(format!("${:.2}", category.current_period));
-            current_row.push(format!("${:.2}", category.goal));
-            current_row.push(format!("={}-{}",
-                                     cell(base_period + 2, row + 2),
-                                     cell(base_period + 1, row + 2)));
-
-            try!(outfile.write(current_row.iter()));
+            try!(self.categories[*category_name].write_to_file(row, &mut outfile));
         }
 
         current_row.clear();
