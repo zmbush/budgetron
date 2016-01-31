@@ -177,7 +177,7 @@ fn main() {
 
     if args.flag_send_email {
         if let Some(email_cfg) = cfg.email {
-            let budget = Budget::calculate(&Months(1), 1, &transactions).unwrap();
+            let budget = Budget::calculate(&Months(1), 2, &transactions).unwrap();
             mailer::email_budget(&email_cfg, &budget);
         } else {
             println!("Can't use --send-email without email config in ~/.budgetron.toml");
