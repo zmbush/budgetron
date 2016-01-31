@@ -1,0 +1,30 @@
+<html>
+  {{#if any_over_budget }}
+  <h1>The following categories are over budget</h1>
+  <h3>
+    {{#each categories}}
+    {{#if over_budget}}
+    {{ name }}<br>
+    {{/if}}
+    {{/each}}
+  </h3>
+  {{/if}}
+  <br>
+  <h1>Here is a summary of your budget:</h1>
+  <table>
+    <tr style="font-weight:bold">
+      <th>Category</th>
+      <th>Last Month</th>
+      <th>Current Period</th>
+      <th>Remaining</th>
+    </tr>
+    {{#each categories}}
+    <tr {{#if over_budget }}style="background-color:lightpink"{{/if}}>
+      <td style="font-weight:bold">{{ name }}</td>
+      <td>{{ money most_recent_period }}</td>
+      <td>{{ money current_period }}</td>
+      <td>{{ money remains }}</td>
+    </tr>
+    {{/each}}
+  </table>
+</html>

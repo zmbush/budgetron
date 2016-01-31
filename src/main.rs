@@ -2,9 +2,11 @@
     plugin,
     op_assign_traits,
     augmented_assignments,
-    custom_attribute
+    custom_attribute,
+    custom_derive
     )]
 #![plugin(phf_macros)]
+#![plugin(tojson_macros)]
 #![deny(unused)]
 
 extern crate csv;
@@ -12,6 +14,11 @@ extern crate docopt;
 extern crate phf;
 extern crate rustc_serialize;
 extern crate chrono;
+extern crate lettre;
+extern crate env_logger;
+extern crate handlebars;
+extern crate toml;
+extern crate email;
 
 mod budget;
 mod categories;
@@ -19,17 +26,23 @@ mod common;
 mod error;
 mod exports;
 mod fintime;
+mod config;
+mod mailer;
 
 use common::Transactions;
 use fintime::Timeframe;
 use fintime::Timeframe::*;
-use exports::{MintExport, LogixExport};
+use exports::{LogixExport, MintExport};
 use rustc_serialize::Decodable;
 use docopt::Docopt;
 use std::{fs, io};
 use std::path::Path;
 use budget::Budget;
 use error::BResult;
+use std::env;
+use std::path::PathBuf;
+use std::fs::File;
+use std::io::Read;
 
 #[allow(unused)]
 #[rustfmt_skip]
@@ -45,6 +58,7 @@ Usage:
     --logix-file=<file>
     --mint-file=<file>
     --output-dir=<directory>
+    --send-email
 ";
 
 #[derive(Debug, RustcDecodable)]
@@ -52,6 +66,7 @@ struct Args {
     flag_logix_file: Vec<String>,
     flag_mint_file: Vec<String>,
     flag_output_dir: String,
+    flag_send_email: bool,
 }
 
 fn generate_budget(d: &Path,
@@ -76,10 +91,32 @@ fn generate_budget(d: &Path,
     Ok(true)
 }
 
+fn cfg() -> config::Config {
+    let contents = {
+        let path = env::home_dir()
+                       .unwrap_or(PathBuf::from("/"))
+                       .join(".budgetron.toml");
+        let ret: String = if let Ok(mut f) = File::open(path) {
+            let mut s = String::new();
+            let _ = f.read_to_string(&mut s);
+            s
+        } else {
+            "".to_owned()
+        };
+        ret
+    };
+
+    toml::decode_str(&contents).unwrap()
+}
+
 fn main() {
+    env_logger::init().unwrap();
+
     let args: Args = Docopt::new(USAGE)
                          .and_then(|d| d.decode())
                          .unwrap_or_else(|e| e.exit());
+
+    let cfg = cfg();
 
     let mut transactions = Transactions::new();
 
@@ -110,7 +147,7 @@ fn main() {
                 println!("Unable to create directory {}", e);
                 return;
             }
-        }
+        },
     };
 
     if !metadata.is_dir() {
@@ -137,4 +174,13 @@ fn main() {
 
     let _ = generate_budget(d, &Months(1), 3, &transactions);
     let _ = generate_budget(d, &Weeks(2), 6, &transactions);
+
+    if args.flag_send_email {
+        if let Some(email_cfg) = cfg.email {
+            let budget = Budget::calculate(&Months(1), 1, &transactions).unwrap();
+            mailer::email_budget(&email_cfg, &budget);
+        } else {
+            println!("Can't use --send-email without email config in ~/.budgetron.toml");
+        }
+    }
 }

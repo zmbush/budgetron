@@ -1,12 +1,18 @@
 [package]
 name = "budgetron"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Zachary Bush <zach@zmbush.com>"]
 
 [dependencies]
+chrono = "*"
 csv = "*"
 docopt = "*"
+email = "*"
+env_logger = "*"
+handlebars = "*"
+lettre = { git = "https://github.com/lettre/lettre.git" }
 phf = "*"
 phf_macros = "*"
 rustc-serialize = "*"
-chrono = "*"
+tojson_macros = "*"
+toml = "*"

@@ -1,30 +1,50 @@
 use categories;
-use common::{Transactions, TransactionType};
-use error::{BudgetError, BResult};
+use common::{TransactionType, Transactions};
+use error::{BResult, BudgetError};
 use fintime::Timeframe::*;
-use fintime::{Timeframe, Date};
+use fintime::{Date, Timeframe};
 use std::collections::HashMap;
 use std::path::Path;
 use csv;
 use std::io::Write;
+use rustc_serialize::json::{Json, ToJson};
 
 fn cell(col: usize, row: usize) -> String {
     format!("{}{}", ('A' as usize + col) as u8 as char, row)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, RustcEncodable, ToJson)]
 struct BudgetPeriodAmount {
     start: Date,
     end: Date,
     amount: f64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, RustcEncodable)]
 struct BudgetCategory {
     name: String,
     previous_periods: Vec<f64>,
     current_period: f64,
     goal: f64,
+}
+
+impl ToJson for BudgetCategory {
+    fn to_json(&self) -> Json {
+        let mut m = HashMap::new();
+        m.insert("name".to_owned(), self.name.to_json());
+        m.insert("previous_periods".to_owned(),
+                 self.previous_periods.to_json());
+        m.insert("current_period".to_owned(), self.current_period.to_json());
+        m.insert("most_recent_period".to_owned(),
+                 self.previous_periods[self.previous_periods.len() - 1].to_json());
+        m.insert("goal".to_owned(), self.goal.to_json());
+        m.insert("remains".to_owned(),
+                 (self.goal - self.current_period).to_json());
+        m.insert("over_budget".to_owned(),
+                 (self.current_period > self.goal).to_json());
+
+        m.to_json()
+    }
 }
 
 impl BudgetCategory {
@@ -63,7 +83,7 @@ impl BudgetCategory {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, RustcEncodable, ToJson)]
 pub struct Budget {
     pub end_date: Date,
     period_length: Timeframe,
@@ -71,6 +91,7 @@ pub struct Budget {
     period_start_dates: Vec<Date>,
     current_period_start_date: Date,
     categories: HashMap<String, BudgetCategory>,
+    any_over_budget: bool,
     has_historical: bool,
 }
 
@@ -80,9 +101,9 @@ impl Budget {
                      transactions: &Transactions)
                      -> BResult<Budget> {
         let now = try! {
-                    transactions.date_of_last_transaction()
-                        .ok_or(BudgetError::NoTransactionError)
-                };
+                transactions.date_of_last_transaction()
+                    .ok_or(BudgetError::NoTransactionError)
+            };
         let mut start_date = now;
         for _ in 0..periods {
             start_date -= period;
@@ -92,7 +113,7 @@ impl Budget {
             Months(_) => start_date.align_to_month(),
             Quarters(_) => start_date.align_to_quarter(),
             Years(_) => start_date.align_to_year(),
-            Days(_) => {}
+            Days(_) => {},
         }
 
         let mut end_date = start_date + period;
@@ -105,17 +126,19 @@ impl Budget {
             end_date: now,
             categories: HashMap::new(),
             has_historical: periods > 0,
+            any_over_budget: false,
         };
 
         let factor = period / Months(1);
         for limited_category in categories::LIMITS.keys().cloned() {
-            budget.categories.insert(limited_category.to_owned(),
-                                     BudgetCategory {
-                                         name: limited_category.to_owned(),
-                                         previous_periods: vec![0.0; periods],
-                                         current_period: 0.0,
-                                         goal: categories::LIMITS[limited_category] * factor,
-                                     });
+            budget.categories
+                  .insert(limited_category.to_owned(),
+                          BudgetCategory {
+                              name: limited_category.to_owned(),
+                              previous_periods: vec![0.0; periods],
+                              current_period: 0.0,
+                              goal: categories::LIMITS[limited_category] * factor,
+                          });
         }
 
         for t in transactions.iter() {
@@ -153,6 +176,11 @@ impl Budget {
                 }
             }
         }
+
+        budget.any_over_budget = budget.categories
+                                       .iter()
+                                       .filter(|&(_, c)| c.current_period > c.goal)
+                                       .count() > 0;
 
         Ok(budget)
     }
