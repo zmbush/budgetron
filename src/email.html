@@ -14,17 +14,29 @@
   <table>
     <tr style="font-weight:bold">
       <th>Category</th>
-      <th>Last Month</th>
+      {{#each period_names }}
+      <th>{{ this }}</th>
+      {{/each}}
       <th>Current Period</th>
       <th>Remaining</th>
     </tr>
     {{#each categories}}
     <tr {{#if over_budget }}style="background-color:lightpink"{{/if}}>
       <td style="font-weight:bold">{{ name }}</td>
-      <td>{{ money most_recent_period }}</td>
+      {{#each previous_periods}}
+      <td>{{ money this }}</td>
+      {{/each}}
       <td>{{ money current_period }}</td>
       <td>{{ money remains }}</td>
     </tr>
     {{/each}}
+    <tr>
+      <td style="font-weight:bold">Total</td>
+      {{#each previous_period_sums}}
+      <td>{{ money this }}</td>
+      {{/each}}
+      <td>{{ money current_period_sums }}</td>
+      <td>{{ money remaining_sum }}</td>
+    </tr>
   </table>
 </html>

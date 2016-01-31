@@ -89,10 +89,14 @@ pub struct Budget {
     period_length: Timeframe,
 
     period_start_dates: Vec<Date>,
+    period_names: Vec<String>,
     current_period_start_date: Date,
     categories: HashMap<String, BudgetCategory>,
     any_over_budget: bool,
     has_historical: bool,
+    current_period_sums: f64,
+    remaining_sum: f64,
+    previous_period_sums: Vec<f64>,
 }
 
 impl Budget {
@@ -122,11 +126,16 @@ impl Budget {
         let mut budget = Budget {
             period_length: *period,
             period_start_dates: vec![start_date],
+            period_names: vec![format!("{} - {}", start_date, start_date + period - Days(1))],
             current_period_start_date: now,
             end_date: now,
             categories: HashMap::new(),
             has_historical: periods > 0,
             any_over_budget: false,
+
+            current_period_sums: 0.0,
+            remaining_sum: 0.0,
+            previous_period_sums: Vec::new(),
         };
 
         let factor = period / Months(1);
@@ -149,6 +158,7 @@ impl Budget {
 
                 if ix < periods {
                     budget.period_start_dates.push(start_date);
+                    budget.period_names.push(format!("{} - {}", start_date, end_date - Days(1)));
                 } else if ix == periods {
                     budget.current_period_start_date = start_date;
                 }
@@ -181,6 +191,23 @@ impl Budget {
                                        .iter()
                                        .filter(|&(_, c)| c.current_period > c.goal)
                                        .count() > 0;
+
+        budget.current_period_sums = budget.categories
+                                           .iter()
+                                           .fold(0.0, |acc, (&_, ref c)| acc + c.current_period);
+
+        budget.remaining_sum = budget.categories
+                                     .iter()
+                                     .fold(0.0, |acc, (&_, ref c)| acc + c.goal - c.current_period);
+
+        budget.previous_period_sums = budget.categories
+                                            .iter()
+                                            .fold(vec![0.0; periods], |acc, (&_, ref c)| {
+                                                acc.iter()
+                                                   .enumerate()
+                                                   .map(|(ix, &val)| c.previous_periods[ix] + val)
+                                                   .collect()
+                                            });
 
         Ok(budget)
     }
