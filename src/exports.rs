@@ -1,7 +1,7 @@
-use common::{Genericize, Person, TransactionType, Transaction};
+use common::{Genericize, Person, Transaction, TransactionType};
 use fintime::Date;
 use std::str::FromStr;
-use rustc_serialize::{Decoder, Decodable};
+use rustc_serialize::{Decodable, Decoder};
 use categories::find_category;
 
 #[derive(Debug)]

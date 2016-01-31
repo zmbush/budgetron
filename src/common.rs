@@ -1,6 +1,6 @@
 use csv;
 use error::BResult;
-use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
+use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use std::cmp::min;
 use fintime::Date;
 

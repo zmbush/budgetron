@@ -5,7 +5,8 @@ use chrono::offset::TimeZone;
 use std::fmt;
 use self::Timeframe::*;
 use std::ops;
-use rustc_serialize::{Decoder, Decodable, Encoder, Encodable};
+use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
+use rustc_serialize::json::{Json, ToJson};
 
 pub fn is_leap_year(year: i64) -> bool {
     (year % 4 == 0) || ((year % 100 != 0) && (year % 400 == 0))
@@ -25,7 +26,7 @@ pub fn days_in_month(month: i64, year: i64) -> i64 {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, RustcEncodable)]
 #[allow(unused)]
 pub enum Timeframe {
     Days(i64),
@@ -33,6 +34,12 @@ pub enum Timeframe {
     Months(i64),
     Quarters(i64),
     Years(i64),
+}
+
+impl ToJson for Timeframe {
+    fn to_json(&self) -> Json {
+        format!("{}", self).to_json()
+    }
 }
 
 impl fmt::Display for Timeframe {
@@ -72,6 +79,12 @@ impl Timeframe {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct Date {
     date: chrono::Date<chrono::UTC>,
+}
+
+impl ToJson for Date {
+    fn to_json(&self) -> Json {
+        format!("{}", self).to_json()
+    }
 }
 
 impl fmt::Display for Date {
