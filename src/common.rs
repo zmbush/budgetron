@@ -3,6 +3,7 @@ use error::BResult;
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use std::cmp::min;
 use fintime::Date;
+use std::collections::HashSet;
 
 #[derive(Debug, RustcEncodable, PartialEq)]
 pub enum TransactionType {
@@ -69,17 +70,19 @@ impl Transactions {
     pub fn collate(&mut self) {
         self.transactions.sort_by(|a, b| a.date.cmp(&b.date));
 
-        let mut to_delete = Vec::new();
+        let mut to_delete = HashSet::new();
         for (i, t) in self.transactions.iter().enumerate() {
             for j in i..min(self.transactions.len(), i + 50) {
                 let ref tn = self.transactions[j];
-                if tn.amount == t.amount && tn.transaction_type != t.transaction_type {
-                    to_delete.push(i);
-                    to_delete.push(j);
+                if tn.amount == t.amount && tn.transaction_type != t.transaction_type &&
+                   !to_delete.contains(&i) && !to_delete.contains(&j) {
+                    to_delete.insert(i);
+                    to_delete.insert(j);
                 }
             }
         }
 
+        let mut to_delete: Vec<_> = to_delete.into_iter().collect();
         to_delete.sort();
         to_delete.reverse();
 
