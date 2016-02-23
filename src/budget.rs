@@ -13,13 +13,6 @@ fn cell(col: usize, row: usize) -> String {
     format!("{}{}", ('A' as usize + col) as u8 as char, row)
 }
 
-#[derive(Debug, Clone, RustcEncodable, ToJson)]
-struct BudgetPeriodAmount {
-    start: Date,
-    end: Date,
-    amount: f64,
-}
-
 #[derive(Debug, RustcEncodable)]
 struct BudgetCategory {
     name: String,
