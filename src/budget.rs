@@ -85,6 +85,9 @@ pub struct Budget {
     period_names: Vec<String>,
     current_period_start_date: Date,
     categories: HashMap<String, BudgetCategory>,
+
+    income: BudgetCategory,
+
     any_over_budget: bool,
     has_historical: bool,
     current_period_sums: f64,
@@ -125,6 +128,13 @@ impl Budget {
             categories: HashMap::new(),
             has_historical: periods > 0,
             any_over_budget: false,
+
+            income: BudgetCategory {
+                name: "Income".to_owned(),
+                previous_periods: vec![0.0; periods],
+                current_period: 0.0,
+                goal: 0.0,
+            },
 
             current_period_sums: 0.0,
             remaining_sum: 0.0,
@@ -177,6 +187,19 @@ impl Budget {
                 } else if ix == periods {
                     budget_category.current_period += t.amount;
                 }
+            } else if t.transaction_type == TransactionType::Credit && t.date >= start_date &&
+               t.date < end_date {
+
+                if ix < periods {
+                    *budget.income
+                           .previous_periods
+                           .get_mut(ix)
+                           .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
+                        t.amount;
+                } else if ix == periods {
+                    budget.income.current_period += t.amount;
+                }
+
             }
         }
 
@@ -229,15 +252,36 @@ impl Budget {
         current_row.append(&mut vec!["Target Budget".to_owned(), "Budget Left".to_owned()]);
         try!(outfile.write(current_row.iter()));
         for (row, category_name) in keys.iter().enumerate() {
-            current_row.clear();
+            if **category_name != "Income".to_owned() {
+                current_row.clear();
 
-            try!(self.categories[*category_name].write_to_file(row, &mut outfile));
+                try!(self.categories[*category_name].write_to_file(row, &mut outfile));
+            }
         }
 
         current_row.clear();
         current_row.push("Total".to_owned());
         for i in 0..base_period + 3 {
             current_row.push(format!("=sum({}:{})", cell(i + 1, 2), cell(i + 1, keys.len() + 1)));
+        }
+        try!(outfile.write(current_row.iter()));
+
+        current_row.clear();
+        current_row.push("".to_owned());
+        for _ in 0..base_period + 3 {
+            current_row.push("".to_owned());
+        }
+        try!(outfile.write(current_row.iter()));
+        try!(outfile.write(current_row.iter()));
+
+        try!(self.income.write_to_file(keys.len() + 3, &mut outfile));
+
+        current_row.clear();
+        current_row.push("Money Saved".to_owned());
+        for i in 0..base_period + 3 {
+            current_row.push(format!("={} - {}",
+                                     cell(i + 1, keys.len() + 5),
+                                     cell(i + 1, keys.len() + 2)));
         }
         try!(outfile.write(current_row.iter()));
 
