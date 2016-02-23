@@ -4,12 +4,10 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Auto Payment" => phf_set![],
     "Automobile" => phf_set![
         "Auto & Transport", "Service & Parts", "Gas & Fuel", "Parking"],
-    "Bills" => phf_set![
-        "Bills & Utilities", "BillsCable", "BillsElectric", "BillsPhone", "BillsRent", "Internet",
-        "Mortgage & Rent", "Utilities", "Security", "Mobile Phone"],
     "Business" => phf_set!["Advertising","Business Services", "Office Supplies"],
     "Cash" => phf_set!["ATM", "Cash & ATM"],
     "Charity" => phf_set![],
+    "Crowdfunding" => phf_set!["Kickstarter"],
     "Education" => phf_set!["Tuition", "Student Loan"],
     "Entertainment" => phf_set!["Movies & DVDs", "Music", "Arts", "Amusement"],
     "Fees" => phf_set!["Fees & Charges", "Finance Charge", "Bank Fee", "Shipping", "ATM Fee"],
@@ -33,7 +31,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Legal" => phf_set![],
     "Online Subscriptions" => phf_set![],
     "Personal Care" => phf_set!["PersonalCare", "Hair", "Spa & Massage"],
-    "Crowdfunding" => phf_set!["Kickstarter"],
+    "Rent" => phf_set!["BillsRent", "Mortgage & Rent"],
     "Shopping" => phf_set![
         "Amazon", "Clothing", "Sporting Goods", "Sports", "Costco", "Warehouse Clubs"],
     "Taxes" => phf_set!["State Tax", "Federal Tax"],
@@ -44,12 +42,15 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Uncategorized" => phf_set![
         "Transfer", "Check", "CreditMiscellaneous", "CreditNone", "CreditTransfer",
         "DebitMiscellaneous", "DebitNone", "DebitTransfer", "Reimbursement"],
+    "Bills & Utilities" => phf_set!["Bills", "BillsCable", "BillsElectric", "BillsPhone",
+        "Internet", "Utilities", "Security", "Mobile Phone"],
     "Hide" => phf_set!["Hide from Budgets & Trends", "Pending"]
 };
 
 pub static LIMITS: Map<&'static str, f64> = phf_map! {
     "Automobile" => 250.0,
-    "Bills" => 2700.0,
+    "Bills & Utilities" => 524.29 - 92.50,
+    "Rent" => 2175.71 + 92.50,
     "Charity" => 34.0,
     "Entertainment" => 50.0,
     "Food & Dining" => 300.0,
