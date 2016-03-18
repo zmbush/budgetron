@@ -154,6 +154,9 @@ impl Budget {
         }
 
         for t in transactions.iter() {
+            if t.category == "Hide" {
+                continue;
+            }
             if t.date >= end_date {
                 ix += 1;
                 start_date += period;
