@@ -172,7 +172,7 @@ fn main() {
         out.encode(transaction).unwrap();
     }
 
-    let _ = generate_budget(d, &Months(1), 3, &transactions);
+    let _ = generate_budget(d, &Months(1), 4, &transactions);
     let _ = generate_budget(d, &Weeks(2), 6, &transactions);
 
     if args.flag_send_email {
