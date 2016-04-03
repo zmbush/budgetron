@@ -43,7 +43,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
         "Transfer", "Check", "CreditMiscellaneous", "CreditNone", "CreditTransfer",
         "DebitMiscellaneous", "DebitNone", "DebitTransfer", "Reimbursement"],
     "Bills & Utilities" => phf_set!["Bills", "BillsCable", "BillsElectric", "BillsPhone",
-        "Internet", "Utilities", "Security", "Mobile Phone"],
+        "Internet", "Utilities", "Security", "Mobile Phone", "BillsInternet"],
     "Hide" => phf_set!["Hide from Budgets & Trends", "Pending", "Exclusions"]
 };
 
