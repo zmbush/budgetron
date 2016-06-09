@@ -72,7 +72,7 @@ impl Transactions {
 
         let mut to_delete = HashSet::new();
         for (i, t) in self.transactions.iter().enumerate() {
-            for j in i..min(self.transactions.len(), i + 50) {
+            for j in i..min(self.transactions.len(), i + 100) {
                 let ref tn = self.transactions[j];
                 if tn.amount == t.amount && tn.transaction_type != t.transaction_type &&
                    !to_delete.contains(&i) && !to_delete.contains(&j) {

@@ -18,7 +18,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Gifts" => phf_set!["Gift"],
     "Groceries" => phf_set![],
     "Health" => phf_set!["Pharmacy", "HealthDental", "Health & Fitness", "Dentist", "Doctor",
-        "Gym"],
+        "Gym", "HealthMedical"],
     "Hobbies" => phf_set!["Books", "Books & Magazines", "Conventions"],
     "Household" => phf_set![
         "Furnishings", "Home Improvement", "Home Services", "Lawn & Garden", "Pets",
@@ -31,7 +31,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Legal" => phf_set![],
     "Online Subscriptions" => phf_set![],
     "Personal Care" => phf_set!["PersonalCare", "Hair", "Spa & Massage"],
-    "Rent" => phf_set!["BillsRent", "Mortgage & Rent"],
+    "Mortgage & Rent" => phf_set!["BillsRent", "Rent"],
     "Shopping" => phf_set![
         "Amazon", "Clothing", "Sporting Goods", "Sports", "Costco", "Warehouse Clubs"],
     "Taxes" => phf_set!["State Tax", "Federal Tax"],
@@ -44,23 +44,23 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
         "DebitMiscellaneous", "DebitNone", "DebitTransfer", "Reimbursement"],
     "Bills & Utilities" => phf_set!["Bills", "BillsCable", "BillsElectric", "BillsPhone",
         "Internet", "Utilities", "Security", "Mobile Phone", "BillsInternet"],
-    "Hide" => phf_set!["Hide from Budgets & Trends", "Pending", "Exclusions"]
+    "Hide" => phf_set!["Hide from Budgets & Trends", "Pending", "Exclusions", "Move-in"]
 };
 
 pub static LIMITS: Map<&'static str, f64> = phf_map! {
     "Automobile" => 250.0,
     "Bills & Utilities" => 524.29 - 92.50,
-    "Rent" => 2175.71 + 92.50,
+    "Mortgage" => 3543.13 + 92.50,
     "Charity" => 34.0,
     "Entertainment" => 50.0,
     "Food & Dining" => 300.0,
-    "Groceries" => 400.0,
+    "Groceries" => 600.0,
     "Health" => 200.0,
     "Hobbies" => 100.0,
     "Household" => 50.0,
-    "Insurance" => 260.0,
+    "Insurance" => 321.0,
     "Online Subscriptions" => 50.0,
-    "Shopping" => 175.0
+    "Shopping" => 115.0
 };
 
 pub fn find_category(cat: &str) -> Option<&'static str> {
