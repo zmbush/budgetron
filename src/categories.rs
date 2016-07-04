@@ -18,7 +18,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
     "Gifts" => phf_set!["Gift"],
     "Groceries" => phf_set![],
     "Health" => phf_set!["Pharmacy", "HealthDental", "Health & Fitness", "Dentist", "Doctor",
-        "Gym", "HealthMedical"],
+        "Gym", "HealthMedical", "BillsGym"],
     "Hobbies" => phf_set!["Books", "Books & Magazines", "Conventions"],
     "Household" => phf_set![
         "Furnishings", "Home Improvement", "Home Services", "Lawn & Garden", "Pets",
@@ -50,7 +50,7 @@ pub static CATEGORIES: Map<&'static str, Set<&'static str>> = phf_map! {
 pub static LIMITS: Map<&'static str, f64> = phf_map! {
     "Automobile" => 250.0,
     "Bills & Utilities" => 524.29 - 92.50,
-    "Mortgage" => 3543.13 + 92.50,
+    "Mortgage & Rent" => 3543.13 + 92.50,
     "Charity" => 34.0,
     "Entertainment" => 50.0,
     "Food & Dining" => 300.0,

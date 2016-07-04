@@ -1,10 +1,8 @@
 #![feature(
     plugin,
-    op_assign_traits,
-    augmented_assignments,
     custom_attribute,
     custom_derive
-    )]
+)]
 #![plugin(phf_macros)]
 #![plugin(tojson_macros)]
 #![deny(unused)]
@@ -19,6 +17,7 @@ extern crate env_logger;
 extern crate handlebars;
 extern crate toml;
 extern crate email;
+extern crate budget_server;
 
 mod budget;
 mod categories;
@@ -33,7 +32,6 @@ use common::Transactions;
 use fintime::Timeframe;
 use fintime::Timeframe::*;
 use exports::{LogixExport, MintExport};
-use rustc_serialize::Decodable;
 use docopt::Docopt;
 use std::{fs, io};
 use std::path::Path;
@@ -94,8 +92,8 @@ fn generate_budget(d: &Path,
 fn cfg() -> config::Config {
     let contents = {
         let path = env::home_dir()
-                       .unwrap_or(PathBuf::from("/"))
-                       .join(".budgetron.toml");
+            .unwrap_or(PathBuf::from("/"))
+            .join(".budgetron.toml");
         let ret: String = if let Ok(mut f) = File::open(path) {
             let mut s = String::new();
             let _ = f.read_to_string(&mut s);
@@ -110,11 +108,13 @@ fn cfg() -> config::Config {
 }
 
 fn main() {
+    // budget_server::run_server();
+
     env_logger::init().unwrap();
 
     let args: Args = Docopt::new(USAGE)
-                         .and_then(|d| d.decode())
-                         .unwrap_or_else(|e| e.exit());
+        .and_then(|d| d.decode())
+        .unwrap_or_else(|e| e.exit());
 
     let cfg = cfg();
 
@@ -122,12 +122,12 @@ fn main() {
 
     for file in args.flag_logix_file {
         transactions.load_records::<LogixExport>(&file)
-                    .expect(&format!("Couldn't load logix transactions from {}", file));
+            .expect(&format!("Couldn't load logix transactions from {}", file));
     }
 
     for file in args.flag_mint_file {
         transactions.load_records::<MintExport>(&file)
-                    .expect(&format!("Couldn't load mint transactions from {}", file));
+            .expect(&format!("Couldn't load mint transactions from {}", file));
     }
 
     transactions.collate();
@@ -156,25 +156,27 @@ fn main() {
 
     let mut out = csv::Writer::from_file(d.join("All Transactions.csv")).unwrap();
     out.write(["date",
-               "person",
-               "description",
-               "original description",
-               "amount",
-               "type",
-               "category",
-               "original category",
-               "account",
-               "labels",
-               "notes"]
-                  .iter())
-       .unwrap();
+                "person",
+                "description",
+                "original description",
+                "amount",
+                "type",
+                "category",
+                "original category",
+                "account",
+                "labels",
+                "notes"]
+            .iter())
+        .unwrap();
     for transaction in transactions.iter() {
         out.encode(transaction).unwrap();
     }
 
     let _ = generate_budget(d, &Months(1), 4, &transactions);
+    let _ = generate_budget(d, &Months(1), 12, &transactions);
     let _ = generate_budget(d, &Weeks(2), 6, &transactions);
     let _ = generate_budget(d, &Quarters(1), 4, &transactions);
+    let _ = generate_budget(d, &Years(1), 4, &transactions);
 
     if args.flag_send_email {
         if let Some(email_cfg) = cfg.email {
