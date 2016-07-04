@@ -144,13 +144,13 @@ impl Budget {
         let factor = period / Months(1);
         for limited_category in categories::LIMITS.keys().cloned() {
             budget.categories
-                  .insert(limited_category.to_owned(),
-                          BudgetCategory {
-                              name: limited_category.to_owned(),
-                              previous_periods: vec![0.0; periods],
-                              current_period: 0.0,
-                              goal: categories::LIMITS[limited_category] * factor,
-                          });
+                .insert(limited_category.to_owned(),
+                        BudgetCategory {
+                            name: limited_category.to_owned(),
+                            previous_periods: vec![0.0; periods],
+                            current_period: 0.0,
+                            goal: categories::LIMITS[limited_category] * factor,
+                        });
         }
 
         for t in transactions.iter() {
@@ -173,20 +173,19 @@ impl Budget {
             if t.transaction_type == TransactionType::Debit && t.date >= start_date &&
                t.date < end_date {
                 let ref mut budget_category = budget.categories
-                                                    .entry(t.category.to_owned())
-                                                    .or_insert(BudgetCategory {
-                                                        name: t.category.to_owned(),
-                                                        previous_periods: vec![0.0; periods],
-                                                        current_period: 0.0,
-                                                        goal: 0.0,
-                                                    });
+                    .entry(t.category.to_owned())
+                    .or_insert(BudgetCategory {
+                        name: t.category.to_owned(),
+                        previous_periods: vec![0.0; periods],
+                        current_period: 0.0,
+                        goal: 0.0,
+                    });
 
                 if ix < periods {
                     *budget_category.previous_periods
-                                    .get_mut(ix)
-                                    .expect(&format!("Tried to get index {}. Too big {}",
-                                                     ix,
-                                                     periods)) += t.amount;
+                        .get_mut(ix)
+                        .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
+                        t.amount;
                 } else if ix == periods {
                     budget_category.current_period += t.amount;
                 }
@@ -195,9 +194,9 @@ impl Budget {
 
                 if ix < periods {
                     *budget.income
-                           .previous_periods
-                           .get_mut(ix)
-                           .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
+                        .previous_periods
+                        .get_mut(ix)
+                        .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
                         t.amount;
                 } else if ix == periods {
                     budget.income.current_period += t.amount;
@@ -207,26 +206,26 @@ impl Budget {
         }
 
         budget.any_over_budget = budget.categories
-                                       .iter()
-                                       .filter(|&(_, c)| c.current_period > c.goal)
-                                       .count() > 0;
+            .iter()
+            .filter(|&(_, c)| c.current_period > c.goal)
+            .count() > 0;
 
         budget.current_period_sums = budget.categories
-                                           .iter()
-                                           .fold(0.0, |acc, (&_, ref c)| acc + c.current_period);
+            .iter()
+            .fold(0.0, |acc, (&_, ref c)| acc + c.current_period);
 
         budget.remaining_sum = budget.categories
-                                     .iter()
-                                     .fold(0.0, |acc, (&_, ref c)| acc + c.goal - c.current_period);
+            .iter()
+            .fold(0.0, |acc, (&_, ref c)| acc + c.goal - c.current_period);
 
         budget.previous_period_sums = budget.categories
-                                            .iter()
-                                            .fold(vec![0.0; periods], |acc, (&_, ref c)| {
-                                                acc.iter()
-                                                   .enumerate()
-                                                   .map(|(ix, &val)| c.previous_periods[ix] + val)
-                                                   .collect()
-                                            });
+            .iter()
+            .fold(vec![0.0; periods], |acc, (&_, ref c)| {
+                acc.iter()
+                    .enumerate()
+                    .map(|(ix, &val)| c.previous_periods[ix] + val)
+                    .collect()
+            });
 
         Ok(budget)
     }

@@ -1,0 +1,7 @@
+[package]
+name = "budget_server"
+version = "0.1.0"
+authors = ["Zach Bush <zach@zmbush.com>"]
+
+[dependencies]
+pencil = "*"
