@@ -17,7 +17,6 @@ extern crate env_logger;
 extern crate handlebars;
 extern crate toml;
 extern crate email;
-extern crate budget_server;
 
 mod budget;
 mod categories;
@@ -108,8 +107,6 @@ fn cfg() -> config::Config {
 }
 
 fn main() {
-    // budget_server::run_server();
-
     env_logger::init().unwrap();
 
     let args: Args = Docopt::new(USAGE)
