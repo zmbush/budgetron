@@ -2,7 +2,7 @@ use common::{Genericize, Person, Transaction, TransactionType};
 use fintime::Date;
 use std::str::FromStr;
 use rustc_serialize::{Decodable, Decoder};
-use categories::find_category;
+use config;
 
 #[derive(Debug)]
 struct TransactionAmount {
@@ -78,7 +78,7 @@ pub struct LogixExport {
 }
 
 impl Genericize for LogixExport {
-    fn genericize(self) -> Transaction {
+    fn genericize(self, cfg: &config::CategoryConfig) -> Transaction {
         Transaction {
             date: self.date,
             person: Person::Molly,
@@ -90,7 +90,7 @@ impl Genericize for LogixExport {
             } else {
                 TransactionType::Credit
             },
-            category: find_category(&self.category).unwrap().to_owned(),
+            category: cfg.find_category(&self.category).unwrap().to_owned(),
             original_category: self.category,
             account_name: self.account,
             labels: self.memo,
@@ -113,7 +113,7 @@ pub struct MintExport {
 }
 
 impl Genericize for MintExport {
-    fn genericize(self) -> Transaction {
+    fn genericize(self, cfg: &config::CategoryConfig) -> Transaction {
         Transaction {
             date: self.date,
             person: Person::Zach,
@@ -121,7 +121,7 @@ impl Genericize for MintExport {
             original_description: self.original_description,
             amount: self.amount,
             transaction_type: self.transaction_type,
-            category: find_category(&self.category).unwrap().to_owned(),
+            category: cfg.find_category(&self.category).unwrap().to_owned(),
             original_category: self.category,
             account_name: self.account_name,
             labels: self.labels,
