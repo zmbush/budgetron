@@ -184,8 +184,10 @@ impl Budget {
                 if ix < periods {
                     *budget_category.previous_periods
                         .get_mut(ix)
-                        .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
-                        t.amount;
+                        .expect(&format!("Tried to get index {}. Too big \
+                                          {}",
+                                         ix,
+                                         periods)) += t.amount;
                 } else if ix == periods {
                     budget_category.current_period += t.amount;
                 }
@@ -196,8 +198,10 @@ impl Budget {
                     *budget.income
                         .previous_periods
                         .get_mut(ix)
-                        .expect(&format!("Tried to get index {}. Too big {}", ix, periods)) +=
-                        t.amount;
+                        .expect(&format!("Tried to get index {}. Too big \
+                                          {}",
+                                         ix,
+                                         periods)) += t.amount;
                 } else if ix == periods {
                     budget.income.current_period += t.amount;
                 }

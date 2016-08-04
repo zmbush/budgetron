@@ -36,10 +36,6 @@ use std::{fs, io};
 use std::path::Path;
 use budget::Budget;
 use error::BResult;
-use std::env;
-use std::path::PathBuf;
-use std::fs::File;
-use std::io::Read;
 
 #[allow(unused)]
 #[rustfmt_skip]
@@ -88,24 +84,6 @@ fn generate_budget(d: &Path,
     Ok(true)
 }
 
-fn cfg() -> config::Config {
-    let contents = {
-        let path = env::home_dir()
-            .unwrap_or(PathBuf::from("/"))
-            .join(".budgetron.toml");
-        let ret: String = if let Ok(mut f) = File::open(path) {
-            let mut s = String::new();
-            let _ = f.read_to_string(&mut s);
-            s
-        } else {
-            "".to_owned()
-        };
-        ret
-    };
-
-    toml::decode_str(&contents).unwrap()
-}
-
 fn main() {
     env_logger::init().unwrap();
 
@@ -113,9 +91,13 @@ fn main() {
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
 
-    let cfg = cfg();
+    let cfg: config::SecureConfig = config::load_cfg(".budgetron.toml")
+        .expect("Couldn't load email config");
 
-    let mut transactions = Transactions::new();
+    let category_cfg: config::CategoryConfig = config::load_cfg("budgetronrc.toml")
+        .expect("Unable to load budgetronrc.toml");
+
+    let mut transactions = Transactions::new(&category_cfg);
 
     for file in args.flag_logix_file {
         transactions.load_records::<LogixExport>(&file)

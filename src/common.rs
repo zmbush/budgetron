@@ -4,6 +4,7 @@ use rustc_serialize::{Decodable, Decoder};
 use std::cmp::min;
 use fintime::Date;
 use std::collections::HashSet;
+use config;
 
 #[derive(Debug, RustcEncodable, PartialEq)]
 pub enum TransactionType {
@@ -22,7 +23,7 @@ impl Decodable for TransactionType {
 }
 
 pub trait Genericize {
-    fn genericize(self) -> Transaction;
+    fn genericize(self, &config::CategoryConfig) -> Transaction;
 }
 
 #[derive(Debug, RustcEncodable)]
@@ -46,13 +47,17 @@ pub struct Transaction {
     pub notes: String,
 }
 
-pub struct Transactions {
+pub struct Transactions<'a> {
     pub transactions: Vec<Transaction>,
+    config: &'a config::CategoryConfig,
 }
 
-impl Transactions {
-    pub fn new() -> Transactions {
-        Transactions { transactions: Vec::new() }
+impl<'a> Transactions<'a> {
+    pub fn new(config: &'a config::CategoryConfig) -> Transactions<'a> {
+        Transactions {
+            transactions: Vec::new(),
+            config: config,
+        }
     }
 
     pub fn load_records<ExportType>(&mut self, filename: &str) -> BResult<i32>
@@ -61,7 +66,7 @@ impl Transactions {
         let mut count = 0;
         for record in try!(csv::Reader::from_file(filename)).decode() {
             let record: ExportType = try!(record);
-            self.transactions.push(record.genericize());
+            self.transactions.push(record.genericize(&self.config));
             count += 1;
         }
         Ok(count)
