@@ -1,3 +1,5 @@
+ignored_accounts = ["MORTGAGE LOAN"]
+
 [categories]
 "Auto Payment" = []
 "Automobile" = ["Auto & Transport", "Service & Parts", "Gas & Fuel", "Parking"]
@@ -32,7 +34,7 @@
 "Legal" = []
 "Online Subscriptions" = []
 "Personal Care" = ["PersonalCare", "Hair", "Spa & Massage"]
-"Mortgage & Rent" = ["BillsRent", "Rent"]
+"Mortgage & Rent" = ["BillsRent", "Rent", "BillsMortgage"]
 "Shopping" = [
   "Amazon", "Clothing", "Sporting Goods", "Sports", "Costco", "Warehouse Clubs"
 ]
@@ -49,7 +51,7 @@
   "Bills", "BillsCable", "BillsElectric", "BillsPhone", "Internet", "Utilities",
   "Security", "Mobile Phone", "BillsInternet"
 ]
-"Hide" = ["Hide from Budgets & Trends", "Pending", "Exclusions", "Masterson Move-in"]
+"Hide" = ["Hide from Budgets & Trends", "Pending", "Exclusions", "Masterson Move-in", "Loan Payment", "Loan Insurance", "Loans"]
 
 [budgets.monthly]
 "Automobile" = 250.0
