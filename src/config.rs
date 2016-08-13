@@ -58,6 +58,7 @@ pub struct Budgets {
 pub struct CategoryConfig {
     pub categories: HashMap<String, Vec<String>>,
     pub budgets: Budgets,
+    pub ignored_accounts: Vec<String>,
 }
 
 impl CategoryConfig {

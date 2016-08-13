@@ -76,6 +76,13 @@ impl<'a> Transactions<'a> {
         self.transactions.sort_by(|a, b| a.date.cmp(&b.date));
 
         let mut to_delete = HashSet::new();
+
+        for (i, t) in self.transactions.iter().enumerate() {
+            if self.config.ignored_accounts.contains(&t.account_name) {
+                to_delete.insert(i);
+            }
+        }
+
         for (i, t) in self.transactions.iter().enumerate() {
             for j in i..min(self.transactions.len(), i + 100) {
                 let ref tn = self.transactions[j];
