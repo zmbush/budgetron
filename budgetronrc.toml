@@ -26,7 +26,7 @@ ignored_accounts = ["MORTGAGE LOAN"]
 "Household" = [
   "Furnishings", "Home Services", "Lawn & Garden", "Pets", "Home Supplies", "Home"
 ]
-"Income" = ["Wages", "Paycheck", "Rental Income"]
+"Income" = ["Wages", "Paycheck", "Rental Income", "Bonus"]
 "Insurance" = ["Auto Insurance", "BillsInsurance"]
 "Interest" = ["Interest Income", "Dividends"]
 "Investments" = ["Trade Commissions"]
