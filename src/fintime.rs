@@ -78,7 +78,7 @@ impl Timeframe {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct Date {
-    date: chrono::Date<chrono::UTC>,
+    pub date: chrono::Date<chrono::UTC>,
 }
 
 impl ToJson for Date {
