@@ -1,12 +1,12 @@
 [package]
 name = "budgetron"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Zachary Bush <zach@zmbush.com>"]
 
 [dependencies]
 chrono = "*"
 csv = "*"
-docopt = "*"
+clap = "*"
 email = "*"
 env_logger = "*"
 handlebars = "*"
