@@ -1,0 +1,11 @@
+[package]
+name = "data_store"
+version = "0.1.0"
+authors = ["Zach Bush <zach@zmbush.com>"]
+
+[dependencies]
+diesel = { version = "*", features = ["chrono"] }
+diesel_codegen = "*"
+dotenv = "*"
+dotenv_macros = "*"
+chrono = "*"

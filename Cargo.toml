@@ -16,3 +16,4 @@ phf_macros = "*"
 rustc-serialize = "*"
 tojson_macros = "*"
 toml = "*"
+data_store = { path = "data_store" }

@@ -17,6 +17,7 @@ extern crate env_logger;
 extern crate handlebars;
 extern crate toml;
 extern crate email;
+extern crate data_store;
 
 mod budget;
 mod categories;
@@ -110,6 +111,31 @@ fn main() {
     }
 
     transactions.collate();
+
+    let trans_db = data_store::Transactions::new_from_env();
+    let mut all_transactions = Vec::new();
+    for t in transactions.iter() {
+        all_transactions.push(data_store::models::NewTransaction {
+            date: t.date.date.naive_utc(),
+            person: match t.person {
+                common::Person::Molly => "Molly",
+                common::Person::Zach => "Zach",
+            },
+            description: &t.description,
+            original_description: &t.original_description,
+            amount: t.amount,
+            transaction_type: match t.transaction_type {
+                common::TransactionType::Debit => "Debit",
+                common::TransactionType::Credit => "Credit",
+            },
+            category: &t.category,
+            original_category: &t.original_category,
+            account_name: &t.account_name,
+            labels: &t.labels,
+            notes: &t.notes,
+        });
+    }
+    trans_db.set_transactions(&all_transactions);
 
     let d = Path::new(&args.flag_output_dir);
 
