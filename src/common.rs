@@ -5,6 +5,7 @@ use std::cmp::min;
 use fintime::Date;
 use std::collections::HashSet;
 use config;
+use data_store;
 
 #[derive(Debug, RustcEncodable, PartialEq)]
 pub enum TransactionType {
@@ -100,6 +101,34 @@ impl<'a> Transactions<'a> {
 
         for i in to_delete {
             self.transactions.remove(i);
+        }
+    }
+
+    pub fn write_to_db(&self, db: &data_store::Transactions) {
+        let mut all_transactions = Vec::new();
+        for t in self.iter() {
+            all_transactions.push(data_store::models::NewTransaction {
+                date: t.date.date.naive_utc(),
+                person: match t.person {
+                    Person::Molly => "Molly",
+                    Person::Zach => "Zach",
+                },
+                description: &t.description,
+                original_description: &t.original_description,
+                amount: t.amount,
+                transaction_type: match t.transaction_type {
+                    TransactionType::Debit => "Debit",
+                    TransactionType::Credit => "Credit",
+                },
+                category: &t.category,
+                original_category: &t.original_category,
+                account_name: &t.account_name,
+                labels: &t.labels,
+                notes: &t.notes,
+            });
+        }
+        if !all_transactions.is_empty() {
+            db.set_transactions(&all_transactions);
         }
     }
 
