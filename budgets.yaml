@@ -1,0 +1,41 @@
+joint:
+    accounts:
+        - "Joint.*"
+        - "House Fund \\(0\\)"
+        - "ACCT.*"
+    categories:
+        - "Gas & Fuel"
+        - "Groceries"
+        - "Home Improvement"
+        - ".*Insurance.*"
+        - "Move-in"
+    descriptions:
+        - "ACH.*ADT"
+        - "ACH.*ELECTRIC"
+        - "ADT SECURITY"
+        - "WASTE MGMT"
+    monthly:
+        Automobile: 250.0
+        "Bills & Utilities": 431.79
+        Charity: 34
+        Entertainment: 50
+        "Food & Dining": 300
+        Groceries: 400
+        Health: 200
+        Hobbies: 100
+        Insurance: 321
+        "Mortgage & Rent": 3635.63
+        Online Subscriptions: 50
+        Shopping: 115.0
+Barry:
+    accounts:
+        - "ACCOUNT_NUMBER-.*"
+Zach:
+    accounts:
+        - "Personal.*"
+        - "Checking \\(9\\)"
+        - "Card 1"
+        - "Card 2"
+        - "Card 3"
+        - "Card 4.*"
+

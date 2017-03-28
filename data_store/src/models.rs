@@ -18,7 +18,8 @@ pub struct Transaction {
 
 use super::schema::transactions;
 
-#[insertable_into(transactions)]
+#[derive(Insertable)]
+#[table_name="transactions"]
 pub struct NewTransaction<'a> {
     pub date: NaiveDate,
     pub person: &'a str,

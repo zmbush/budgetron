@@ -1,8 +1,10 @@
 use common::{Genericize, Person, Transaction, TransactionType};
 use fintime::Date;
 use std::str::FromStr;
+use serde::{de, Deserialize, Deserializer};
 use rustc_serialize::{Decodable, Decoder};
 use config;
+use std::fmt;
 
 #[derive(Debug)]
 struct TransactionAmount {
@@ -25,12 +27,34 @@ impl FromStr for TransactionAmount {
     }
 }
 
+struct TransactionAmountVisitor;
+impl de::Visitor for TransactionAmountVisitor {
+    type Value = TransactionAmount;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a money amount")
+    }
+
+    fn visit_str<E: de::Error>(self, value: &str) -> Result<TransactionAmount, E> {
+        match value.parse() {
+            Ok(m) => Ok(m),
+            Err(s) => Err(E::custom(s))
+        }
+    }
+}
+
+impl Deserialize for TransactionAmount {
+    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+        d.deserialize_str(TransactionAmountVisitor)
+    }
+}
+
 impl Decodable for TransactionAmount {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        let s = try!(d.read_str());
+        let s = d.read_str()?;
         match s.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(d.error(&s)),
+            Err(s) => Err(d.error(&s))
         }
     }
 }
@@ -55,7 +79,27 @@ impl FromStr for Money {
     }
 }
 
-impl Decodable for Money {
+struct MoneyVisitor;
+impl de::Visitor for MoneyVisitor {
+    type Value = Money;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("money")
+    }
+
+    fn visit_str<E: de::Error>(self, value: &str) -> Result<Money, E> {
+        match value.parse() {
+            Ok(m) => Ok(m),
+            Err(s) => Err(E::custom(s))
+        }
+    }
+}
+impl Deserialize for Money {
+    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+        d.deserialize_str(MoneyVisitor)
+    }
+}
+impl Decodable for Money{
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         let s = try!(d.read_str());
         match s.parse() {
@@ -65,7 +109,7 @@ impl Decodable for Money {
     }
 }
 
-#[derive(RustcDecodable, Debug)]
+#[derive(Deserialize, Debug, RustcDecodable)]
 pub struct LogixExport {
     account: String,
     date: Date,
@@ -99,7 +143,7 @@ impl Genericize for LogixExport {
     }
 }
 
-#[derive(RustcDecodable, Debug)]
+#[derive(Deserialize, Debug, RustcDecodable)]
 pub struct MintExport {
     date: Date,
     description: String,

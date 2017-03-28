@@ -1,12 +1,12 @@
 use chrono;
 use chrono::Datelike;
-use chrono::duration;
 use chrono::offset::TimeZone;
 use std::fmt;
 use self::Timeframe::*;
 use std::ops;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+//use serde_json::value::{ToJson, Value};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
-use rustc_serialize::json::{Json, ToJson};
 
 pub fn is_leap_year(year: i64) -> bool {
     (year % 4 == 0) || ((year % 100 != 0) && (year % 400 == 0))
@@ -26,7 +26,7 @@ pub fn days_in_month(month: i64, year: i64) -> i64 {
     }
 }
 
-#[derive(Debug, Clone, Copy, RustcEncodable)]
+#[derive(Debug, Clone, Copy, Serialize)]
 #[allow(unused)]
 pub enum Timeframe {
     Days(i64),
@@ -34,12 +34,6 @@ pub enum Timeframe {
     Months(i64),
     Quarters(i64),
     Years(i64),
-}
-
-impl ToJson for Timeframe {
-    fn to_json(&self) -> Json {
-        format!("{}", self).to_json()
-    }
 }
 
 impl fmt::Display for Timeframe {
@@ -81,12 +75,6 @@ pub struct Date {
     pub date: chrono::Date<chrono::UTC>,
 }
 
-impl ToJson for Date {
-    fn to_json(&self) -> Json {
-        format!("{}", self).to_json()
-    }
-}
-
 impl fmt::Display for Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let y = self.date.year();
@@ -103,7 +91,7 @@ impl fmt::Display for Date {
 
 impl Date {
     fn move_days(&mut self, days: i64) {
-        self.date = self.date + duration::Duration::days(days);
+        self.date = self.date + chrono::Duration::days(days);
     }
 
     fn move_one_month(&mut self, forward: bool) {
@@ -272,6 +260,43 @@ impl ops::Div<Timeframe> for Timeframe {
 }
 forward_ref_binop!(impl Div, div for Timeframe, Timeframe);
 
+struct DateVisitor;
+impl de::Visitor for DateVisitor {
+    type Value = Date;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a valid date")
+    }
+
+    fn visit_str<E: de::Error>(self, value: &str) -> Result<Date, E> {
+        let error = Err(E::custom(&format!("Bad date format '{}'", value)));
+
+        macro_rules! get_num {
+            ($d:ident) => {
+                match $d.next() {
+                    Some(s) => match s.parse() {
+                        Ok(i) => i,
+                        Err(_) => return error
+                    },
+                    None => return error
+                }
+            }
+        }
+
+        let mut parts = value.split("/");
+        let m = get_num!(parts);
+        let d = get_num!(parts);
+        let y = get_num!(parts);
+        Ok(Date::ymd(y, m, d))
+    }
+}
+
+impl Deserialize for Date {
+    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error>{
+        d.deserialize_str(DateVisitor)
+    }
+}
+
 impl Decodable for Date {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         let s = try!(d.read_str());
@@ -294,6 +319,12 @@ impl Decodable for Date {
         let d = get_num!(parts);
         let y = get_num!(parts);
         Ok(Date::ymd(y, m, d))
+    }
+}
+
+impl Serialize for Date {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(&format!("{}", self))
     }
 }
 
