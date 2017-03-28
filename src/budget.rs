@@ -1,14 +1,14 @@
 use categories;
 use common::{TransactionType, Transactions};
-use error::{BResult, BudgetError};
-use fintime::Timeframe::*;
-use fintime::{Date, Timeframe};
-use std::collections::HashMap;
-use std::path::Path;
 use csv;
+use error::{BResult, BudgetError};
+use fintime::{Date, Timeframe};
+use fintime::Timeframe::*;
+use std::collections::HashMap;
 use std::io::Write;
-//use serde_json::value::{ToJson, Value};
-//use rustc_serialize::json::{Json, ToJson};
+use std::path::Path;
+// use serde_json::value::{ToJson, Value};
+// use rustc_serialize::json::{Json, ToJson};
 
 fn cell(col: usize, row: usize) -> String {
     format!("{}{}", ('A' as usize + col) as u8 as char, row)
@@ -144,7 +144,8 @@ impl Budget {
 
         let factor = period / Months(1);
         for limited_category in categories::LIMITS.keys().cloned() {
-            budget.categories
+            budget
+                .categories
                 .insert(limited_category.to_owned(),
                         BudgetCategory {
                             name: limited_category.to_owned(),
@@ -165,7 +166,9 @@ impl Budget {
 
                 if ix < periods {
                     budget.period_start_dates.push(start_date);
-                    budget.period_names.push(format!("{} - {}", start_date, end_date - Days(1)));
+                    budget
+                        .period_names
+                        .push(format!("{} - {}", start_date, end_date - Days(1)));
                 } else if ix == periods {
                     budget.current_period_start_date = start_date;
                 }
@@ -173,36 +176,39 @@ impl Budget {
 
             if t.transaction_type == TransactionType::Debit && t.date >= start_date &&
                t.date < end_date {
-                let ref mut budget_category = budget.categories
+                let ref mut budget_category = budget
+                    .categories
                     .entry(t.category.to_owned())
                     .or_insert(BudgetCategory {
-                        name: t.category.to_owned(),
-                        previous_periods: vec![0.0; periods],
-                        current_period: 0.0,
-                        goal: 0.0,
-                    });
+                                   name: t.category.to_owned(),
+                                   previous_periods: vec![0.0; periods],
+                                   current_period: 0.0,
+                                   goal: 0.0,
+                               });
 
                 if ix < periods {
-                    *budget_category.previous_periods
-                        .get_mut(ix)
-                        .expect(&format!("Tried to get index {}. Too big \
+                    *budget_category
+                         .previous_periods
+                         .get_mut(ix)
+                         .expect(&format!("Tried to get index {}. Too big \
                                           {}",
-                                         ix,
-                                         periods)) += t.amount;
+                                          ix,
+                                          periods)) += t.amount;
                 } else if ix == periods {
                     budget_category.current_period += t.amount;
                 }
             } else if t.transaction_type == TransactionType::Credit && t.date >= start_date &&
-               t.date < end_date {
+                      t.date < end_date {
 
                 if ix < periods {
-                    *budget.income
-                        .previous_periods
-                        .get_mut(ix)
-                        .expect(&format!("Tried to get index {}. Too big \
+                    *budget
+                         .income
+                         .previous_periods
+                         .get_mut(ix)
+                         .expect(&format!("Tried to get index {}. Too big \
                                           {}",
-                                         ix,
-                                         periods)) += t.amount;
+                                          ix,
+                                          periods)) += t.amount;
                 } else if ix == periods {
                     budget.income.current_period += t.amount;
                 }
@@ -210,20 +216,24 @@ impl Budget {
             }
         }
 
-        budget.any_over_budget = budget.categories
+        budget.any_over_budget = budget
+            .categories
             .iter()
             .filter(|&(_, c)| c.current_period > c.goal)
             .count() > 0;
 
-        budget.current_period_sums = budget.categories
+        budget.current_period_sums = budget
+            .categories
             .iter()
             .fold(0.0, |acc, (&_, ref c)| acc + c.current_period);
 
-        budget.remaining_sum = budget.categories
+        budget.remaining_sum = budget
+            .categories
             .iter()
             .fold(0.0, |acc, (&_, ref c)| acc + c.goal - c.current_period);
 
-        budget.previous_period_sums = budget.categories
+        budget.previous_period_sums = budget
+            .categories
             .iter()
             .fold(vec![0.0; periods], |acc, (&_, ref c)| {
                 acc.iter()

@@ -1,12 +1,13 @@
-use std::env;
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
-use std::collections::HashMap;
+
 
 use email::Mailbox;
 use lettre::email::IntoMailbox;
 use serde::Deserialize;
+use std::collections::HashMap;
+use std::env;
+use std::fs::File;
+use std::io::Read;
+use std::path::PathBuf;
 use toml;
 
 #[derive(Deserialize)]
@@ -86,9 +87,7 @@ pub fn load_cfg<Cfg: Deserialize>(fname: &str) -> Option<Cfg> {
             }
             contents
         } else {
-            let path = env::home_dir()
-                .unwrap_or(PathBuf::from("/"))
-                .join(fname);
+            let path = env::home_dir().unwrap_or(PathBuf::from("/")).join(fname);
             let ret: String = if let Ok(mut f) = File::open(path) {
                 let mut s = String::new();
                 let _ = f.read_to_string(&mut s);

@@ -1,10 +1,10 @@
 use common::{Genericize, Person, Transaction, TransactionType};
-use fintime::Date;
-use std::str::FromStr;
-use serde::{de, Deserialize, Deserializer};
-use rustc_serialize::{Decodable, Decoder};
 use config;
+use fintime::Date;
+use rustc_serialize::{Decodable, Decoder};
+use serde::{de, Deserialize, Deserializer};
 use std::fmt;
+use std::str::FromStr;
 
 #[derive(Debug)]
 struct TransactionAmount {
@@ -17,13 +17,13 @@ impl FromStr for TransactionAmount {
     fn from_str(s: &str) -> Result<TransactionAmount, String> {
         let negative = s.starts_with("(") && s.ends_with(")");
         Ok(TransactionAmount {
-            amount: try!(if negative {
-                s[1..s.len() - 1].parse()
-            } else {
-                s.parse()
-            }),
-            negative: negative,
-        })
+               amount: try!(if negative {
+                                s[1..s.len() - 1].parse()
+                            } else {
+                                s.parse()
+                            }),
+               negative: negative,
+           })
     }
 }
 
@@ -38,7 +38,7 @@ impl de::Visitor for TransactionAmountVisitor {
     fn visit_str<E: de::Error>(self, value: &str) -> Result<TransactionAmount, E> {
         match value.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(E::custom(s))
+            Err(s) => Err(E::custom(s)),
         }
     }
 }
@@ -54,7 +54,7 @@ impl Decodable for TransactionAmount {
         let s = d.read_str()?;
         match s.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(d.error(&s))
+            Err(s) => Err(d.error(&s)),
         }
     }
 }
@@ -90,7 +90,7 @@ impl de::Visitor for MoneyVisitor {
     fn visit_str<E: de::Error>(self, value: &str) -> Result<Money, E> {
         match value.parse() {
             Ok(m) => Ok(m),
-            Err(s) => Err(E::custom(s))
+            Err(s) => Err(E::custom(s)),
         }
     }
 }
@@ -99,7 +99,7 @@ impl Deserialize for Money {
         d.deserialize_str(MoneyVisitor)
     }
 }
-impl Decodable for Money{
+impl Decodable for Money {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         let s = try!(d.read_str());
         match s.parse() {
