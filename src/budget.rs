@@ -7,13 +7,14 @@ use std::collections::HashMap;
 use std::path::Path;
 use csv;
 use std::io::Write;
-use rustc_serialize::json::{Json, ToJson};
+//use serde_json::value::{ToJson, Value};
+//use rustc_serialize::json::{Json, ToJson};
 
 fn cell(col: usize, row: usize) -> String {
     format!("{}{}", ('A' as usize + col) as u8 as char, row)
 }
 
-#[derive(Debug, RustcEncodable)]
+#[derive(Debug, Serialize)]
 struct BudgetCategory {
     name: String,
     previous_periods: Vec<f64>,
@@ -21,8 +22,8 @@ struct BudgetCategory {
     goal: f64,
 }
 
-impl ToJson for BudgetCategory {
-    fn to_json(&self) -> Json {
+/*impl ToJson for BudgetCategory {
+    fn to_json(&self) -> Value {
         let mut m = HashMap::new();
         m.insert("name".to_owned(), self.name.to_json());
         m.insert("previous_periods".to_owned(),
@@ -38,7 +39,7 @@ impl ToJson for BudgetCategory {
 
         m.to_json()
     }
-}
+}*/
 
 impl BudgetCategory {
     pub fn write_to_file<W: Write>(&self,
@@ -76,7 +77,7 @@ impl BudgetCategory {
     }
 }
 
-#[derive(Debug, RustcEncodable, ToJson)]
+#[derive(Debug, Serialize)]
 pub struct Budget {
     pub end_date: Date,
     period_length: Timeframe,

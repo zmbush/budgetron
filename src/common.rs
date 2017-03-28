@@ -1,21 +1,45 @@
 use csv;
 use error::BResult;
-use rustc_serialize::{Decodable, Decoder};
+use serde::{Deserialize, Deserializer};
 use std::cmp::min;
 use fintime::Date;
 use std::collections::HashSet;
 use config;
 use data_store;
+use serde::de;
+use std::fmt;
+use rustc_serialize::{Decodable, Decoder};
 
-#[derive(Debug, RustcEncodable, PartialEq)]
+struct TransactionTypeVisitor;
+impl de::Visitor for TransactionTypeVisitor {
+    type Value = TransactionType;
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a string in the set [debit, credit]")
+    }
+
+    fn visit_str<E: de::Error>(self, value: &str) -> Result<TransactionType, E> {
+        match value{
+            "debit" => Ok(TransactionType::Debit),
+            "credit" => Ok(TransactionType::Credit),
+            s => Err(E::custom(&format!("'{}' is not one of debit or credit", s))),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, RustcEncodable, PartialEq)]
 pub enum TransactionType {
     Credit,
     Debit,
 }
 
+impl Deserialize for TransactionType {
+    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+        d.deserialize_str(TransactionTypeVisitor)
+    }
+}
 impl Decodable for TransactionType {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        match try!(d.read_str()).as_ref() {
+        match d.read_str()?.as_ref() {
             "debit" => Ok(TransactionType::Debit),
             "credit" => Ok(TransactionType::Credit),
             s => Err(d.error(&format!("'{}' is not one of debit or credit", s))),
@@ -27,13 +51,13 @@ pub trait Genericize {
     fn genericize(self, &config::CategoryConfig) -> Transaction;
 }
 
-#[derive(Debug, RustcEncodable)]
+#[derive(Debug, Serialize, RustcEncodable)]
 pub enum Person {
     Molly,
     Zach,
 }
 
-#[derive(Debug, RustcEncodable)]
+#[derive(Debug, Serialize, RustcEncodable)]
 pub struct Transaction {
     pub date: Date,
     pub person: Person,

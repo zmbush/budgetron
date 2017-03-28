@@ -16,6 +16,9 @@ extern crate env_logger;
 extern crate handlebars;
 extern crate lettre;
 extern crate phf;
+#[macro_use]extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
 extern crate rustc_serialize;
 extern crate toml;
 
@@ -102,6 +105,7 @@ fn main() {
 
     if let Some(logix_files) = matches.values_of("logix-file") {
         for file in logix_files {
+            println!("Opening logix file: {}", file);
             transactions.load_records::<LogixExport>(&file)
                 .expect(&format!("Couldn't load logix transactions from {}", file));
         }
@@ -109,6 +113,7 @@ fn main() {
 
     if let Some(mint_files) = matches.values_of("mint-file") {
         for file in mint_files {
+            println!("Opening mint file: {}", file);
             transactions.load_records::<MintExport>(&file)
                 .expect(&format!("Couldn't load mint transactions from {}", file));
         }

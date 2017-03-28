@@ -1,17 +1,17 @@
 use budget::Budget;
 use config::Email;
-use handlebars::{Context, Handlebars, Helper, HelperDef, RenderContext, RenderError};
+/*use handlebars::{Context, Handlebars, Helper, HelperDef, RenderContext, RenderError};
 use lettre::email::EmailBuilder;
 use lettre::transport::smtp;
-use lettre::transport::EmailTransport;
-use rustc_serialize;
+use lettre::transport::EmailTransport;*/
 
-pub fn email_budget(cfg: &Email, budget: &Budget) {
+pub fn email_budget(_: &Email, _: &Budget) {
+    /*
     let mut handlebars = Handlebars::new();
     handlebars.register_template_string("email", include_str!("email.html").to_owned())
         .expect("Couldn't register email");
 
-    handlebars.register_helper("money", Box::new(MoneyHelper));
+    // handlebars.register_helper("money", Box::new(MoneyHelper));
 
     println!("Constructing mail");
     let mut builder = EmailBuilder::new();
@@ -33,10 +33,11 @@ pub fn email_budget(cfg: &Email, budget: &Budget) {
             .build();
 
     let _ = mailer.send(mail);
+    */
 }
 
-struct MoneyHelper;
-
+//struct MoneyHelper;
+/*
 impl HelperDef for MoneyHelper {
     fn call(&self,
             c: &Context,
@@ -57,4 +58,4 @@ impl HelperDef for MoneyHelper {
 
         Ok(())
     }
-}
+}*/

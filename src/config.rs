@@ -5,11 +5,11 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 
 use email::Mailbox;
-use lettre::email::ToMailbox;
-use rustc_serialize::Decodable;
+use lettre::email::IntoMailbox;
+use serde::Deserialize;
 use toml;
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 pub struct EmailAccount {
     pub username: String,
     pub password: String,
@@ -17,44 +17,44 @@ pub struct EmailAccount {
     pub port: u16,
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 pub struct EmailDestination {
     pub name: String,
     pub email: String,
 }
 
-impl ToMailbox for EmailDestination {
-    fn to_mailbox(&self) -> Mailbox {
-        (&self).to_mailbox()
+impl IntoMailbox for EmailDestination {
+    fn into_mailbox(self) -> Mailbox {
+        (&self).into_mailbox()
     }
 }
 
-impl<'a> ToMailbox for &'a EmailDestination {
-    fn to_mailbox(&self) -> Mailbox {
+impl<'a> IntoMailbox for &'a EmailDestination {
+    fn into_mailbox(self) -> Mailbox {
         Mailbox::new_with_name(self.name.to_owned(), self.email.to_owned())
     }
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 pub struct Email {
     pub to: Vec<EmailDestination>,
     pub from: EmailDestination,
     pub account: EmailAccount,
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 pub struct SecureConfig {
     pub email: Option<Email>,
 }
 
-#[derive(RustcDecodable, Debug)]
+#[derive(Deserialize, Debug)]
 pub struct Budgets {
     pub monthly: HashMap<String, f64>,
     pub quarterly: HashMap<String, f64>,
     pub yearly: HashMap<String, f64>,
 }
 
-#[derive(RustcDecodable, Debug)]
+#[derive(Deserialize, Debug)]
 pub struct CategoryConfig {
     pub categories: HashMap<String, Vec<String>>,
     pub budgets: Budgets,
@@ -73,7 +73,7 @@ impl CategoryConfig {
     }
 }
 
-pub fn load_cfg<Cfg: Decodable>(fname: &str) -> Option<Cfg> {
+pub fn load_cfg<Cfg: Deserialize>(fname: &str) -> Option<Cfg> {
     let file_contents = {
         if let Ok(mut dir) = env::current_dir() {
             let mut contents = "".to_owned();
@@ -100,5 +100,5 @@ pub fn load_cfg<Cfg: Decodable>(fname: &str) -> Option<Cfg> {
         }
     };
 
-    toml::decode_str(&file_contents)
+    toml::from_str(&file_contents).ok()
 }

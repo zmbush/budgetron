@@ -1,5 +1,6 @@
 #![feature(custom_derive, custom_attribute, plugin)]
-#![plugin(diesel_codegen, dotenv_macros)]
+
+#[macro_use] extern crate diesel_codegen;
 
 pub mod schema;
 pub mod models;
@@ -10,7 +11,7 @@ extern crate dotenv;
 extern crate chrono;
 
 use diesel::prelude::*;
-use diesel::pg::{Pg, PgConnection};
+use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 
