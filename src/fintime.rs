@@ -1,12 +1,13 @@
+
+use self::Timeframe::*;
 use chrono;
 use chrono::Datelike;
 use chrono::offset::TimeZone;
-use std::fmt;
-use self::Timeframe::*;
-use std::ops;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-//use serde_json::value::{ToJson, Value};
+// use serde_json::value::{ToJson, Value};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
+use std::ops;
 
 pub fn is_leap_year(year: i64) -> bool {
     (year % 4 == 0) || ((year % 100 != 0) && (year % 400 == 0))
@@ -15,12 +16,7 @@ pub fn is_leap_year(year: i64) -> bool {
 
 pub fn days_in_month(month: i64, year: i64) -> i64 {
     if month == 2 {
-        28 +
-        if is_leap_year(year) {
-            1
-        } else {
-            0
-        }
+        28 + if is_leap_year(year) { 1 } else { 0 }
     } else {
         31 - (month - 1) % 7 % 2
     }
@@ -95,19 +91,9 @@ impl Date {
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(self.date.month() as i64 -
-                                 if forward {
-                                     0
-                                 } else {
-                                     1
-                                 },
+        let days = days_in_month(self.date.month() as i64 - if forward { 0 } else { 1 },
                                  self.date.year() as i64);
-        self.move_days(days *
-                       if forward {
-            1
-        } else {
-            -1
-        });
+        self.move_days(days * if forward { 1 } else { -1 });
     }
 
     fn move_months(&mut self, months: i64) {
@@ -292,7 +278,7 @@ impl de::Visitor for DateVisitor {
 }
 
 impl Deserialize for Date {
-    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error>{
+    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
         d.deserialize_str(DateVisitor)
     }
 }

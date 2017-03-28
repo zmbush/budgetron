@@ -1,6 +1,7 @@
 #![feature(custom_derive, custom_attribute, plugin)]
 
-#[macro_use] extern crate diesel_codegen;
+#[macro_use]
+extern crate diesel_codegen;
 
 pub mod schema;
 pub mod models;
@@ -10,8 +11,8 @@ extern crate diesel;
 extern crate dotenv;
 extern crate chrono;
 
-use diesel::prelude::*;
 use diesel::pg::PgConnection;
+use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
 
@@ -28,8 +29,8 @@ impl Transactions {
 
     pub fn new(database_url: &str) -> Transactions {
         Transactions {
-            db: PgConnection::establish(database_url)
-                .expect(&format!("Error connecting to {}", database_url)),
+            db: PgConnection::establish(database_url).expect(&format!("Error connecting to {}",
+                                                                      database_url)),
         }
     }
 

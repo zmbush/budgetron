@@ -1,14 +1,15 @@
-use csv;
-use error::BResult;
-use serde::{Deserialize, Deserializer};
-use std::cmp::min;
-use fintime::Date;
-use std::collections::HashSet;
+
 use config;
+use csv;
 use data_store;
-use serde::de;
-use std::fmt;
+use error::BResult;
+use fintime::Date;
 use rustc_serialize::{Decodable, Decoder};
+use serde::{Deserialize, Deserializer};
+use serde::de;
+use std::cmp::min;
+use std::collections::HashSet;
+use std::fmt;
 
 struct TransactionTypeVisitor;
 impl de::Visitor for TransactionTypeVisitor {
@@ -18,7 +19,7 @@ impl de::Visitor for TransactionTypeVisitor {
     }
 
     fn visit_str<E: de::Error>(self, value: &str) -> Result<TransactionType, E> {
-        match value{
+        match value {
             "debit" => Ok(TransactionType::Debit),
             "credit" => Ok(TransactionType::Credit),
             s => Err(E::custom(&format!("'{}' is not one of debit or credit", s))),
@@ -132,24 +133,24 @@ impl<'a> Transactions<'a> {
         let mut all_transactions = Vec::new();
         for t in self.iter() {
             all_transactions.push(data_store::models::NewTransaction {
-                date: t.date.date.naive_utc(),
-                person: match t.person {
-                    Person::Barry => "Barry",
-                    Person::Zach => "Zach",
-                },
-                description: &t.description,
-                original_description: &t.original_description,
-                amount: t.amount,
-                transaction_type: match t.transaction_type {
-                    TransactionType::Debit => "Debit",
-                    TransactionType::Credit => "Credit",
-                },
-                category: &t.category,
-                original_category: &t.original_category,
-                account_name: &t.account_name,
-                labels: &t.labels,
-                notes: &t.notes,
-            });
+                                      date: t.date.date.naive_utc(),
+                                      person: match t.person {
+                                          Person::Barry => "Barry",
+                                          Person::Zach => "Zach",
+                                      },
+                                      description: &t.description,
+                                      original_description: &t.original_description,
+                                      amount: t.amount,
+                                      transaction_type: match t.transaction_type {
+                                          TransactionType::Debit => "Debit",
+                                          TransactionType::Credit => "Credit",
+                                      },
+                                      category: &t.category,
+                                      original_category: &t.original_category,
+                                      account_name: &t.account_name,
+                                      labels: &t.labels,
+                                      notes: &t.notes,
+                                  });
         }
         if !all_transactions.is_empty() {
             db.set_transactions(&all_transactions);

@@ -16,7 +16,8 @@ extern crate env_logger;
 extern crate handlebars;
 extern crate lettre;
 extern crate phf;
-#[macro_use]extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 extern crate rustc_serialize;
@@ -31,15 +32,15 @@ mod fintime;
 mod config;
 mod mailer;
 
+use budget::Budget;
+use clap::{App, Arg};
 use common::Transactions;
+use error::BResult;
+use exports::{LogixExport, MintExport};
 use fintime::Timeframe;
 use fintime::Timeframe::*;
-use exports::{LogixExport, MintExport};
 use std::{fs, io};
 use std::path::Path;
-use budget::Budget;
-use error::BResult;
-use clap::{App, Arg};
 
 fn generate_budget(d: &Path,
                    period: &Timeframe,
@@ -53,10 +54,10 @@ fn generate_budget(d: &Path,
                            if periods == 0 {
                                format!("last {}", period)
                            } else if periods == 1 {
-                               format!("1 {} period", period)
-                           } else {
-                               format!("{} {} periods", periods, period)
-                           },
+        format!("1 {} period", period)
+    } else {
+        format!("{} {} periods", periods, period)
+    },
                            budget.end_date);
     try!(budget.write_to_file(d.join(filename)));
 
@@ -71,42 +72,43 @@ fn main() {
         .author("Zachary Bush <zach@zmbush.com>")
         .about("Makes you a budget for great success")
         .arg(Arg::with_name("logix-file")
-            .short("l")
-            .long("logix-file")
-            .value_name("FILE")
-            .help("File from Logix")
-            .takes_value(true)
-            .multiple(true))
+                 .short("l")
+                 .long("logix-file")
+                 .value_name("FILE")
+                 .help("File from Logix")
+                 .takes_value(true)
+                 .multiple(true))
         .arg(Arg::with_name("mint-file")
-            .short("m")
-            .long("mint-file")
-            .value_name("FILE")
-            .help("File from mint")
-            .takes_value(true)
-            .multiple(true))
+                 .short("m")
+                 .long("mint-file")
+                 .value_name("FILE")
+                 .help("File from mint")
+                 .takes_value(true)
+                 .multiple(true))
         .arg(Arg::with_name("output-dir")
-            .short("o")
-            .long("output-dir")
-            .value_name("DIR")
-            .help("Directory for output reports")
-            .takes_value(true))
+                 .short("o")
+                 .long("output-dir")
+                 .value_name("DIR")
+                 .help("Directory for output reports")
+                 .takes_value(true))
         .arg(Arg::with_name("send-email")
-            .short("e")
-            .long("send-email"))
+                 .short("e")
+                 .long("send-email"))
         .get_matches();
 
-    let cfg: config::SecureConfig = config::load_cfg(".budgetron.toml")
-        .expect("Couldn't load email config");
+    let cfg: config::SecureConfig =
+        config::load_cfg(".budgetron.toml").expect("Couldn't load email config");
 
-    let category_cfg: config::CategoryConfig = config::load_cfg("budgetronrc.toml")
-        .expect("Unable to load budgetronrc.toml");
+    let category_cfg: config::CategoryConfig =
+        config::load_cfg("budgetronrc.toml").expect("Unable to load budgetronrc.toml");
 
     let mut transactions = Transactions::new(&category_cfg);
 
     if let Some(logix_files) = matches.values_of("logix-file") {
         for file in logix_files {
             println!("Opening logix file: {}", file);
-            transactions.load_records::<LogixExport>(&file)
+            transactions
+                .load_records::<LogixExport>(&file)
                 .expect(&format!("Couldn't load logix transactions from {}", file));
         }
     }
@@ -114,7 +116,8 @@ fn main() {
     if let Some(mint_files) = matches.values_of("mint-file") {
         for file in mint_files {
             println!("Opening mint file: {}", file);
-            transactions.load_records::<MintExport>(&file)
+            transactions
+                .load_records::<MintExport>(&file)
                 .expect(&format!("Couldn't load mint transactions from {}", file));
         }
     }
@@ -159,7 +162,7 @@ fn main() {
                     "account",
                     "labels",
                     "notes"]
-                .iter())
+                           .iter())
             .unwrap();
         for transaction in transactions.iter() {
             out.encode(transaction).unwrap();
