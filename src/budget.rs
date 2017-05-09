@@ -1,4 +1,3 @@
-use categories;
 use common::{TransactionType, Transactions};
 use csv;
 use error::{BResult, BudgetError};
@@ -141,8 +140,9 @@ impl Budget {
             remaining_sum: 0.0,
             previous_period_sums: Vec::new(),
         };
+        /*
 
-        let factor = period / Months(1);
+        factor = period / Months(1);
         for limited_category in categories::LIMITS.keys().cloned() {
             budget
                 .categories
@@ -153,7 +153,7 @@ impl Budget {
                             current_period: 0.0,
                             goal: categories::LIMITS[limited_category] * factor,
                         });
-        }
+        }*/
 
         for t in transactions.iter() {
             if t.category == "Hide" {

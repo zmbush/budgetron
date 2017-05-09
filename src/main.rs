@@ -1,10 +1,3 @@
-#![feature(
-    plugin,
-    custom_attribute,
-    custom_derive
-)]
-#![plugin(phf_macros)]
-#![plugin(tojson_macros)]
 #![deny(unused)]
 
 extern crate chrono;
@@ -15,7 +8,6 @@ extern crate email;
 extern crate env_logger;
 extern crate handlebars;
 extern crate lettre;
-extern crate phf;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;

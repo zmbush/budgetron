@@ -11,8 +11,6 @@ email = "*"
 env_logger = "*"
 handlebars = "*"
 lettre = { git = "https://github.com/lettre/lettre.git" }
-phf = "*"
-phf_macros = "*"
 rustc-serialize = "*"
 serde = "*"
 serde_derive = "*"
