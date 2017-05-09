@@ -1,5 +1,3 @@
-#![feature(custom_derive, custom_attribute, plugin)]
-
 #[macro_use]
 extern crate diesel_codegen;
 

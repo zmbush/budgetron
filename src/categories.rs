@@ -1,4 +1,4 @@
-use phf::Map;
+/*use phf::Map;
 
 pub static LIMITS: Map<&'static str, f64> = phf_map! {
     "Automobile" => 250.0,
@@ -14,4 +14,4 @@ pub static LIMITS: Map<&'static str, f64> = phf_map! {
     "Insurance" => 321.0,
     "Online Subscriptions" => 50.0,
     "Shopping" => 115.0
-};
+};*/
