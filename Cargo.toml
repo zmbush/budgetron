@@ -19,3 +19,4 @@ tojson_macros = "*"
 toml = "*"
 data_store = { path = "data_store" }
 transactor = { path = "transactor" }
+budgetronlib = { path = "budgetronlib" }
