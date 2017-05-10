@@ -5,7 +5,6 @@ authors = ["Zachary Bush <zach@zmbush.com>"]
 
 [dependencies]
 chrono = "*"
-csv = "*"
 clap = "*"
 email = "*"
 env_logger = "*"
@@ -21,3 +20,7 @@ data_store = { path = "data_store" }
 transactor = { path = "transactor" }
 budgetronlib = { path = "budgetronlib" }
 log = "*"
+
+[dependencies.csv]
+git = "https://github.com/BurntSushi/rust-csv.git"
+branch = "rewrite"

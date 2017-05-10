@@ -5,7 +5,7 @@ dependencies = [
  "budgetronlib 0.1.0",
  "chrono 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.24.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "csv 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "csv 0.15.0 (git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite)",
  "data_store 0.1.0",
  "email 0.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -145,16 +145,6 @@ source = "git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite#6d47c0a3
 dependencies = [
  "csv-core 0.1.0 (git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite)",
  "serde 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "csv"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "byteorder 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "memchr 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc-serialize 0.3.24 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -836,7 +826,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum chrono 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d9123be86fd2a8f627836c235ecdf331fdd067ecf7ac05aa1a68fbcf2429f056"
 "checksum clap 2.24.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b7541069be0b8aec41030802abe8b5cdef0490070afaa55418adea93b1e431e0"
 "checksum csv 0.15.0 (git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite)" = "<none>"
-"checksum csv 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7ef22b37c7a51c564a365892c012dc0271221fdcc64c69b19ba4d6fa8bd96d9c"
 "checksum csv-core 0.1.0 (git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite)" = "<none>"
 "checksum dbghelp-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "97590ba53bcb8ac28279161ca943a924d1fd4a8fb3fa63302591647c4fc5b850"
 "checksum derive-error-chain 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5aa0793c7e314a5c8b4092ed60ce447627eb9790c610fa48d6df4f4f05064039"
