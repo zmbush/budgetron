@@ -4,6 +4,7 @@ use std::convert::From;
 #[derive(Debug)]
 pub enum BudgetError {
     CSVError(csv::Error),
+    NoCategoryFoundError(String),
     NoTransactionError,
 }
 
@@ -12,6 +13,5 @@ impl From<csv::Error> for BudgetError {
         BudgetError::CSVError(e)
     }
 }
-
 
 pub type BResult<T> = Result<T, BudgetError>;

@@ -1,0 +1,14 @@
+[package]
+name = "budgetronlib"
+version = "0.1.0"
+authors = ["Zach Bush <zach@zmbush.com>"]
+
+[dependencies]
+chrono = "*"
+serde = "*"
+serde_derive = "*"
+toml = "*"
+
+[dependencies.csv]
+git = "https://github.com/BurntSushi/rust-csv.git"
+branch = "rewrite"
