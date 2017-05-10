@@ -46,10 +46,10 @@ fn generate_budget(d: &Path,
                            if periods == 0 {
                                format!("last {}", period)
                            } else if periods == 1 {
-        format!("1 {} period", period)
-    } else {
-        format!("{} {} periods", periods, period)
-    },
+                               format!("1 {} period", period)
+                           } else {
+                               format!("{} {} periods", periods, period)
+                           },
                            budget.end_date);
     try!(budget.write_to_file(d.join(filename)));
 
@@ -83,16 +83,14 @@ fn main() {
                  .value_name("DIR")
                  .help("Directory for output reports")
                  .takes_value(true))
-        .arg(Arg::with_name("send-email")
-                 .short("e")
-                 .long("send-email"))
+        .arg(Arg::with_name("send-email").short("e").long("send-email"))
         .get_matches();
 
-    let cfg: config::SecureConfig =
-        config::load_cfg(".budgetron.toml").expect("Couldn't load email config");
+    let cfg: config::SecureConfig = config::load_cfg(".budgetron.toml")
+        .expect("Couldn't load email config");
 
-    let category_cfg: config::CategoryConfig =
-        config::load_cfg("budgetronrc.toml").expect("Unable to load budgetronrc.toml");
+    let category_cfg: config::CategoryConfig = config::load_cfg("budgetronrc.toml")
+        .expect("Unable to load budgetronrc.toml");
 
     let mut transactions = Transactions::new(&category_cfg);
 
