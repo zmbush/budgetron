@@ -1,10 +1,9 @@
 use budgetronlib::config;
-use budgetronlib::fintime::Date;
 use budgetronlib::error::BResult;
-use serde::de::{self, Visitor, Deserialize, Deserializer};
-use std::fmt;
+use budgetronlib::fintime::Date;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all="lowercase")]
 pub enum TransactionType {
     Credit,
     Debit,
@@ -33,27 +32,4 @@ pub struct Transaction {
 
 pub trait Genericize {
     fn genericize(self, &config::CategoryConfig) -> BResult<Transaction>;
-}
-
-struct TransactionTypeVisitor;
-impl<'de> Visitor<'de> for TransactionTypeVisitor {
-    type Value = TransactionType;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("a string in the set [debit, credit]")
-    }
-
-    fn visit_str<E: de::Error>(self, value: &str) -> Result<TransactionType, E> {
-        match value {
-            "debit" => Ok(TransactionType::Debit),
-            "credit" => Ok(TransactionType::Credit),
-            s => Err(E::custom(format!("'{}' is not one of credit or debit", s)))
-        }
-    }
-}
-
-impl<'de> Deserialize<'de> for TransactionType {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        d.deserialize_str(TransactionTypeVisitor)
-    }
 }
