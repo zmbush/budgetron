@@ -9,8 +9,8 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 "Crowdfunding" = ["Kickstarter"]
 "Education" = ["Tuition", "Student Loan"]
 "Entertainment" = ["Movies & DVDs", "Music", "Arts", "Amusement"]
-"Fees" = ["Fees & Charges", "Finance Charge", "Bank Fee", "Shipping", "ATM Fee"]
-"Financial" = []
+"Fees" = ["Fees & Charges", "Finance Charge", "Bank Fee", "Shipping", "ATM Fee", "Service Fee"]
+"Financial" = ["Financial Advisor"]
 "Food & Dining" = [
   "Alcohol & Bars", "Fast Food", "Food Trucks", "DiningOut", "Delivery/Takeout",
   "Coffee Shops", "Restaurants", "Seamless"
