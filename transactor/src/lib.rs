@@ -11,4 +11,4 @@ pub mod mint;
 mod util;
 
 pub use generic::Transaction;
-pub use util::from_file;
+pub use util::{from_file, from_file_inferred};
