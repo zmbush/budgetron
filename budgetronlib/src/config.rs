@@ -1,9 +1,11 @@
+use error::{BResult, BudgetError};
+use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use error::{BResult, BudgetError};
+use toml;
 
 #[derive(Deserialize)]
 pub struct EmailAccount {
@@ -41,26 +43,32 @@ impl CategoryConfig {
     }
 }
 
-pub fn open_cfg(fname: &str) -> String {
-    if let Ok(mut dir) = env::current_dir() {
-        let mut contents = "".to_owned();
-        while dir.file_name() != None {
-            if let Ok(mut f) = File::open(dir.join(fname)) {
-                let _ = f.read_to_string(&mut contents);
-                break;
+pub fn load_cfg<Cfg>(fname: &str) -> BResult<Cfg>
+    where Cfg: DeserializeOwned
+{
+    let config_contents = {
+        if let Ok(mut dir) = env::current_dir() {
+            let mut contents = "".to_owned();
+            while dir.file_name() != None {
+                if let Ok(mut f) = File::open(dir.join(fname)) {
+                    let _ = f.read_to_string(&mut contents);
+                    break;
+                }
+                dir.pop();
             }
-            dir.pop();
-        }
-        contents
-    } else {
-        let path = env::home_dir().unwrap_or(PathBuf::from("/")).join(fname);
-        let ret: String = if let Ok(mut f) = File::open(path) {
-            let mut s = String::new();
-            let _ = f.read_to_string(&mut s);
-            s
+            contents
         } else {
-            "".to_owned()
-        };
-        ret
-    }
+            let path = env::home_dir().unwrap_or(PathBuf::from("/")).join(fname);
+            let ret: String = if let Ok(mut f) = File::open(path) {
+                let mut s = String::new();
+                let _ = f.read_to_string(&mut s);
+                s
+            } else {
+                "".to_owned()
+            };
+            ret
+        }
+    };
+
+    Ok(try!(toml::from_str(&config_contents)))
 }
