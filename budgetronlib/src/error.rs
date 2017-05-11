@@ -11,6 +11,8 @@ pub enum BudgetError {
     IOError(io::Error),
     NoMatchingImporter,
     NoTransactionError,
+
+    Multi(Vec<BudgetError>),
 }
 
 impl From<csv::Error> for BudgetError {

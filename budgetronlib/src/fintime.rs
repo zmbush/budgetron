@@ -265,7 +265,13 @@ impl<'de> de::Visitor<'de> for DateVisitor {
             }
         }
 
-        let mut parts = value.split("/");
+        let val = if value.contains(" ") {
+            value.split(" ").next().expect("Value contains lies")
+        } else {
+            value
+        };
+
+        let mut parts = val.split("/");
         let m = get_num!(parts);
         let d = get_num!(parts);
         let y = get_num!(parts);

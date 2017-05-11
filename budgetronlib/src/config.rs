@@ -70,5 +70,5 @@ pub fn load_cfg<Cfg>(fname: &str) -> BResult<Cfg>
         }
     };
 
-    Ok(try!(toml::from_str(&config_contents)))
+    Ok(toml::from_str(&config_contents)?)
 }

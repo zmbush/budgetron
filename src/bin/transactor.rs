@@ -30,16 +30,13 @@ fn main() {
     let category_config: CategoryConfig = config::load_cfg("budgetronrc.toml")
         .expect("Unable to load budgetronrc.toml");
 
-    let mut transactions = Vec::new();
-    if let Some(files) = matches.values_of("file") {
-        for file in files {
-            info!("Opening file: {}", file);
-            transactions.append(&mut transactor::from_file_inferred(&file, &category_config)
-                                         .expect(&format!("Unable to load file `{}`", file)));
-        }
-    }
 
-    transactions.sort_by(|a, b| a.date.cmp(&b.date));
+    let transactions = if let Some(files) = matches.values_of("file") {
+        transactor::load_from_files(files, &category_config).expect("Unable to load files")
+    } else {
+        Vec::new()
+    };
+
     let mut writer = Writer::from_writer(io::stdout());
     for transaction in transactions {
         writer

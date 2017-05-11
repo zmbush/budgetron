@@ -29,7 +29,7 @@ impl Genericize for MintExport {
                original_description: self.original_description,
                amount: self.amount,
                transaction_type: self.transaction_type,
-               category: cfg.find_category(&self.category).unwrap().to_owned(),
+               category: cfg.find_category(&self.category)?.to_owned(),
                original_category: self.category,
                account_name: self.account_name,
                labels: self.labels,

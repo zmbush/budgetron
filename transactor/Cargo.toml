@@ -7,6 +7,7 @@ authors = ["Zach Bush <zach@zmbush.com>"]
 serde = "^1.0"
 serde_derive = "*"
 budgetronlib = { path = "../budgetronlib" }
+log = "*"
 
 [dependencies.csv]
 git = "https://github.com/BurntSushi/rust-csv.git"
