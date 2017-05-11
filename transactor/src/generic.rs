@@ -18,11 +18,11 @@ pub enum Person {
 #[derive(Debug, Serialize)]
 pub struct Transaction {
     pub date: Date,
-    pub person: Person,
     pub description: String,
-    pub original_description: String,
     pub amount: f64,
     pub transaction_type: TransactionType,
+    pub person: Person,
+    pub original_description: String,
     pub category: String,
     pub original_category: String,
     pub account_name: String,

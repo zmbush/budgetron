@@ -2,7 +2,7 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 
 [categories]
 "Auto Payment" = []
-"Automobile" = ["Auto & Transport", "Service & Parts", "Gas & Fuel", "Parking"]
+"Automobile" = ["Auto & Transport", "Service & Parts", "Gas & Fuel", "Parking", "Transportation"]
 "Business" = ["Advertising","Business Services", "Office Supplies"]
 "Cash" = ["ATM", "Cash & ATM"]
 "Charity" = []
@@ -13,7 +13,7 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 "Financial" = ["Financial Advisor"]
 "Food & Dining" = [
   "Alcohol & Bars", "Fast Food", "Food Trucks", "DiningOut", "Delivery/Takeout",
-  "Coffee Shops", "Restaurants", "Seamless"
+  "Coffee Shops", "Restaurants", "Seamless", "Diningout"
 ]
 "Gifts" = ["Gift"]
 "Groceries" = []
@@ -26,7 +26,7 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 "Household" = [
   "Furnishings", "Home Services", "Lawn & Garden", "Pets", "Home Supplies", "Home"
 ]
-"Income" = ["Wages", "Paycheck", "Rental Income", "Bonus"]
+"Income" = ["Wages", "Paycheck", "Rental Income", "Bonus", "Personal"]
 "Insurance" = ["Auto Insurance", "BillsInsurance"]
 "Interest" = ["Interest Income", "Dividends"]
 "Investments" = ["Trade Commissions"]
@@ -41,11 +41,11 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 "Taxes" = ["State Tax", "Federal Tax"]
 "Technology" = ["Computer/Video Games", "Electronics & Software", "VPS Hosting"]
 "Television" = []
-"Transfers" = ["Transfer", "Credit Card Payment"]
+"Transfers" = ["Transfer", "Credit Card Payment", "Payment", "Savings"]
 "Travel" = ["Hotel", "Public Transportation", "Rental Car & Taxi"]
 "Uncategorized" = [
   "Transfer", "Check", "CreditMiscellaneous", "CreditNone", "CreditTransfer",
-  "DebitMiscellaneous", "DebitNone", "DebitTransfer", "Reimbursement"
+  "DebitMiscellaneous", "DebitNone", "DebitTransfer", "Reimbursement", ""
 ]
 "Bills & Utilities" = [
   "Bills", "BillsCable", "BillsElectric", "BillsPhone", "Internet", "Utilities",
