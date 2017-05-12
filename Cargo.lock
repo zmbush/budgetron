@@ -5,6 +5,7 @@ dependencies = [
  "budgetronlib 0.1.0",
  "chrono 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.24.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "collator 0.1.0",
  "csv 0.15.0 (git+https://github.com/BurntSushi/rust-csv.git?branch=rewrite)",
  "data_store 0.1.0",
  "email 0.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -136,6 +137,14 @@ dependencies = [
  "unicode-segmentation 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-width 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "vec_map 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "collator"
+version = "0.1.0"
+dependencies = [
+ "budgetronlib 0.1.0",
+ "transactor 0.1.0",
 ]
 
 [[package]]

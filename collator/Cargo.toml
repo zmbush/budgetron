@@ -1,0 +1,8 @@
+[package]
+name = "collator"
+version = "0.1.0"
+authors = ["Zach Bush <zach@zmbush.com>"]
+
+[dependencies]
+budgetronlib = { path = "../budgetronlib" }
+transactor = { path = "../transactor" }

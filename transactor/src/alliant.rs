@@ -53,6 +53,7 @@ impl Genericize for AlliantExport {
                account_name: self.account_name,
                labels: "".to_owned(),
                notes: "".to_owned(),
+               transfer_destination_account: None,
            })
     }
 }
