@@ -9,8 +9,6 @@ extern crate csv;
 
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
-use collator::collate_all;
-use collator::transfers::TransferCollator;
 use csv::Writer;
 use std::io;
 
