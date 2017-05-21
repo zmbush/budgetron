@@ -1,6 +1,6 @@
 [root]
 name = "budgetron"
-version = "2.0.0-0.0.1"
+version = "2.0.0-0.0.2"
 dependencies = [
  "budgetronlib 0.1.0",
  "chrono 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
