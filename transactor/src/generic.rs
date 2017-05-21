@@ -2,20 +2,20 @@ use budgetronlib::config;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum TransactionType {
     Credit,
     Debit,
     Transfer,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Person {
     Barry,
     Zach,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: Date,
     pub description: String,
@@ -33,4 +33,10 @@ pub struct Transaction {
 
 pub trait Genericize {
     fn genericize(self, &config::CategoryConfig) -> BResult<Transaction>;
+}
+
+impl Genericize for Transaction {
+    fn genericize(self, _: &config::CategoryConfig) -> BResult<Transaction> {
+        Ok(self)
+    }
 }

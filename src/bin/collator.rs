@@ -17,7 +17,7 @@ use std::io;
 fn main() {
     env_logger::init().expect("Unable to set up env_logger");
 
-    let matches = App::new("Transactor")
+    let matches = App::new("Collator")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Zachary Bush <zach@zmbush.com>")
         .about("Parse exports and convert to standard format")
@@ -33,12 +33,14 @@ fn main() {
     let category_config: CategoryConfig = config::load_cfg("budgetronrc.toml")
         .expect("Unable to load budgetronrc.toml");
 
-
     let transactions = if let Some(files) = matches.values_of("file") {
         transactor::load_from_files(files, &category_config).expect("Unable to load files")
     } else {
         Vec::new()
     };
+
+    let transactions = collate_all(transactions, vec![Box::new(TransferCollator::new(100))])
+        .expect("Unable to collate");
 
     let mut writer = Writer::from_writer(io::stdout());
     for transaction in transactions {

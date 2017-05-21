@@ -13,5 +13,5 @@ pub mod mint;
 pub mod alliant;
 mod util;
 
-pub use generic::Transaction;
+pub use generic::{Transaction, TransactionType};
 pub use util::load_from_files;
