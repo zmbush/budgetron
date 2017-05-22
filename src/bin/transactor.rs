@@ -1,12 +1,12 @@
 #[deny(unused_extern_crates)]
 
-extern crate transactor;
-extern crate collator;
 extern crate budgetronlib;
 extern crate env_logger;
 extern crate clap;
 extern crate csv;
+extern crate budgetron;
 
+use budgetron::loading;
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use csv::Writer;
@@ -33,7 +33,7 @@ fn main() {
 
 
     let transactions = if let Some(files) = matches.values_of("file") {
-        transactor::load_from_files(files, &category_config).expect("Unable to load files")
+        loading::load_from_files(files, &category_config).expect("Unable to load files")
     } else {
         Vec::new()
     };

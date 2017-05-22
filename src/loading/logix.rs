@@ -1,7 +1,7 @@
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use generic::{Genericize, Transaction, Person, TransactionType};
+use loading::generic::{Genericize, Transaction, Person, TransactionType};
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use std::fmt;
 use std::str::FromStr;

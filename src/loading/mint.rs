@@ -1,7 +1,7 @@
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use generic::{Transaction, Person, TransactionType, Genericize};
+use loading::generic::{Transaction, Person, TransactionType, Genericize};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all="lowercase")]

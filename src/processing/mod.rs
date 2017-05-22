@@ -1,10 +1,9 @@
-extern crate budgetronlib;
-extern crate transactor;
-
 use budgetronlib::error::BResult;
-use transactor::Transaction;
+use loading::Transaction;
 
-pub mod transfers;
+mod transfers;
+
+pub use processing::transfers::TransferCollator;
 
 pub trait Collator {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;
