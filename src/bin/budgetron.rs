@@ -8,6 +8,7 @@ extern crate budgetron;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator};
+use budgetron::reporting::{NetWorth, Reporter};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use csv::Writer;
@@ -44,17 +45,21 @@ fn main() {
         Vec::new()
     };
 
-    let mut collations: Vec<Box<Collator>> = Vec::new();
+    let mut collations = Vec::new();
     if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
-        collations.push(Box::new(TransferCollator::new(horizon)));
+        collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
+
     let mut writer = Writer::from_writer(io::stdout());
-    for transaction in transactions {
+    for transaction in &transactions {
         writer
             .serialize(transaction)
             .expect("Could not write transaction!");
     }
+    writer.flush().unwrap();
+
+    println!("{:?}", NetWorth.report(&transactions));
 }

@@ -1,6 +1,6 @@
 use budgetronlib::error::BResult;
 use loading::{Transaction, TransactionType};
-use processing::Collator;
+use processing::Collate;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
 
@@ -14,7 +14,7 @@ impl TransferCollator {
     }
 }
 
-impl Collator for TransferCollator {
+impl Collate for TransferCollator {
     fn collate(&self, mut transactions: Vec<Transaction>) -> BResult<Vec<Transaction>> {
         let mut to_delete = HashSet::new();
         let mut to_update = HashMap::new();
