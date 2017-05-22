@@ -1,10 +1,10 @@
-use alliant;
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::{BResult, BudgetError};
 use csv::Reader;
-use generic::{Transaction, Genericize};
-use logix;
-use mint;
+use loading::alliant;
+use loading::generic::{Transaction, Genericize};
+use loading::logix;
+use loading::mint;
 use serde::de::DeserializeOwned;
 use std::cmp::min;
 use std::fmt::Display;

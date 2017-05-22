@@ -17,8 +17,6 @@ serde_json = "*"
 tojson_macros = "*"
 toml = "*"
 data_store = { path = "data_store" }
-transactor = { path = "transactor" }
-collator = { path = "collator" }
 budgetronlib = { path = "budgetronlib" }
 log = "*"
 

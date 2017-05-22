@@ -1,8 +1,8 @@
-use Collator;
 use budgetronlib::error::BResult;
+use loading::{Transaction, TransactionType};
+use processing::Collator;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
-use transactor::{Transaction, TransactionType};
 
 pub struct TransferCollator {
     pub horizon: usize,
@@ -24,17 +24,22 @@ impl Collator for TransferCollator {
                 if tn.amount == t.amount && tn.transaction_type != t.transaction_type &&
                    !to_delete.contains(&i) && !to_delete.contains(&j) &&
                    !to_update.contains_key(&i) && !to_update.contains_key(&j) {
-                    match t.transaction_type {
-                        TransactionType::Debit => {
-                            to_delete.insert(j);
-                            to_update.insert(i, tn.account_name.clone());
-                        },
-                        TransactionType::Credit => {
-                            to_delete.insert(i);
-                            to_update.insert(j, t.account_name.clone());
-                        },
-                        TransactionType::Transfer => unreachable!(),
-                    };
+                    if t.account_name == tn.account_name {
+                        to_delete.insert(i);
+                        to_delete.insert(j);
+                    } else {
+                        match t.transaction_type {
+                            TransactionType::Debit => {
+                                to_delete.insert(j);
+                                to_update.insert(i, tn.account_name.clone());
+                            },
+                            TransactionType::Credit => {
+                                to_delete.insert(i);
+                                to_update.insert(j, t.account_name.clone());
+                            },
+                            TransactionType::Transfer => unreachable!(),
+                        };
+                    }
                 }
             }
         }

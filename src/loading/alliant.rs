@@ -1,7 +1,7 @@
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use generic::{TransactionType, Genericize, Transaction, Person};
+use loading::generic::{TransactionType, Genericize, Transaction, Person};
 
 // "id","account_id","reference_id","transaction_type","amount","posted_at",
 // "created_at","nickname","original_name","merchant_id","updated_at",

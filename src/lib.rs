@@ -7,11 +7,5 @@ extern crate serde;
 extern crate budgetronlib;
 extern crate csv;
 
-mod generic;
-pub mod logix;
-pub mod mint;
-pub mod alliant;
-mod util;
-
-pub use generic::{Transaction, TransactionType};
-pub use util::load_from_files;
+pub mod loading;
+pub mod processing;
