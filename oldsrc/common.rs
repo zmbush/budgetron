@@ -152,7 +152,7 @@ impl<'a> Transactions<'a> {
                                   });
         }
         if !all_transactions.is_empty() {
-            db.set_transactions(&all_transactions);
+            db.set_transactions(all_transactions);
         }
     }
 

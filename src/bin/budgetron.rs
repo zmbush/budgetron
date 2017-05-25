@@ -8,11 +8,9 @@ extern crate budgetron;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator};
-use budgetron::reporting::{NetWorth, Reporter};
+use budgetron::reporting::{NetWorth, Database, Reporter};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
-use csv::Writer;
-use std::io;
 
 fn main() {
     env_logger::init().expect("Unable to set up env_logger");
@@ -53,13 +51,14 @@ fn main() {
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
 
-    let mut writer = Writer::from_writer(io::stdout());
+    /*let mut writer = Writer::from_writer(io::stdout());
     for transaction in &transactions {
         writer
             .serialize(transaction)
             .expect("Could not write transaction!");
     }
-    writer.flush().unwrap();
+    writer.flush().unwrap();*/
 
-    println!("{:?}", NetWorth.report(&transactions));
+    Database.report(&transactions);
+    NetWorth.report(&transactions).print();
 }
