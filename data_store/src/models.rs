@@ -14,6 +14,7 @@ pub struct Transaction {
     pub account_name: String,
     pub labels: String,
     pub notes: String,
+    pub transfer_destination_account: Option<String>,
 }
 
 use super::schema::transactions;
@@ -32,4 +33,5 @@ pub struct NewTransaction<'a> {
     pub account_name: &'a str,
     pub labels: &'a str,
     pub notes: &'a str,
+    pub transfer_destination_account: Option<&'a String>,
 }

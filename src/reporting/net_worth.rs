@@ -1,6 +1,7 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
 use std::collections::HashMap;
+use std::fmt;
 
 pub struct NetWorth;
 #[derive(Debug)]
@@ -28,5 +29,26 @@ impl Reporter for NetWorth {
             }
         }
         NetWorthReport { worth }
+    }
+}
+
+impl NetWorthReport {
+    pub fn print(&self) {
+        println!("{}", self);
+    }
+}
+
+impl fmt::Display for NetWorthReport {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let maxlen = self.worth.keys().map(String::len).max().unwrap_or(0);
+        writeln!(f, "{:>width$}  {}", "Account", "Balance", width = maxlen)?;
+        for (key, value) in &self.worth {
+            if *value < 0.001 && *value > -0.001 {
+                continue;
+            }
+            writeln!(f, "{:>width$}  {:.2}", key, value, width = maxlen)?;
+        }
+
+        Ok(())
     }
 }

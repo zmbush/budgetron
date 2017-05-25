@@ -1,4 +1,5 @@
 use loading::Transaction;
+use std::fmt;
 
 pub trait Reporter {
     type OutputType;
@@ -7,5 +8,7 @@ pub trait Reporter {
 }
 
 mod net_worth;
+mod database;
 
+pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;
