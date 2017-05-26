@@ -7,7 +7,9 @@ pub struct Database;
 impl Reporter for Database {
     type OutputType = ();
 
-    fn report(&self, transactions: &Vec<Transaction>) {
+    fn report<'a, I>(&self, transactions: I)
+        where I: Iterator<Item = &'a Transaction>
+    {
         let db = data_store::Transactions::new_from_env();
         let mut all_transactions = Vec::new();
         for t in transactions {

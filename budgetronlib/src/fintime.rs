@@ -62,9 +62,15 @@ impl Timeframe {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Hash)]
 pub struct Date {
     pub date: chrono::Date<chrono::UTC>,
+}
+
+impl Default for Date {
+    fn default() -> Date {
+        Date::ymd(2000, 1, 1)
+    }
 }
 
 impl fmt::Display for Date {

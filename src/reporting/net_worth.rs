@@ -1,19 +1,21 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
 pub struct NetWorth;
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct NetWorthReport {
-    pub worth: HashMap<String, f64>,
+    pub worth: BTreeMap<String, f64>,
 }
 
 impl Reporter for NetWorth {
     type OutputType = NetWorthReport;
 
-    fn report(&self, transactions: &Vec<Transaction>) -> NetWorthReport {
-        let mut worth = HashMap::new();
+    fn report<'a, I>(&self, transactions: I) -> NetWorthReport
+        where I: Iterator<Item = &'a Transaction>
+    {
+        let mut worth = BTreeMap::new();
         for transaction in transactions {
             *worth.entry(transaction.account_name.clone()).or_insert(0.0) +=
                 match transaction.transaction_type {

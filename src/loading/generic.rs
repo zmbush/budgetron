@@ -2,20 +2,32 @@ use budgetronlib::config;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum TransactionType {
     Credit,
     Debit,
     Transfer,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl Default for TransactionType {
+    fn default() -> TransactionType {
+        TransactionType::Credit
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Person {
     Molly,
     Zach,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl Default for Person {
+    fn default() -> Person {
+        Person::Molly
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Transaction {
     pub date: Date,
     pub description: String,

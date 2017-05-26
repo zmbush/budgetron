@@ -5,10 +5,11 @@ extern crate env_logger;
 extern crate clap;
 extern crate csv;
 extern crate budgetron;
+extern crate serde_json;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator};
-use budgetron::reporting::{NetWorth, Database, Reporter};
+use budgetron::reporting::{Database, Cashflow, Reporter};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 
@@ -44,21 +45,16 @@ fn main() {
     };
 
     let mut collations = Vec::new();
-    if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
+    if let Ok(horizon) = matches.value_of("transfers").unwrap_or("100").parse() {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
+    Database.report(transactions.iter());
 
-
-    /*let mut writer = Writer::from_writer(io::stdout());
-    for transaction in &transactions {
-        writer
-            .serialize(transaction)
-            .expect("Could not write transaction!");
-    }
-    writer.flush().unwrap();*/
-
-    Database.report(&transactions);
-    NetWorth.report(&transactions).print();
+    let report = Cashflow
+        .by_month()
+        .for_account("Joint Expense Account".to_owned())
+        .report(transactions.iter());
+    println!("{}", serde_json::to_string_pretty(&report).expect("NORP"));
 }
