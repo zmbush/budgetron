@@ -3,13 +3,14 @@ use loading::Transaction;
 use reporting::by_account::ByAccount;
 use reporting::by_timeframe::ByTimeframe;
 use serde;
+use std::borrow::Cow;
 use std::fmt;
 
 pub trait Reporter: Sized {
     type OutputType;
 
     fn report<'a, I>(&self, transactions: I) -> Self::OutputType
-        where I: Iterator<Item = &'a Transaction>;
+        where I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 
     fn by_week(&self) -> ByTimeframe<Self> {
         ByTimeframe::new(self, Timeframe::Weeks(1))
@@ -35,6 +36,7 @@ mod by_account;
 mod net_worth;
 mod database;
 mod cashflow;
+mod multi;
 
 pub use reporting::cashflow::Cashflow;
 pub use reporting::database::Database;

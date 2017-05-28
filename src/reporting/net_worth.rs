@@ -1,5 +1,6 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -13,7 +14,7 @@ impl Reporter for NetWorth {
     type OutputType = NetWorthReport;
 
     fn report<'a, I>(&self, transactions: I) -> NetWorthReport
-        where I: Iterator<Item = &'a Transaction>
+        where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let mut worth = BTreeMap::new();
         for transaction in transactions {

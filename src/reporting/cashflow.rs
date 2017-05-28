@@ -1,5 +1,6 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
+use std::borrow::Cow;
 use std::fmt;
 
 pub struct Cashflow;
@@ -14,9 +15,9 @@ impl Reporter for Cashflow {
     type OutputType = CashflowReport;
 
     fn report<'a, I>(&self, transactions: I) -> CashflowReport
-        where I: Iterator<Item = &'a Transaction>
+        where I: Iterator<Item = Cow<'a, Transaction>>
     {
-        transactions.fold(Default::default(), |mut acc, &ref t| {
+        transactions.fold(Default::default(), |mut acc, ref t| {
             match t.transaction_type {
                 TransactionType::Credit => acc.credit += t.amount,
                 TransactionType::Debit => acc.debit += t.amount,
