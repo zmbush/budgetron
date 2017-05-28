@@ -9,9 +9,10 @@ extern crate serde_json;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator};
-use budgetron::reporting::{Database, Cashflow, Reporter};
+use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
+use std::borrow::Cow;
 
 fn main() {
     env_logger::init().expect("Unable to set up env_logger");
@@ -32,6 +33,7 @@ fn main() {
                  .long("transfers")
                  .value_name("HORIZON")
                  .help("The number of transactions to look through to find transfer.")
+                 .default_value("100")
                  .takes_value(true))
         .get_matches();
 
@@ -45,16 +47,21 @@ fn main() {
     };
 
     let mut collations = Vec::new();
-    if let Ok(horizon) = matches.value_of("transfers").unwrap_or("100").parse() {
+    if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
-    Database.report(transactions.iter());
 
-    let report = Cashflow
-        .by_month()
-        .for_account("Joint Expense Account".to_owned())
-        .report(transactions.iter());
+    let cow_transactions = transactions
+        .iter()
+        .map(|t| Cow::Borrowed(t))
+        .collect::<Vec<_>>();
+    let report = (Database,
+                  Cashflow.by_month(),
+                  NetWorth,
+                  (Cashflow.by_month(), Cashflow.by_quarter(), NetWorth)
+                      .for_account("Joint Expense Account".to_owned()))
+            .report(cow_transactions.into_iter());
     println!("{}", serde_json::to_string_pretty(&report).expect("NORP"));
 }

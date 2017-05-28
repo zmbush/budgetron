@@ -1,6 +1,6 @@
-use budgetronlib::fintime::Timeframe;
-use loading::Transaction;
+use loading::{Transaction, TransactionType};
 use reporting::Reporter;
+use std::borrow::Cow;
 use std::fmt;
 
 pub struct ByAccount<'a, T>
@@ -47,17 +47,33 @@ impl<'a, T> Reporter for ByAccount<'a, T>
     type OutputType = ByAccountReport<T::OutputType>;
 
     fn report<'b, I>(&self, transactions: I) -> ByAccountReport<T::OutputType>
-        where I: Iterator<Item = &'b Transaction>
+        where I: Iterator<Item = Cow<'b, Transaction>>
     {
-        let (transactions, _): (Vec<_>, Vec<_>) = transactions
-            .into_iter()
-            .partition(|t| {
-                           t.account_name == self.account ||
-                           t.transfer_destination_account
-                               .as_ref()
-                               .map(|s| *s == self.account)
-                               .unwrap_or(false)
-                       });
+        let (transactions, _): (Vec<_>, Vec<_>) =
+            transactions
+                .into_iter()
+                .map(|t| if let TransactionType::Transfer = t.transaction_type {
+                         if t.account_name == self.account {
+                             let mut t = t.into_owned();
+                             t.transaction_type = TransactionType::Debit;
+                             t.transfer_destination_account = None;
+                             Cow::Owned(t)
+                         } else if *t.transfer_destination_account
+                                        .as_ref()
+                                        .expect("all transfers should have destinations") ==
+                                   self.account {
+                             let mut t = t.into_owned();
+                             t.transaction_type = TransactionType::Credit;
+                             t.account_name = t.transfer_destination_account.take().unwrap();
+                             Cow::Owned(t)
+                         } else {
+                             t
+                         }
+                     } else {
+                         t
+                     })
+                .partition(|t| t.account_name == self.account);
+
         ByAccountReport {
             by_account: self.inner.report(transactions.into_iter()),
             account: self.account.clone(),

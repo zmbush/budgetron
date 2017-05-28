@@ -1,6 +1,7 @@
 use budgetronlib::fintime::{Date, Timeframe};
 use loading::Transaction;
 use reporting::Reporter;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -54,7 +55,7 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
     type OutputType = ByTimeframeReport<T::OutputType>;
 
     fn report<'b, I>(&self, transactions: I) -> ByTimeframeReport<T::OutputType>
-        where I: Iterator<Item = &'b Transaction>
+        where I: Iterator<Item = Cow<'b, Transaction>>
     {
         let mut transactions: Vec<_> = transactions.collect();
         let mut date = transactions
