@@ -1,5 +1,6 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
+use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::fmt;
 
@@ -44,9 +45,7 @@ impl<T> fmt::Display for ByAccountReport<T>
 impl<'a, T> Reporter for ByAccount<'a, T>
     where T: Reporter
 {
-    type OutputType = ByAccountReport<T::OutputType>;
-
-    fn report<'b, I>(&self, transactions: I) -> ByAccountReport<T::OutputType>
+    fn report<'b, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'b, Transaction>>
     {
         let (transactions, _): (Vec<_>, Vec<_>) =
@@ -74,9 +73,34 @@ impl<'a, T> Reporter for ByAccount<'a, T>
                      })
                 .partition(|t| t.account_name == self.account);
 
-        ByAccountReport {
-            by_account: self.inner.report(transactions.into_iter()),
-            account: self.account.clone(),
+        let mut retval = serde_json::map::Map::new();
+        retval.insert("account".to_owned(), Value::String(self.account.clone()));
+        if let Some(v) = self.inner.key() {
+            retval.insert(v.to_owned(), self.inner.report(transactions.into_iter()));
+        } else {
+            match self.inner.report(transactions.into_iter()) {
+                Value::Object(o) => {
+                    for (k, v) in o {
+                        retval.insert(k, v);
+                    }
+                },
+                other => {
+                    retval.insert("by_account".to_owned(), other);
+                },
+            }
         }
+        Value::Object(retval)
+    }
+
+    fn key(&self) -> Option<String> {
+        Some(format!("by_account {}", self.account))
+    }
+
+    fn description(&self) -> Vec<String> {
+        self.inner
+            .description()
+            .into_iter()
+            .map(|d| format!("{} by account {}", d, self.account))
+            .collect()
     }
 }

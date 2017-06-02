@@ -2,6 +2,8 @@ use data_store;
 use loading::{Person, TransactionType};
 use loading::Transaction;
 use reporting::Reporter;
+use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 
 macro_rules! tuple_impls {
@@ -12,11 +14,34 @@ macro_rules! tuple_impls {
     )+) => {
         $(
             impl<$($T:Reporter),+> Reporter for ($($T),+) {
-                type OutputType = ($($T::OutputType),+);
-
-                fn report<'a, It>(&self, transactions: It) -> ($($T::OutputType),+)
+                fn report<'a, It>(&self, transactions: It) -> Value
                     where It: Iterator<Item = Cow<'a, Transaction>> + Clone {
-                        ($(self.$idx.report(transactions.clone())),+)
+                        let mut retval = Map::new();
+                        $(
+                            if let Some(v) = self.$idx.key() {
+                                retval.insert(v.to_owned(), self.$idx.report(transactions.clone()));
+                            } else {
+                                match self.$idx.report(transactions.clone()) {
+                                    Value::Object(o) => for (k, v) in o {
+                                        retval.insert(k, v);
+                                    },
+                                    other => {
+                                        retval.insert("UNNAMED".to_owned(), other);
+                                    }
+                                }
+                            }
+                        )+
+                        Value::Object(retval)
+                }
+
+                fn key(&self) -> Option<String> {
+                    None
+                }
+
+                fn description(&self) -> Vec<String> {
+                    let mut ret = Vec::new();
+                    $(ret.extend(self.$idx.description().into_iter()));+;
+                    ret
                 }
             }
         )+

@@ -1,6 +1,7 @@
 use budgetronlib::fintime::{Date, Timeframe};
 use loading::Transaction;
 use reporting::Reporter;
+use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
@@ -52,9 +53,7 @@ impl<T> fmt::Display for ByTimeframeReport<T>
 impl<'a, T> Reporter for ByTimeframe<'a, T>
     where T: Reporter
 {
-    type OutputType = ByTimeframeReport<T::OutputType>;
-
-    fn report<'b, I>(&self, transactions: I) -> ByTimeframeReport<T::OutputType>
+    fn report<'b, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'b, Transaction>>
     {
         let mut transactions: Vec<_> = transactions.collect();
@@ -79,12 +78,41 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
                     .into_iter()
                     .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
-            by_timeframe.insert(date, self.inner.report(current.into_iter()));
+            let mut map = serde_json::map::Map::new();
+            if let Some(v) = self.inner.key() {
+                map.insert(v.to_owned(), self.inner.report(current.into_iter()));
+            } else {
+                match self.inner.report(current.into_iter()) {
+                    Value::Object(o) => {
+                        for (k, v) in o {
+                            map.insert(k, v);
+                        }
+                    },
+                    other => {
+                        map.insert("by_timeframe".to_owned(), other);
+                    },
+                }
+            }
+            by_timeframe.insert(date, map);
             date += self.timeframe;
         }
-        ByTimeframeReport {
-            by_timeframe,
-            timeframe: self.timeframe,
+        let mut retval = serde_json::to_value(by_timeframe).expect("shitballs");
+        if let Some(mut obj) = retval.as_object_mut() {
+            obj.insert("timeframe".to_owned(),
+                       serde_json::to_value(self.timeframe).expect("shibble"));
         }
+        retval
+    }
+
+    fn key(&self) -> Option<String> {
+        Some(format!("by_timeframe{:?}", self.timeframe))
+    }
+
+    fn description(&self) -> Vec<String> {
+        self.inner
+            .description()
+            .into_iter()
+            .map(|d| format!("{} by timeframe `{}`", d, self.timeframe))
+            .collect()
     }
 }

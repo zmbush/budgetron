@@ -6,13 +6,23 @@ extern crate clap;
 extern crate csv;
 extern crate budgetron;
 extern crate serde_json;
+extern crate handlebars;
+extern crate serde;
+
+extern crate iron;
+extern crate staticfile;
+extern crate mount;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator};
 use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
+use iron::prelude::*;
+use mount::Mount;
+use serde::Serialize;
 use std::borrow::Cow;
+use std::path::Path;
 
 fn main() {
     env_logger::init().expect("Unable to set up env_logger");
@@ -35,6 +45,9 @@ fn main() {
                  .help("The number of transactions to look through to find transfer.")
                  .default_value("100")
                  .takes_value(true))
+        .arg(Arg::with_name("serve")
+                 .long("serve")
+                 .help("Start server to view reports"))
         .get_matches();
 
     let category_config: CategoryConfig = config::load_cfg("budgetronrc.toml")
@@ -63,5 +76,21 @@ fn main() {
                   (Cashflow.by_month(), Cashflow.by_quarter(), NetWorth)
                       .for_account("Joint Expense Account".to_owned()))
             .report(cow_transactions.into_iter());
-    println!("{}", serde_json::to_string_pretty(&report).expect("NORP"));
+
+    if matches.is_present("serve") {
+        let mut mount = Mount::new();
+        mount.mount("/", staticfile::Static::new(Path::new("web/static")));
+        mount.mount("__/data.json", JsonHandler { data: report });
+        Iron::new(mount).http("0.0.0.0:3000").unwrap();
+    }
+}
+
+struct JsonHandler<T: Serialize> {
+    data: T,
+}
+
+impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
+    fn handle(&self, _: &mut Request) -> IronResult<Response> {
+        Ok(Response::with((iron::status::Ok, serde_json::to_string(&self.data).unwrap())))
+    }
 }
