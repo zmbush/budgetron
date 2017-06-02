@@ -1,19 +1,15 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
+use serde_json::{self, Value};
+use serde_json::map::Map;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
 pub struct NetWorth;
-#[derive(Debug, Serialize)]
-pub struct NetWorthReport {
-    pub worth: BTreeMap<String, f64>,
-}
 
 impl Reporter for NetWorth {
-    type OutputType = NetWorthReport;
-
-    fn report<'a, I>(&self, transactions: I) -> NetWorthReport
+    fn report<'a, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let mut worth = BTreeMap::new();
@@ -31,27 +27,15 @@ impl Reporter for NetWorth {
                      .or_insert(0.0) += transaction.amount;
             }
         }
-        NetWorthReport { worth }
+
+        serde_json::to_value(worth).expect("Could not convert networth")
     }
-}
 
-impl NetWorthReport {
-    pub fn print(&self) {
-        println!("{}", self);
+    fn key(&self) -> Option<String> {
+        Some("net_worth".to_owned())
     }
-}
 
-impl fmt::Display for NetWorthReport {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let maxlen = self.worth.keys().map(String::len).max().unwrap_or(0);
-        writeln!(f, "{:>width$}  {}", "Account", "Balance", width = maxlen)?;
-        for (key, value) in &self.worth {
-            if *value < 0.001 && *value > -0.001 {
-                continue;
-            }
-            writeln!(f, "{:>width$}  {:.2}", key, value, width = maxlen)?;
-        }
-
-        Ok(())
+    fn description(&self) -> Vec<String> {
+        vec!["Net Worth".to_owned()]
     }
 }

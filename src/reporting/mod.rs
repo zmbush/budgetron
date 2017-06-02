@@ -3,14 +3,17 @@ use loading::Transaction;
 use reporting::by_account::ByAccount;
 use reporting::by_timeframe::ByTimeframe;
 use serde;
+use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 
 pub trait Reporter: Sized {
-    type OutputType;
-
-    fn report<'a, I>(&self, transactions: I) -> Self::OutputType
+    fn report<'a, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'a, Transaction>> + Clone;
+
+    fn key(&self) -> Option<String>;
+
+    fn description(&self) -> Vec<String>;
 
     fn by_week(&self) -> ByTimeframe<Self> {
         ByTimeframe::new(self, Timeframe::Weeks(1))

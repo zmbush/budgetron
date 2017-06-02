@@ -2,13 +2,12 @@ use data_store;
 use loading::{Person, TransactionType};
 use loading::Transaction;
 use reporting::Reporter;
+use serde_json::Value;
 use std::borrow::Cow;
 
 pub struct Database;
 impl Reporter for Database {
-    type OutputType = ();
-
-    fn report<'a, I>(&self, transactions: I)
+    fn report<'a, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let db = data_store::Transactions::new_from_env();
@@ -40,5 +39,15 @@ impl Reporter for Database {
         if !all_transactions.is_empty() {
             db.set_transactions(all_transactions);
         }
+
+        return Value::Null;
+    }
+
+    fn key(&self) -> Option<String> {
+        None
+    }
+
+    fn description(&self) -> Vec<String> {
+        vec!["Database".to_owned()]
     }
 }
