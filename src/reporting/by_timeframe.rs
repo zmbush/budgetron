@@ -72,28 +72,38 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
         }
 
         let mut by_timeframe = BTreeMap::new();
+        if let Some(v) = self.inner.key() {
+            by_timeframe.insert(v.to_owned(), BTreeMap::new());
+        }
         while transactions.len() > 0 {
             let (current, remaining): (Vec<_>, Vec<_>) =
                 transactions
                     .into_iter()
                     .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
-            let mut map = serde_json::map::Map::new();
             if let Some(v) = self.inner.key() {
-                map.insert(v.to_owned(), self.inner.report(current.into_iter()));
+                by_timeframe
+                    .entry(v.to_owned())
+                    .or_insert_with(|| BTreeMap::new())
+                    .insert(date, self.inner.report(current.into_iter()));
             } else {
                 match self.inner.report(current.into_iter()) {
                     Value::Object(o) => {
                         for (k, v) in o {
-                            map.insert(k, v);
+                            by_timeframe
+                                .entry(k)
+                                .or_insert_with(|| BTreeMap::new())
+                                .insert(date, v);
                         }
                     },
                     other => {
-                        map.insert("by_timeframe".to_owned(), other);
+                        by_timeframe
+                            .entry("by_timeframe".to_owned())
+                            .or_insert_with(|| BTreeMap::new())
+                            .insert(date, other);
                     },
                 }
             }
-            by_timeframe.insert(date, map);
             date += self.timeframe;
         }
         let mut retval = serde_json::to_value(by_timeframe).expect("shitballs");
@@ -105,7 +115,13 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!("by_timeframe{:?}", self.timeframe))
+        Some(format!("{}",
+                     self.timeframe
+                         .ly()
+                         .to_lowercase()
+                         .split_whitespace()
+                         .collect::<Vec<_>>()
+                         .join("_")))
     }
 
     fn description(&self) -> Vec<String> {

@@ -93,7 +93,12 @@ impl<'a, T> Reporter for ByAccount<'a, T>
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!("by_account {}", self.account))
+        Some(format!("for_{}",
+                     self.account
+                         .to_lowercase()
+                         .split_whitespace()
+                         .collect::<Vec<_>>()
+                         .join("_")))
     }
 
     fn description(&self) -> Vec<String> {

@@ -60,6 +60,22 @@ impl Timeframe {
             Years(n) => Years(-n),
         }
     }
+
+    pub fn ly(&self) -> String {
+        let (prefix, plural, amount) = match *self {
+            Days(amount) => ("dai", "days", amount),
+            Weeks(amount) => ("week", "weeks", amount),
+            Months(amount) => ("month", "months", amount),
+            Quarters(amount) => ("quarter", "quarters", amount),
+            Years(amount) => ("year", "years", amount),
+        };
+
+        match amount {
+            1 => format!("{}ly", prefix),
+            2 => format!("bi {}ly", prefix),
+            n => format!("every {} {}", n, plural),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Hash)]
