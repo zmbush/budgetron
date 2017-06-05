@@ -25,6 +25,7 @@ macro_rules! tuple_impls {
                                     Value::Object(o) => for (k, v) in o {
                                         retval.insert(k, v);
                                     },
+                                    Value::Null => {},
                                     other => {
                                         retval.insert("UNNAMED".to_owned(), other);
                                     }

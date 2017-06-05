@@ -73,8 +73,9 @@ fn main() {
     let report = (Database,
                   Cashflow.by_month(),
                   NetWorth,
-                  (Cashflow.by_month(), Cashflow.by_quarter(), NetWorth)
-                      .for_account("Joint Expense Account".to_owned()))
+                  (Cashflow.by_month(), Cashflow.by_quarter(), Cashflow.by_quarters(2), NetWorth)
+                      .for_account("Joint Expense Account".to_owned()),
+                  NetWorth.for_account("Personal Savings Account".to_owned()))
             .report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
@@ -91,6 +92,6 @@ struct JsonHandler<T: Serialize> {
 
 impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
-        Ok(Response::with((iron::status::Ok, serde_json::to_string(&self.data).unwrap())))
+        Ok(Response::with((iron::status::Ok, serde_json::to_string_pretty(&self.data).unwrap())))
     }
 }

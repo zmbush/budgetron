@@ -27,6 +27,10 @@ pub trait Reporter: Sized {
         ByTimeframe::new(self, Timeframe::Quarters(1))
     }
 
+    fn by_quarters(&self, quarters: i64) -> ByTimeframe<Self> {
+        ByTimeframe::new(self, Timeframe::Quarters(quarters))
+    }
+
     fn for_account(&self, account: String) -> ByAccount<Self> {
         ByAccount::new(self, account)
     }
