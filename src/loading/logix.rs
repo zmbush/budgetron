@@ -93,6 +93,7 @@ impl Genericize for LogixExport {
                labels: self.memo,
                notes: self.notes,
                transfer_destination_account: None,
+               tags: vec![],
            })
     }
 }

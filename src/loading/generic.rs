@@ -2,7 +2,7 @@ use budgetronlib::config;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Copy, Deserialize, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub enum TransactionType {
     Credit,
     Debit,
@@ -41,6 +41,7 @@ pub struct Transaction {
     pub labels: String,
     pub notes: String,
     pub transfer_destination_account: Option<String>,
+    pub tags: Vec<String>,
 }
 
 pub trait Genericize {

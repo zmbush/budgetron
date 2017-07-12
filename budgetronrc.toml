@@ -72,3 +72,6 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 
 [budgets.yearly]
 "Home Improvement" = 5000.0
+
+[tag.category]
+"essential" = ["CHASE", "T-Mobile"]

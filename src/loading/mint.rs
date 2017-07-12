@@ -50,6 +50,7 @@ impl Genericize for MintExport {
                labels: self.labels,
                notes: self.notes,
                transfer_destination_account: None,
+               tags: vec![],
            })
 
     }

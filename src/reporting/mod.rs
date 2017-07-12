@@ -13,8 +13,6 @@ pub trait Reporter: Sized {
 
     fn key(&self) -> Option<String>;
 
-    fn description(&self) -> Vec<String>;
-
     fn by_week(&self) -> ByTimeframe<Self> {
         ByTimeframe::new(self, Timeframe::Weeks(1))
     }
@@ -44,7 +42,9 @@ mod net_worth;
 mod database;
 mod cashflow;
 mod multi;
+mod repeats;
 
 pub use reporting::cashflow::Cashflow;
 pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;
+pub use reporting::repeats::RepeatedTransactions;

@@ -34,6 +34,7 @@ impl Reporter for Database {
                                       labels: t.labels,
                                       notes: t.notes,
                                       transfer_destination_account: t.transfer_destination_account,
+                                      tags: t.tags,
                                   })
         }
         if !all_transactions.is_empty() {
@@ -45,9 +46,5 @@ impl Reporter for Database {
 
     fn key(&self) -> Option<String> {
         None
-    }
-
-    fn description(&self) -> Vec<String> {
-        vec!["Database".to_owned()]
     }
 }
