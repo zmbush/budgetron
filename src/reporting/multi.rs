@@ -38,12 +38,6 @@ macro_rules! tuple_impls {
                 fn key(&self) -> Option<String> {
                     None
                 }
-
-                fn description(&self) -> Vec<String> {
-                    let mut ret = Vec::new();
-                    $(ret.extend(self.$idx.description().into_iter()));+;
-                    ret
-                }
             }
         )+
     }

@@ -34,8 +34,4 @@ impl Reporter for NetWorth {
     fn key(&self) -> Option<String> {
         Some("net_worth".to_owned())
     }
-
-    fn description(&self) -> Vec<String> {
-        vec!["Net Worth".to_owned()]
-    }
 }

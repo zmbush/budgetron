@@ -14,8 +14,9 @@ extern crate staticfile;
 extern crate mount;
 
 use budgetron::loading;
-use budgetron::processing::{collate_all, TransferCollator, Collator};
-use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth};
+use budgetron::processing::{collate_all, TransferCollator, Collator, TagCollator,
+                            TagCollatorConfig};
+use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth, RepeatedTransactions};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -64,6 +65,11 @@ fn main() {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
+    let tag_config: TagCollatorConfig =
+        config::load_cfg("budgetronrc.toml")
+            .expect("Unable to load tag config from budgetronrc.toml");
+    collations.push(Collator::Tags(TagCollator::new(tag_config)));
+
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
     let cow_transactions = transactions
@@ -73,6 +79,7 @@ fn main() {
     let report = (Database,
                   Cashflow.by_month(),
                   NetWorth,
+                  // RepeatedTransactions::new(100.0),
                   (Cashflow.by_month(), Cashflow.by_quarter(), Cashflow.by_quarters(2), NetWorth)
                       .for_account("Joint Expense Account".to_owned()),
                   NetWorth.for_account("Personal Savings Account".to_owned()))

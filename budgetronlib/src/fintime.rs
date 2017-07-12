@@ -83,6 +83,13 @@ pub struct Date {
     pub date: chrono::Date<chrono::UTC>,
 }
 
+impl ops::Sub<Date> for Date {
+    type Output = i64;
+    fn sub(self, other: Date) -> i64 {
+        self.date.signed_duration_since(other.date).num_days()
+    }
+}
+
 impl Default for Date {
     fn default() -> Date {
         Date::ymd(2000, 1, 1)

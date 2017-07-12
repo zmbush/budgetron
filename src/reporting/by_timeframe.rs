@@ -123,12 +123,4 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
                          .collect::<Vec<_>>()
                          .join("_")))
     }
-
-    fn description(&self) -> Vec<String> {
-        self.inner
-            .description()
-            .into_iter()
-            .map(|d| format!("{} by timeframe `{}`", d, self.timeframe))
-            .collect()
-    }
 }

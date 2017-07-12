@@ -54,6 +54,7 @@ impl Genericize for AlliantExport {
                labels: "".to_owned(),
                notes: "".to_owned(),
                transfer_destination_account: None,
+               tags: vec![],
            })
     }
 }

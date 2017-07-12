@@ -100,12 +100,4 @@ impl<'a, T> Reporter for ByAccount<'a, T>
                          .collect::<Vec<_>>()
                          .join("_")))
     }
-
-    fn description(&self) -> Vec<String> {
-        self.inner
-            .description()
-            .into_iter()
-            .map(|d| format!("{} by account {}", d, self.account))
-            .collect()
-    }
 }

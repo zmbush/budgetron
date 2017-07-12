@@ -32,10 +32,6 @@ impl Reporter for Cashflow {
     fn key(&self) -> Option<String> {
         Some("cashflow".to_owned())
     }
-
-    fn description(&self) -> Vec<String> {
-        vec!["Cashflow".to_owned()]
-    }
 }
 
 impl CashflowReport {

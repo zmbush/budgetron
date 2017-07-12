@@ -10,6 +10,9 @@ extern crate csv;
 #[macro_use]
 extern crate serde_json;
 extern crate handlebars;
+extern crate ordered_float;
+extern crate num_traits;
+extern crate regex;
 
 pub mod loading;
 pub mod processing;
