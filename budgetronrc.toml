@@ -74,4 +74,12 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 "Home Improvement" = 5000.0
 
 [tag.category]
-"essential" = ["CHASE", "T-Mobile"]
+"essential" = ["LIBERTY MUTUAL", "ADT SECURITY", "PGANDE", "BERKELEY BOWL", "VIRGIN MOBILE",
+               "GOLDEN STATE S", "EAST BAY MUD", "FASTRAK", "ZIPCAR", "PACIFIC GAS/ELEC",
+               "COSTCO WHSE", "JPMORGAN CHASE", "HOUSE OF PRODUCE", "EBMUD", "SAFEWAY", "LASTPASS",
+               "WASTE MGMT", "AmazonPrime Membership", "KASPERSKY", "NEARLYFREESPEECH.NET",
+               "COMCAST", "T-MOBILE", "TMOBILE", "GOOGLE STORA", "HOVER", "OAKLAND-ALARM PR",
+               "OAKLAND WEB PAYMENT"]
+"recurring" = ["Anfang", "Hulu", "Google *Music", "NETFLIX", "GOOGLE *Google Music", "EFF",
+               "ANFANG", "ACTBLUE", "Audible", "AUDIBLE", "AAA", "Duolingo", "Endomondo",
+               "PLAYSTATION NETWORK", "CR *CONSUMERREPORTS", "Netflix"]
