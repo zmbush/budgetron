@@ -57,7 +57,7 @@ impl Collate for TagCollator {
             for (key, value) in self.config.tag.category.iter() {
                 if value
                        .iter()
-                       .any(|v| v.re.is_match(&transaction.description)) {
+                       .any(|v| v.re.is_match(&transaction.original_description)) {
                     transaction.tags.push(key.clone());
                 }
             }

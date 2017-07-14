@@ -74,4 +74,12 @@ ignored_accounts = ["Home Mortgage"]
 "Home Improvement" = 5000.0
 
 [tag.category]
-"essential" = ["CHASE", "T-Mobile"]
+"essential" = ["LIBERTY MUTUAL", "ADT SECURITY", "ELECTRIC", "GROCERY", "VIRGIN MOBILE",
+               "STORAGE", "MUD", "TOLLS", "CAR RENTAL", "GAS/ELEC",
+               "COSTCO WHSE", "JPMORGAN CHASE", "GROCERY", "UTILITIES", "SAFEWAY", "SECURITY",
+               "WASTE MGMT", "AmazonPrime Membership", "KASPERSKY", "DOMAINS",
+               "COMCAST", "T-MOBILE", "TMOBILE", "GOOGLE STORA", "HOVER", "-ALARM PR",
+               " WEB PAYMENT"]
+"recurring" = ["Anfang", "Hulu", "Google *Music", "NETFLIX", "GOOGLE *Google Music", "EFF",
+               "ANFANG", "ACTBLUE", "Audible", "AUDIBLE", "AAA", "Duolingo", "Endomondo",
+               "PLAYSTATION NETWORK", "CR *CONSUMERREPORTS", "Netflix"]
