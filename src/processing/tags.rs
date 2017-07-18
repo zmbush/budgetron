@@ -1,36 +1,46 @@
 use budgetronlib::error::BResult;
 use loading::Transaction;
 use processing::Collate;
-use regex::Regex;
+use regex;
 use serde::de::{self, Visitor, Deserialize, Deserializer};
 use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Debug)]
-struct CategoryRegex {
-    re: Regex,
+struct Regex(regex::Regex);
+
+#[derive(Debug, Deserialize)]
+struct MoneyRange {
+    low: f64,
+    high: f64,
+}
+
+#[derive(Debug, Deserialize)]
+struct Matchers {
+    description: Option<Vec<Regex>>,
+    range: Option<MoneyRange>,
 }
 
 struct CategoryRegexVisitor;
 impl<'de> Visitor<'de> for CategoryRegexVisitor {
-    type Value = CategoryRegex;
+    type Value = Regex;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("a valid regex string")
     }
 
-    fn visit_str<E>(self, value: &str) -> Result<CategoryRegex, E>
+    fn visit_str<E>(self, value: &str) -> Result<Regex, E>
         where E: de::Error
     {
-        match Regex::new(value) {
-            Ok(re) => Ok(CategoryRegex { re }),
+        match regex::Regex::new(value) {
+            Ok(re) => Ok(Regex(re)),
             Err(e) => Err(E::custom(format!("Unable to parse `{}` as regex {}", value, e))),
         }
     }
 }
 
-impl<'de> Deserialize<'de> for CategoryRegex {
-    fn deserialize<D>(deserializer: D) -> Result<CategoryRegex, D::Error>
+impl<'de> Deserialize<'de> for Regex {
+    fn deserialize<D>(deserializer: D) -> Result<Regex, D::Error>
         where D: Deserializer<'de>
     {
         deserializer.deserialize_str(CategoryRegexVisitor)
@@ -39,7 +49,7 @@ impl<'de> Deserialize<'de> for CategoryRegex {
 
 #[derive(Debug, Deserialize)]
 struct TagCategories {
-    category: HashMap<String, Vec<CategoryRegex>>,
+    category: HashMap<String, Matchers>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -55,11 +65,21 @@ impl Collate for TagCollator {
     fn collate(&self, mut transactions: Vec<Transaction>) -> BResult<Vec<Transaction>> {
         for transaction in transactions.iter_mut() {
             for (key, value) in self.config.tag.category.iter() {
-                if value
-                       .iter()
-                       .any(|v| v.re.is_match(&transaction.original_description)) {
-                    transaction.tags.push(key.clone());
+                if let Some(ref description) = value.description {
+                    if description
+                           .iter()
+                           .any(|v| v.0.is_match(&transaction.original_description)) {
+                        transaction.tags.push(key.clone());
+                        continue;
+                    }
                 }
+
+                if let Some(ref range) = value.range {
+                    if transaction.amount >= range.low && transaction.amount < range.high {
+                        transaction.tags.push(key.clone());
+                    }
+                }
+
             }
         }
         Ok(transactions)
