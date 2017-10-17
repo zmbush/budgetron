@@ -8,6 +8,7 @@ chrono = "*"
 serde = "*"
 serde_derive = "*"
 toml = "*"
+serde_yaml = "*"
 
 [dependencies.csv]
 git = "https://github.com/BurntSushi/rust-csv.git"

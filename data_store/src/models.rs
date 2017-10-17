@@ -21,10 +21,10 @@ pub struct Transaction {
 use super::schema::transactions;
 
 #[derive(Insertable)]
-#[table_name="transactions"]
+#[table_name = "transactions"]
 pub struct NewTransaction<'a> {
     pub date: NaiveDate,
-    pub person: &'a str,
+    pub person: String,
     pub description: String,
     pub original_description: String,
     pub amount: f64,

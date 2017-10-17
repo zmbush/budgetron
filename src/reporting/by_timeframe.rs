@@ -7,14 +7,16 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 pub struct ByTimeframe<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     inner: &'a T,
     timeframe: Timeframe,
 }
 
 impl<'a, T> ByTimeframe<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     pub fn new(inner: &'a T, timeframe: Timeframe) -> Self {
         ByTimeframe { inner, timeframe }
@@ -28,7 +30,8 @@ pub struct ByTimeframeReport<T> {
 }
 
 impl<T> ByTimeframeReport<T>
-    where T: fmt::Display
+where
+    T: fmt::Display,
 {
     pub fn print(&self) {
         println!("{}", self)
@@ -36,14 +39,17 @@ impl<T> ByTimeframeReport<T>
 }
 
 impl<T> fmt::Display for ByTimeframeReport<T>
-    where T: fmt::Display
+where
+    T: fmt::Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (key, value) in &self.by_timeframe {
-            writeln!(f,
-                     "For the transactions in {}-{}",
-                     key,
-                     key + self.timeframe - Timeframe::Days(1))?;
+            writeln!(
+                f,
+                "For the transactions in {}-{}",
+                key,
+                key + self.timeframe - Timeframe::Days(1)
+            )?;
             writeln!(f, "{}", value)?;
         }
         Ok(())
@@ -51,17 +57,19 @@ impl<T> fmt::Display for ByTimeframeReport<T>
 }
 
 impl<'a, T> Reporter for ByTimeframe<'a, T>
-    where T: Reporter
+where
+    T: Reporter,
 {
     fn report<'b, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'b, Transaction>>
+    where
+        I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let mut transactions: Vec<_> = transactions.collect();
-        let mut date = transactions
-            .get(0)
-            .map(|t| t.date)
-            .clone()
-            .unwrap_or_else(|| Date::ymd(2000, 1, 1));
+        let mut date = transactions.get(0).map(|t| t.date).clone().unwrap_or_else(
+            || {
+                Date::ymd(2000, 1, 1)
+            },
+        );
 
         match self.timeframe {
             Timeframe::Days(_) => {},
@@ -76,10 +84,9 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
             by_timeframe.insert(v.to_owned(), BTreeMap::new());
         }
         while transactions.len() > 0 {
-            let (current, remaining): (Vec<_>, Vec<_>) =
-                transactions
-                    .into_iter()
-                    .partition(|t| t.date >= date && t.date < date + self.timeframe);
+            let (current, remaining): (Vec<_>, Vec<_>) = transactions.into_iter().partition(|t| {
+                t.date >= date && t.date < date + self.timeframe
+            });
             transactions = remaining;
             if let Some(v) = self.inner.key() {
                 by_timeframe
@@ -108,19 +115,23 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
         }
         let mut retval = serde_json::to_value(by_timeframe).expect("shitballs");
         if let Some(mut obj) = retval.as_object_mut() {
-            obj.insert("timeframe".to_owned(),
-                       serde_json::to_value(self.timeframe).expect("shibble"));
+            obj.insert(
+                "timeframe".to_owned(),
+                serde_json::to_value(self.timeframe).expect("shibble"),
+            );
         }
         retval
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!("{}",
-                     self.timeframe
-                         .ly()
-                         .to_lowercase()
-                         .split_whitespace()
-                         .collect::<Vec<_>>()
-                         .join("_")))
+        Some(format!(
+            "{}",
+            self.timeframe
+                .ly()
+                .to_lowercase()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join("_")
+        ))
     }
 }

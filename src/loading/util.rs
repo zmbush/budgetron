@@ -13,11 +13,13 @@ use std::io;
 use std::io::{Stdin, StdinLock, Seek, Read};
 use std::path::Path;
 
-fn from_reader<TransactionType, R>(file: &mut R,
-                                   config: &CategoryConfig)
-                                   -> BResult<Vec<Transaction>>
-    where TransactionType: Genericize + DeserializeOwned,
-          R: io::Read
+fn from_reader<TransactionType, R>(
+    file: &mut R,
+    config: &CategoryConfig,
+) -> BResult<Vec<Transaction>>
+where
+    TransactionType: Genericize + DeserializeOwned,
+    R: io::Read,
 {
     let mut transactions = Vec::new();
     for record in Reader::from_reader(file).deserialize() {
@@ -65,14 +67,19 @@ impl<'a> Seek for Source<'a> {
                             source.loc -= (-diff) as usize;
                         }
                         if source.loc >= source.buf.len() {
-                            Err(io::Error::new(io::ErrorKind::UnexpectedEof,
-                                               "Tried to seek past internal buffer"))
+                            Err(io::Error::new(
+                                io::ErrorKind::UnexpectedEof,
+                                "Tried to seek past internal buffer",
+                            ))
                         } else {
                             Ok(source.loc as u64)
                         }
                     },
                     io::SeekFrom::End(_) => {
-                        Err(io::Error::new(io::ErrorKind::InvalidInput, "Stdin has no end"))
+                        Err(io::Error::new(
+                            io::ErrorKind::InvalidInput,
+                            "Stdin has no end",
+                        ))
                     },
                 }
             },
@@ -108,9 +115,10 @@ impl<'a> Read for Source<'a> {
     }
 }
 
-fn from_file_inferred<P: AsRef<Path> + Copy>(filename: P,
-                                             config: &CategoryConfig)
-                                             -> BResult<Vec<Transaction>> {
+fn from_file_inferred<P: AsRef<Path> + Copy>(
+    filename: P,
+    config: &CategoryConfig,
+) -> BResult<Vec<Transaction>> {
     // If the file doesn't exist. Don't bother.
     let stdin = io::stdin();
     let mut reader = match filename.as_ref().to_str() {
@@ -129,17 +137,19 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(filename: P,
             }
         })*)
     }
-    parse_exports!(Transaction,
-                   mint::MintExport,
-                   logix::LogixExport,
-                   alliant::AlliantExport);
+    parse_exports!(
+        Transaction,
+        mint::MintExport,
+        logix::LogixExport,
+        alliant::AlliantExport
+    );
     Err(BudgetError::Multi(errors))
 }
 
-pub fn load_from_files<P: AsRef<Path> + Display, Files: Iterator<Item = P>>
-    (filenames: Files,
-     config: &CategoryConfig)
-     -> BResult<Vec<Transaction>> {
+pub fn load_from_files<P: AsRef<Path> + Display, Files: Iterator<Item = P>>(
+    filenames: Files,
+    config: &CategoryConfig,
+) -> BResult<Vec<Transaction>> {
     let mut transactions = Vec::new();
     for filename in filenames {
         info!("Opening file: {}", filename);

@@ -1,5 +1,3 @@
-use data_store;
-use loading::{Person, TransactionType};
 use loading::Transaction;
 use reporting::Reporter;
 use serde_json::Value;

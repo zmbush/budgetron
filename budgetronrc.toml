@@ -84,7 +84,7 @@ ignored_accounts = ["4431 Masterson Mortgage"]
 [tag.category.recurring]
 "description" = ["Anfang", "Hulu", "Google *Music", "NETFLIX", "GOOGLE *Google Music", "EFF",
                  "ANFANG", "ACTBLUE", "Audible", "AUDIBLE", "AAA", "Duolingo", "Endomondo",
-                 "PLAYSTATION NETWORK", "CR *CONSUMERREPORTS", "Netflix"]
+                 "PLAYSTATION NETWORK", "CR *CONSUMERREPORTS", "Netflix", "GOOGLE *DUOLINGO"]
 
 [tag.category.tiny.range]
 "low" = 0.0

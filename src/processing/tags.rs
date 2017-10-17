@@ -1,13 +1,8 @@
 use budgetronlib::error::BResult;
 use loading::Transaction;
 use processing::Collate;
-use regex;
-use serde::de::{self, Visitor, Deserialize, Deserializer};
+use processing::regex::Regex;
 use std::collections::HashMap;
-use std::fmt;
-
-#[derive(Debug)]
-struct Regex(regex::Regex);
 
 #[derive(Debug, Deserialize)]
 struct MoneyRange {
@@ -19,32 +14,6 @@ struct MoneyRange {
 struct Matchers {
     description: Option<Vec<Regex>>,
     range: Option<MoneyRange>,
-}
-
-struct CategoryRegexVisitor;
-impl<'de> Visitor<'de> for CategoryRegexVisitor {
-    type Value = Regex;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("a valid regex string")
-    }
-
-    fn visit_str<E>(self, value: &str) -> Result<Regex, E>
-        where E: de::Error
-    {
-        match regex::Regex::new(value) {
-            Ok(re) => Ok(Regex(re)),
-            Err(e) => Err(E::custom(format!("Unable to parse `{}` as regex {}", value, e))),
-        }
-    }
-}
-
-impl<'de> Deserialize<'de> for Regex {
-    fn deserialize<D>(deserializer: D) -> Result<Regex, D::Error>
-        where D: Deserializer<'de>
-    {
-        deserializer.deserialize_str(CategoryRegexVisitor)
-    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,9 +35,10 @@ impl Collate for TagCollator {
         for transaction in transactions.iter_mut() {
             for (key, value) in self.config.tag.category.iter() {
                 if let Some(ref description) = value.description {
-                    if description
-                           .iter()
-                           .any(|v| v.0.is_match(&transaction.original_description)) {
+                    if description.iter().any(|v| {
+                        v.0.is_match(&transaction.original_description)
+                    })
+                    {
                         transaction.tags.push(key.clone());
                         continue;
                     }

@@ -22,8 +22,9 @@ impl Collate for TransferCollator {
             for j in i..min(transactions.len(), i + self.horizon) {
                 let ref tn = transactions[j];
                 if tn.amount == t.amount && tn.transaction_type != t.transaction_type &&
-                   !to_delete.contains(&i) && !to_delete.contains(&j) &&
-                   !to_update.contains_key(&i) && !to_update.contains_key(&j) {
+                    !to_delete.contains(&i) && !to_delete.contains(&j) &&
+                    !to_update.contains_key(&i) && !to_update.contains_key(&j)
+                {
                     if t.account_name == tn.account_name {
                         to_delete.insert(i);
                         to_delete.insert(j);

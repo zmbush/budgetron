@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+import psycopg2
+import datetime
+from itertools import tee
+
+conn = psycopg2.connect("dbname=budgetron")
+
+cur = conn.cursor()
+
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+def previous_months(date, count=1):
+    month = 12 if date.month == 1 else date.month - 1
+    year = date.year - 1 if date.month == 1 else date.year
+
+    next_date = datetime.date(year, month, 1)
+    if count == 1:
+        return [date]
+    else:
+        ret = previous_months(next_date, count - 1)
+        ret.append(date)
+        return ret
+
+def previous_month(date):
+    return (datetime.date(date.year, date.month, 1), datetime.date(date.year, date.month+1, 1));
+
+today = datetime.date.today()
+month_start = datetime.date(today.year, today.month, 1)
+
+incomes = []
+essential = []
+for s, e in pairwise(previous_months(month_start, 9)):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT sum(amount) FROM transactions
+        WHERE transaction_type = 'Credit'
+          AND date >= %s
+          AND date < %s""", (s, e))
+    incomes.append(cur.fetchone()[0])
+
+    cur.execute("""
+        SELECT sum(amount) FROM transactions
+        WHERE 'essential' = any(tags)
+          AND date >= %s
+          AND date < %s""", (s, e))
+    essential.append(cur.fetchone()[0])
+
+average_income = sum(incomes) / float(len(incomes))
+average_essential = sum(essential) / float(len(essential))
+average_left = average_income - average_essential - 10000
+
+print("Average left:", average_left)
