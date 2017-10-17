@@ -15,8 +15,8 @@ extern crate mount;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator, TagCollator,
-                            TagCollatorConfig};
-use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth, RepeatedTransactions};
+                            TagCollatorConfig, OwnersConfig, OwnersCollator};
+use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -32,27 +32,33 @@ fn main() {
         .version(env!("CARGO_PKG_VERSION"))
         .author("Zachary Bush <zach@zmbush.com>")
         .about("Parse exports and convert to standard format")
-        .arg(Arg::with_name("file")
-                 .short("f")
-                 .long("file")
-                 .value_name("FILE")
-                 .help("Export from a supported institution")
-                 .takes_value(true)
-                 .multiple(true))
-        .arg(Arg::with_name("transfers")
-                 .short("t")
-                 .long("transfers")
-                 .value_name("HORIZON")
-                 .help("The number of transactions to look through to find transfer.")
-                 .default_value("100")
-                 .takes_value(true))
-        .arg(Arg::with_name("serve")
-                 .long("serve")
-                 .help("Start server to view reports"))
+        .arg(
+            Arg::with_name("file")
+                .short("f")
+                .long("file")
+                .value_name("FILE")
+                .help("Export from a supported institution")
+                .takes_value(true)
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("transfers")
+                .short("t")
+                .long("transfers")
+                .value_name("HORIZON")
+                .help(
+                    "The number of transactions to look through to find transfer.",
+                )
+                .default_value("100")
+                .takes_value(true),
+        )
+        .arg(Arg::with_name("serve").long("serve").help(
+            "Start server to view reports",
+        ))
         .get_matches();
 
-    let category_config: CategoryConfig = config::load_cfg("budgetronrc.toml")
-        .expect("Unable to load budgetronrc.toml");
+    let category_config: CategoryConfig =
+        config::load_cfg("budgetronrc.yaml").expect("Unable to load budgetronrc.yaml");
 
     let transactions = if let Some(files) = matches.values_of("file") {
         loading::load_from_files(files, &category_config).expect("Unable to load files")
@@ -65,10 +71,14 @@ fn main() {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
-    let tag_config: TagCollatorConfig =
-        config::load_cfg("budgetronrc.toml")
-            .expect("Unable to load tag config from budgetronrc.toml");
+    let tag_config: TagCollatorConfig = config::load_cfg("budgetronrc.yaml").expect(
+        "Unable to load tag config from budgetronrc.yaml",
+    );
     collations.push(Collator::Tags(TagCollator::new(tag_config)));
+    let owner_config: OwnersConfig = config::load_cfg("budgetronrc.yaml").expect(
+        "Unable to load tag config from budgetronrc.yaml",
+    );
+    collations.push(Collator::Owners(OwnersCollator::new(owner_config)));
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
@@ -76,14 +86,19 @@ fn main() {
         .iter()
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
-    let report = (Database,
-                  Cashflow.by_month(),
-                  NetWorth,
-                  // RepeatedTransactions::new(100.0),
-                  (Cashflow.by_month(), Cashflow.by_quarter(), Cashflow.by_quarters(2), NetWorth)
-                      .for_account("Joint Expense Account".to_owned()),
-                  NetWorth.for_account("Personal Savings Account".to_owned()))
-            .report(cow_transactions.into_iter());
+    let report = (
+        Database,
+        Cashflow.by_month(),
+        NetWorth,
+        // RepeatedTransactions::new(100.0),
+        (
+            Cashflow.by_month(),
+            Cashflow.by_quarter(),
+            Cashflow.by_quarters(2),
+            NetWorth,
+        ).for_account("Joint Expense Account".to_owned()),
+        NetWorth.for_account("Personal Savings Account".to_owned()),
+    ).report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
         let mut mount = Mount::new();
@@ -99,6 +114,9 @@ struct JsonHandler<T: Serialize> {
 
 impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
-        Ok(Response::with((iron::status::Ok, serde_json::to_string_pretty(&self.data).unwrap())))
+        Ok(Response::with((
+            iron::status::Ok,
+            serde_json::to_string_pretty(&self.data).unwrap(),
+        )))
     }
 }

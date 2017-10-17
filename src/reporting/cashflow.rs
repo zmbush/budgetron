@@ -1,7 +1,6 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
-use serde_json::map::Map;
 use std::borrow::Cow;
 use std::fmt;
 
@@ -15,7 +14,8 @@ pub struct CashflowReport {
 
 impl Reporter for Cashflow {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let cashflow: CashflowReport = transactions.fold(Default::default(), |mut acc, ref t| {
             match t.transaction_type {
@@ -42,10 +42,12 @@ impl CashflowReport {
 
 impl fmt::Display for CashflowReport {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f,
-                 "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
-                 self.credit,
-                 self.debit,
-                 self.credit - self.debit)
+        writeln!(
+            f,
+            "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
+            self.credit,
+            self.debit,
+            self.credit - self.debit
+        )
     }
 }

@@ -15,25 +15,13 @@ impl Default for TransactionType {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum Person {
-    Barry,
-    Zach,
-}
-
-impl Default for Person {
-    fn default() -> Person {
-        Person::Barry
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Transaction {
     pub date: Date,
     pub description: String,
     pub amount: f64,
     pub transaction_type: TransactionType,
-    pub person: Person,
+    pub person: String,
     pub original_description: String,
     pub category: String,
     pub original_category: String,

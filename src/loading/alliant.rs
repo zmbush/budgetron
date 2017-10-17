@@ -1,7 +1,7 @@
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use loading::generic::{TransactionType, Genericize, Transaction, Person};
+use loading::generic::{TransactionType, Genericize, Transaction};
 
 // "id","account_id","reference_id","transaction_type","amount","posted_at",
 // "created_at","nickname","original_name","merchant_id","updated_at",
@@ -42,19 +42,19 @@ pub struct AlliantExport {
 impl Genericize for AlliantExport {
     fn genericize(self, cfg: &CategoryConfig) -> BResult<Transaction> {
         Ok(Transaction {
-               date: self.posted_at,
-               person: Person::Barry,
-               description: self.nickname,
-               original_description: self.original_name,
-               amount: self.amount,
-               transaction_type: self.transaction_type.into(),
-               category: cfg.find_category(&self.tags)?.to_owned(),
-               original_category: self.tags,
-               account_name: self.account_name,
-               labels: "".to_owned(),
-               notes: "".to_owned(),
-               transfer_destination_account: None,
-               tags: vec![],
-           })
+            date: self.posted_at,
+            person: "".to_owned(),
+            description: self.nickname,
+            original_description: self.original_name,
+            amount: self.amount,
+            transaction_type: self.transaction_type.into(),
+            category: cfg.find_category(&self.tags)?.to_owned(),
+            original_category: self.tags,
+            account_name: self.account_name,
+            labels: "".to_owned(),
+            notes: "".to_owned(),
+            transfer_destination_account: None,
+            tags: vec![],
+        })
     }
 }

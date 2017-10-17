@@ -9,7 +9,8 @@ use std::fmt;
 
 pub trait Reporter: Sized {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone;
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 
     fn key(&self) -> Option<String>;
 

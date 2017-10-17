@@ -1,16 +1,15 @@
 use loading::{Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
-use serde_json::map::Map;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fmt;
 
 pub struct NetWorth;
 
 impl Reporter for NetWorth {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let mut worth = BTreeMap::new();
         for transaction in transactions {
@@ -22,9 +21,10 @@ impl Reporter for NetWorth {
                 };
             if let TransactionType::Transfer = transaction.transaction_type {
                 *worth
-                     .entry(transaction.transfer_destination_account.clone()
-                         .expect("transfer records should have a transfer_destination_account"))
-                     .or_insert(0.0) += transaction.amount;
+                    .entry(transaction.transfer_destination_account.clone().expect(
+                        "transfer records should have a transfer_destination_account",
+                    ))
+                    .or_insert(0.0) += transaction.amount;
             }
         }
 

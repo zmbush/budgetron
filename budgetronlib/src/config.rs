@@ -1,11 +1,12 @@
 use error::{BResult, BudgetError};
 use serde::de::DeserializeOwned;
+use serde_yaml;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use toml;
+
 
 #[derive(Deserialize)]
 pub struct EmailAccount {
@@ -44,7 +45,8 @@ impl CategoryConfig {
 }
 
 pub fn load_cfg<Cfg>(fname: &str) -> BResult<Cfg>
-    where Cfg: DeserializeOwned
+where
+    Cfg: DeserializeOwned,
 {
     let config_contents = {
         if let Ok(mut dir) = env::current_dir() {
@@ -70,5 +72,5 @@ pub fn load_cfg<Cfg>(fname: &str) -> BResult<Cfg>
         }
     };
 
-    Ok(toml::from_str(&config_contents)?)
+    Ok(serde_yaml::from_str(&config_contents)?)
 }

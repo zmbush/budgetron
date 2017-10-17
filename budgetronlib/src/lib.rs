@@ -4,6 +4,7 @@ extern crate serde;
 extern crate chrono;
 extern crate toml;
 extern crate csv;
+extern crate serde_yaml;
 
 pub mod fintime;
 pub mod config;
