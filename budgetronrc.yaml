@@ -63,6 +63,7 @@ categories:
     - Books & Magazines
     - Conventions
   Home Improvement: []
+  Home Projects: []
   Household:
     - Furnishings
     - Home Services
@@ -200,38 +201,52 @@ owners:
           - "Card 3"
           - "Card 4.*"
 
+rolling_budget:
+  start_date: '08/01/2017'
+  split: 'joint'
+  skip_tags:
+    - essential
+    - recurring
+    - ach
+  amounts:
+    Barry: 500
+    Zach: 1500
 
 tag:
   category:
     essential:
       description:
-        - LIBERTY MUTUAL
         - ADT SECURITY
-        - ELECTRIC
-        - GROCERY
-        - VIRGIN MOBILE
-        - STORAGE
-        - MUD
-        - TOLLS
-        - CAR RENTAL
-        - GAS/ELEC
-        - COSTCO WHSE
-        - JPMORGAN CHASE
-        - GROCERY
-        - UTILITIES
-        - SAFEWAY
-        - SECURITY
-        - WASTE MGMT
         - AmazonPrime Membership
-        - KASPERSKY
-        - DOMAINS
+        - GROCERY
         - COMCAST
-        - T-MOBILE
-        - TMOBILE
+        - COSTCO WHSE
+        - MUD
+        - UTILITIES
+        - TOLLS
+        - STORAGE
         - GOOGLE STORA
+        - GROCERY
         - HOVER
+        - JPMORGAN CHASE
+        - KASPERSKY
+        - SECURITY
+        - LIBERTY MUTUAL
+        - DOMAINS
         - -ALARM PR
         -  WEB PAYMENT
+        - GAS/ELEC
+        - ELECTRIC
+        - PTY TAX PMTS
+        - SAFEWAY
+        - TMOBILE
+        - T-MOBILE
+        - VIRGIN MOBILE
+        - WASTE MGMT
+        - CAR RENTAL
+        -  AUTOMTC CO LLC  CA
+      category:
+        - Home Projects
     recurring:
       description:
         - Anfang
@@ -251,6 +266,9 @@ tag:
         - CR *CONSUMERREPORTS
         - Netflix
         - GOOGLE *DUOLINGO
+    ach:
+      description:
+        - ACH
     tiny:
       range:
         low: 0

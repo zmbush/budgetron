@@ -111,6 +111,10 @@ impl fmt::Display for Date {
 }
 
 impl Date {
+    pub fn month(&self) -> u32 {
+        self.date.month()
+    }
+
     fn move_days(&mut self, days: i64) {
         self.date = self.date + chrono::Duration::days(days);
     }
