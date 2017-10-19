@@ -45,6 +45,8 @@ mod cashflow;
 mod multi;
 mod repeats;
 
+pub use reporting::by_account::ByAccountReport;
+pub use reporting::by_timeframe::ByTimeframeReport;
 pub use reporting::cashflow::Cashflow;
 pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;

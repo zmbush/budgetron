@@ -34,12 +34,6 @@ impl Reporter for Cashflow {
     }
 }
 
-impl CashflowReport {
-    pub fn print(&self) {
-        println!("{}", self)
-    }
-}
-
 impl fmt::Display for CashflowReport {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(

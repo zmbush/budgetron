@@ -8,33 +8,28 @@ name = "budgetron"
 doc = false
 
 [dependencies]
+budgetronlib = { path = "budgetronlib" }
 chrono = "*"
 clap = "*"
+csv = "1.0.0-beta.5"
+data_store = { path = "data_store" }
 email = "*"
 env_logger = "*"
 handlebars = "*"
-lettre = { git = "https://github.com/lettre/lettre.git" }
+log = "*"
+num-traits = { version = "0.1", default_features = false }
+ordered-float = "*"
+regex = "*"
 rustc-serialize = "*"
 serde = "*"
 serde_derive = "*"
 serde_json = "*"
 serde_yaml = "*"
+tempdir = "*"
 tojson_macros = "*"
 toml = "*"
-data_store = { path = "data_store" }
-budgetronlib = { path = "budgetronlib" }
-log = "*"
-tempdir = "*"
-ordered-float = "*"
-regex = "*"
-num-traits = { version = "0.1", default_features = false }
 
 # Iron
 iron = "*"
 staticfile = "*"
 mount = "*"
-
-
-[dependencies.csv]
-git = "https://github.com/BurntSushi/rust-csv.git"
-branch = "rewrite"
