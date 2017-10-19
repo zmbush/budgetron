@@ -37,13 +37,14 @@ pub trait Reporter: Sized {
 
 pub trait Report: fmt::Display + serde::Serialize {}
 
-mod by_timeframe;
 mod by_account;
-mod net_worth;
-mod database;
+mod by_timeframe;
 mod cashflow;
+mod database;
 mod multi;
+mod net_worth;
 mod repeats;
+mod rolling_budget;
 
 pub use reporting::by_account::ByAccountReport;
 pub use reporting::by_timeframe::ByTimeframeReport;
@@ -51,3 +52,4 @@ pub use reporting::cashflow::Cashflow;
 pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;
 pub use reporting::repeats::RepeatedTransactions;
+pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};

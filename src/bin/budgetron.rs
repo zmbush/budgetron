@@ -16,7 +16,8 @@ extern crate mount;
 use budgetron::loading;
 use budgetron::processing::{collate_all, TransferCollator, Collator, TagCollator,
                             TagCollatorConfig, OwnersConfig, OwnersCollator};
-use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth};
+use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth, RollingBudget,
+                           RollingBudgetConfig};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -82,6 +83,9 @@ fn main() {
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
+    let rolling_budget_cfg: RollingBudgetConfig =
+        config::load_cfg("budgetronrc.yaml").expect("Unable to load rolling budget config");
+
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
@@ -89,6 +93,7 @@ fn main() {
     let report = (
         Database,
         Cashflow.by_month(),
+        RollingBudget::new(rolling_budget_cfg),
         NetWorth,
         // RepeatedTransactions::new(100.0),
         (

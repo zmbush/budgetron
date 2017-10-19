@@ -63,6 +63,7 @@ categories:
     - Books & Magazines
     - Conventions
   Home Improvement: []
+  Home Projects: []
   Household:
     - Furnishings
     - Home Services
@@ -200,38 +201,52 @@ owners:
           - "Discover Card"
           - "Platinum Rewards Visa.*"
 
+rolling_budget:
+  start_date: '08/01/2017'
+  split: 'joint'
+  skip_tags:
+    - essential
+    - recurring
+    - ach
+  amounts:
+    Molly: 500
+    Zach: 1500
 
 tag:
   category:
     essential:
       description:
-        - LIBERTY MUTUAL
         - ADT SECURITY
-        - PGANDE
-        - BERKELEY BOWL
-        - VIRGIN MOBILE
-        - GOLDEN STATE S
-        - EAST BAY MUD
-        - FASTRAK
-        - ZIPCAR
-        - PACIFIC GAS/ELEC
-        - COSTCO WHSE
-        - JPMORGAN CHASE
-        - HOUSE OF PRODUCE
-        - EBMUD
-        - SAFEWAY
-        - LASTPASS
-        - WASTE MGMT
         - AmazonPrime Membership
-        - KASPERSKY
-        - NEARLYFREESPEECH.NET
+        - BERKELEY BOWL
         - COMCAST
-        - T-MOBILE
-        - TMOBILE
+        - COSTCO WHSE
+        - EAST BAY MUD
+        - EBMUD
+        - FASTRAK
+        - GOLDEN STATE S
         - GOOGLE STORA
+        - HOUSE OF PRODUCE
         - HOVER
+        - JPMORGAN CHASE
+        - KASPERSKY
+        - LASTPASS
+        - LIBERTY MUTUAL
+        - NEARLYFREESPEECH.NET
         - OAKLAND-ALARM PR
         - OAKLAND WEB PAYMENT
+        - PACIFIC GAS/ELEC
+        - PGANDE
+        - PTY TAX PMTS
+        - SAFEWAY
+        - TMOBILE
+        - T-MOBILE
+        - VIRGIN MOBILE
+        - WASTE MGMT
+        - ZIPCAR
+        - OAKLAND AUTOMTC CO LLC OAKLAND CA
+      category:
+        - Home Projects
     recurring:
       description:
         - Anfang
@@ -251,6 +266,9 @@ tag:
         - CR *CONSUMERREPORTS
         - Netflix
         - GOOGLE *DUOLINGO
+    ach:
+      description:
+        - ACH
     tiny:
       range:
         low: 0
