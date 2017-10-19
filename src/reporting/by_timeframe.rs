@@ -114,7 +114,7 @@ where
             date += self.timeframe;
         }
         let mut retval = serde_json::to_value(by_timeframe).expect("shitballs");
-        if let Some(mut obj) = retval.as_object_mut() {
+        if let Some(obj) = retval.as_object_mut() {
             obj.insert(
                 "timeframe".to_owned(),
                 serde_json::to_value(self.timeframe).expect("shibble"),

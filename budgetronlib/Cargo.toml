@@ -9,7 +9,4 @@ serde = "*"
 serde_derive = "*"
 toml = "*"
 serde_yaml = "*"
-
-[dependencies.csv]
-git = "https://github.com/BurntSushi/rust-csv.git"
-branch = "rewrite"
+csv = "1.0.0-beta.5"

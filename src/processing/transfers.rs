@@ -46,7 +46,7 @@ impl Collate for TransferCollator {
         }
 
         for (i, destination_account) in to_update {
-            if let Some(mut transaction) = transactions.get_mut(i) {
+            if let Some(transaction) = transactions.get_mut(i) {
                 transaction.transfer_destination_account = Some(destination_account);
                 transaction.transaction_type = TransactionType::Transfer;
             }

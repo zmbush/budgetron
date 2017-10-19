@@ -1,3 +1,5 @@
+#![recursion_limit="128"]
+
 #[macro_use]
 extern crate diesel_codegen;
 
@@ -29,8 +31,10 @@ impl Transactions {
 
     pub fn new(database_url: &str) -> Transactions {
         Transactions {
-            db: PgConnection::establish(database_url)
-                .expect(&format!("Error connecting to {}", database_url)),
+            db: PgConnection::establish(database_url).expect(&format!(
+                "Error connecting to {}",
+                database_url
+            )),
         }
     }
 

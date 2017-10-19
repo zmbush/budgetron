@@ -80,7 +80,7 @@ impl Timeframe {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Hash)]
 pub struct Date {
-    pub date: chrono::Date<chrono::UTC>,
+    pub date: chrono::Date<chrono::Utc>,
 }
 
 impl ops::Sub<Date> for Date {
@@ -116,8 +116,10 @@ impl Date {
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(self.date.month() as i64 - if forward { 0 } else { 1 },
-                                 self.date.year() as i64);
+        let days = days_in_month(
+            self.date.month() as i64 - if forward { 0 } else { 1 },
+            self.date.year() as i64,
+        );
         self.move_days(days * if forward { 1 } else { -1 });
     }
 
@@ -166,7 +168,7 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date { date: chrono::UTC.ymd(y, m as u32, d as u32) }
+        Date { date: chrono::Utc.ymd(y, m as u32, d as u32) }
     }
 
     pub fn year(&self) -> i32 {

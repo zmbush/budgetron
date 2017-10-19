@@ -101,7 +101,7 @@ impl<F: Float + fmt::Debug> NearbyFloats<F> {
         });
         match result {
             Ok(index) => {
-                let mut bucket = self.buckets.get_mut(index).expect("Binary search lied");
+                let bucket = self.buckets.get_mut(index).expect("Binary search lied");
                 if num < bucket.low {
                     bucket.low = num;
                 }
