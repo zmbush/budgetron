@@ -15,6 +15,20 @@ impl Default for TransactionType {
     }
 }
 
+impl TransactionType {
+    pub fn is_credit(&self) -> bool {
+        TransactionType::Credit == *self
+    }
+
+    pub fn is_debit(&self) -> bool {
+        TransactionType::Debit == *self
+    }
+
+    pub fn is_transfer(&self) -> bool {
+        TransactionType::Transfer == *self
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Transaction {
     pub date: Date,

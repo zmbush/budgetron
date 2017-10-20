@@ -86,16 +86,6 @@ impl Reporter for RollingBudget {
                         _ => {},
                     }
                 }
-                println!(
-                    "Processing transaction: {:?} {} (${:.02}) [{}/{}/{}]",
-                    transaction.transaction_type,
-                    transaction.description,
-                    transaction.amount,
-                    transaction.person,
-                    transaction.category,
-                    transaction.original_category,
-                );
-                println!(" -- {:?}", report.budgets["Zach"]);
             }
         }
         serde_json::to_value(&report).expect("Couldn't serialize")
