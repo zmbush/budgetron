@@ -1,0 +1,12 @@
+[package]
+name = "budgetronlib"
+version = "0.1.0"
+authors = ["Zach Bush <zach@zmbush.com>"]
+
+[dependencies]
+chrono = "*"
+serde = "*"
+serde_derive = "*"
+toml = "*"
+serde_yaml = "*"
+csv = "1.0.0-beta.5"

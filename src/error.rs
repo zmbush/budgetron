@@ -1,17 +1,31 @@
-use csv;
-use std::convert::From;
+use handlebars;
+use serde_json;
+use std::io;
 
 #[derive(Debug)]
-pub enum BudgetError {
-    CSVError(csv::Error),
-    NoTransactionError,
+pub enum Error {
+    IO(io::Error),
+    Handlebars(handlebars::RenderError),
+    SerdeJson(serde_json::Error),
 }
 
-impl From<csv::Error> for BudgetError {
-    fn from(e: csv::Error) -> BudgetError {
-        BudgetError::CSVError(e)
+pub type Result<T> = ::std::result::Result<T, Error>;
+
+
+impl From<io::Error> for Error {
+    fn from(e: io::Error) -> Error {
+        Error::IO(e)
     }
 }
 
+impl From<handlebars::RenderError> for Error {
+    fn from(e: handlebars::RenderError) -> Error {
+        Error::Handlebars(e)
+    }
+}
 
-pub type BResult<T> = Result<T, BudgetError>;
+impl From<serde_json::Error> for Error {
+    fn from(e: serde_json::Error) -> Error {
+        Error::SerdeJson(e)
+    }
+}

@@ -1,14 +1,12 @@
-
-
-use email::Mailbox;
-use lettre::email::IntoMailbox;
-use serde::Deserialize;
+use error::{BResult, BudgetError};
+use serde::de::DeserializeOwned;
+use serde_yaml;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use toml;
+
 
 #[derive(Deserialize)]
 pub struct EmailAccount {
@@ -19,34 +17,7 @@ pub struct EmailAccount {
 }
 
 #[derive(Deserialize)]
-pub struct EmailDestination {
-    pub name: String,
-    pub email: String,
-}
-
-impl IntoMailbox for EmailDestination {
-    fn into_mailbox(self) -> Mailbox {
-        (&self).into_mailbox()
-    }
-}
-
-impl<'a> IntoMailbox for &'a EmailDestination {
-    fn into_mailbox(self) -> Mailbox {
-        Mailbox::new_with_name(self.name.to_owned(), self.email.to_owned())
-    }
-}
-
-#[derive(Deserialize)]
-pub struct Email {
-    pub to: Vec<EmailDestination>,
-    pub from: EmailDestination,
-    pub account: EmailAccount,
-}
-
-#[derive(Deserialize)]
-pub struct SecureConfig {
-    pub email: Option<Email>,
-}
+pub struct SecureConfig {}
 
 #[derive(Deserialize, Debug)]
 pub struct Budgets {
@@ -63,19 +34,21 @@ pub struct CategoryConfig {
 }
 
 impl CategoryConfig {
-    pub fn find_category(&self, cat: &str) -> Option<&str> {
+    pub fn find_category(&self, cat: &str) -> BResult<&str> {
         for (key, values) in &self.categories {
             if key == cat || (values.len() > 0 && values.contains(&cat.to_owned())) {
-                return Some(key);
+                return Ok(key);
             }
         }
-        println!("Unable to categorize transaction of category `{}`", cat);
-        None
+        Err(BudgetError::NoCategoryFoundError(cat.to_owned()))
     }
 }
 
-pub fn load_cfg<Cfg: Deserialize>(fname: &str) -> Option<Cfg> {
-    let file_contents = {
+pub fn load_cfg<Cfg>(fname: &str) -> BResult<Cfg>
+where
+    Cfg: DeserializeOwned,
+{
+    let config_contents = {
         if let Ok(mut dir) = env::current_dir() {
             let mut contents = "".to_owned();
             while dir.file_name() != None {
@@ -99,5 +72,5 @@ pub fn load_cfg<Cfg: Deserialize>(fname: &str) -> Option<Cfg> {
         }
     };
 
-    toml::from_str(&file_contents).ok()
+    Ok(serde_yaml::from_str(&config_contents)?)
 }

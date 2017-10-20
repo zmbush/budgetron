@@ -1,10 +1,7 @@
-
 use self::Timeframe::*;
 use chrono;
 use chrono::Datelike;
 use chrono::offset::TimeZone;
-// use serde_json::value::{ToJson, Value};
-use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::ops;
@@ -12,7 +9,6 @@ use std::ops;
 pub fn is_leap_year(year: i64) -> bool {
     (year % 4 == 0) || ((year % 100 != 0) && (year % 400 == 0))
 }
-
 
 pub fn days_in_month(month: i64, year: i64) -> i64 {
     if month == 2 {
@@ -64,11 +60,40 @@ impl Timeframe {
             Years(n) => Years(-n),
         }
     }
+
+    pub fn ly(&self) -> String {
+        let (prefix, plural, amount) = match *self {
+            Days(amount) => ("dai", "days", amount),
+            Weeks(amount) => ("week", "weeks", amount),
+            Months(amount) => ("month", "months", amount),
+            Quarters(amount) => ("quarter", "quarters", amount),
+            Years(amount) => ("year", "years", amount),
+        };
+
+        match amount {
+            1 => format!("{}ly", prefix),
+            2 => format!("bi {}ly", prefix),
+            n => format!("every {} {}", n, plural),
+        }
+    }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Hash)]
 pub struct Date {
-    pub date: chrono::Date<chrono::UTC>,
+    pub date: chrono::Date<chrono::Utc>,
+}
+
+impl ops::Sub<Date> for Date {
+    type Output = i64;
+    fn sub(self, other: Date) -> i64 {
+        self.date.signed_duration_since(other.date).num_days()
+    }
+}
+
+impl Default for Date {
+    fn default() -> Date {
+        Date::ymd(2000, 1, 1)
+    }
 }
 
 impl fmt::Display for Date {
@@ -86,13 +111,19 @@ impl fmt::Display for Date {
 }
 
 impl Date {
+    pub fn month(&self) -> u32 {
+        self.date.month()
+    }
+
     fn move_days(&mut self, days: i64) {
         self.date = self.date + chrono::Duration::days(days);
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(self.date.month() as i64 - if forward { 0 } else { 1 },
-                                 self.date.year() as i64);
+        let days = days_in_month(
+            self.date.month() as i64 - if forward { 0 } else { 1 },
+            self.date.year() as i64,
+        );
         self.move_days(days * if forward { 1 } else { -1 });
     }
 
@@ -141,7 +172,7 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date { date: chrono::UTC.ymd(y, m as u32, d as u32) }
+        Date { date: chrono::Utc.ymd(y, m as u32, d as u32) }
     }
 
     pub fn year(&self) -> i32 {
@@ -247,7 +278,7 @@ impl ops::Div<Timeframe> for Timeframe {
 forward_ref_binop!(impl Div, div for Timeframe, Timeframe);
 
 struct DateVisitor;
-impl de::Visitor for DateVisitor {
+impl<'de> de::Visitor<'de> for DateVisitor {
     type Value = Date;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -269,7 +300,13 @@ impl de::Visitor for DateVisitor {
             }
         }
 
-        let mut parts = value.split("/");
+        let val = if value.contains(" ") {
+            value.split(" ").next().expect("Value contains lies")
+        } else {
+            value
+        };
+
+        let mut parts = val.split("/");
         let m = get_num!(parts);
         let d = get_num!(parts);
         let y = get_num!(parts);
@@ -277,46 +314,15 @@ impl de::Visitor for DateVisitor {
     }
 }
 
-impl Deserialize for Date {
-    fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for Date {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         d.deserialize_str(DateVisitor)
-    }
-}
-
-impl Decodable for Date {
-    fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-        let s = try!(d.read_str());
-        let error = Err(d.error(&format!("Bad date format '{}'", s)));
-
-        macro_rules! get_num {
-            ($d:ident) => {
-                match $d.next() {
-                    Some(s) => match s.parse() {
-                        Ok(i) => i,
-                        Err(_) => return error
-                    },
-                    None => return error
-                }
-            }
-        }
-
-        let mut parts = s.split("/");
-        let m = get_num!(parts);
-        let d = get_num!(parts);
-        let y = get_num!(parts);
-        Ok(Date::ymd(y, m, d))
     }
 }
 
 impl Serialize for Date {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.serialize_str(&format!("{}", self))
-    }
-}
-
-impl Encodable for Date {
-    fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.emit_str(&format!("{}", self))
     }
 }
 

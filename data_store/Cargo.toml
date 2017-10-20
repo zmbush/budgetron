@@ -8,3 +8,4 @@ diesel = { version = "*", features = ["chrono", "postgres"] }
 diesel_codegen = { version = "*", features = ["postgres"] }
 dotenv = "*"
 chrono = "*"
+itertools = "*"
