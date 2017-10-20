@@ -3,6 +3,7 @@ use loading::{Transaction, TransactionType};
 use processing::Collate;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
+use std::i64;
 
 pub struct TransferCollator {
     pub horizon: usize,
@@ -19,28 +20,57 @@ impl Collate for TransferCollator {
         let mut to_delete = HashSet::new();
         let mut to_update = HashMap::new();
         for (i, t) in transactions.iter().enumerate() {
-            for j in i..min(transactions.len(), i + self.horizon) {
-                let ref tn = transactions[j];
-                if tn.amount == t.amount && tn.transaction_type != t.transaction_type &&
-                    !to_delete.contains(&i) && !to_delete.contains(&j) &&
-                    !to_update.contains_key(&i) && !to_update.contains_key(&j)
-                {
-                    if t.account_name == tn.account_name {
-                        to_delete.insert(i);
-                        to_delete.insert(j);
-                    } else {
-                        match t.transaction_type {
-                            TransactionType::Debit => {
-                                to_delete.insert(j);
-                                to_update.insert(i, tn.account_name.clone());
-                            },
-                            TransactionType::Credit => {
-                                to_delete.insert(i);
-                                to_update.insert(j, t.account_name.clone());
-                            },
-                            TransactionType::Transfer => unreachable!(),
-                        };
+            loop {
+                let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
+                    .filter_map(|j| {
+                        let ref tn = transactions[j];
+                        if tn.amount == t.amount && !to_delete.contains(&i) &&
+                            !to_delete.contains(&j) &&
+                            !to_update.contains_key(&i) &&
+                            !to_update.contains_key(&j)
+                        {
+                            Some(j)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                if candidates.len() <= 1 {
+                    break;
+                }
+
+                let mut mindelta = i64::MAX;
+                let mut found_transfer = (0, 0);
+                let debits = candidates.iter().filter(|&i| {
+                    transactions[*i].transaction_type.is_debit()
+                });
+
+                for debit_ix in debits {
+                    let ref debit = transactions[*debit_ix];
+                    let credits = candidates.iter().filter(|&i| {
+                        transactions[*i].transaction_type.is_credit()
+                    });
+                    for credit_ix in credits {
+                        let ref credit = transactions[*credit_ix];
+                        if (debit.date - credit.date).abs() < mindelta {
+                            found_transfer = (*debit_ix, *credit_ix);
+                            mindelta = (debit.date - credit.date).abs();
+                        }
                     }
+                }
+
+                if found_transfer != (0, 0) {
+                    let ref tn = transactions[found_transfer.1];
+
+                    to_delete.insert(found_transfer.1);
+                    to_update.insert(found_transfer.0, tn.account_name.clone());
+
+                    if found_transfer.0 == i || found_transfer.1 == i {
+                        break;
+                    }
+                } else {
+                    break;
                 }
             }
         }

@@ -169,8 +169,6 @@ budgets:
     Household: 150
   yearly:
     Home Improvement: 5000
-  rolling:
-    barry: {}
 
 owners:
   joint:
@@ -202,7 +200,7 @@ owners:
           - "Card 4.*"
 
 rolling_budget:
-  start_date: '08/01/2017'
+  start_date: '10/01/2017'
   split: 'joint'
   skip_tags:
     - essential
