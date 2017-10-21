@@ -8,4 +8,4 @@ output
 *.swo
 *.swn
 *.swm
-budgetronrc.yaml
+budgetronrc.toml

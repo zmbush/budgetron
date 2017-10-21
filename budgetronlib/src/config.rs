@@ -1,11 +1,11 @@
 use error::{BResult, BudgetError};
 use serde::de::DeserializeOwned;
-use serde_yaml;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use toml;
 
 
 #[derive(Deserialize)]
@@ -20,16 +20,8 @@ pub struct EmailAccount {
 pub struct SecureConfig {}
 
 #[derive(Deserialize, Debug)]
-pub struct Budgets {
-    pub monthly: HashMap<String, f64>,
-    pub quarterly: HashMap<String, f64>,
-    pub yearly: HashMap<String, f64>,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct CategoryConfig {
     pub categories: HashMap<String, Vec<String>>,
-    pub budgets: Budgets,
     pub ignored_accounts: Vec<String>,
 }
 
@@ -72,5 +64,5 @@ where
         }
     };
 
-    Ok(serde_yaml::from_str(&config_contents)?)
+    Ok(toml::from_str(&config_contents)?)
 }

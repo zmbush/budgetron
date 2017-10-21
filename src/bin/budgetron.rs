@@ -59,7 +59,7 @@ fn main() {
         .get_matches();
 
     let category_config: CategoryConfig =
-        config::load_cfg("budgetronrc.yaml").expect("Unable to load budgetronrc.yaml");
+        config::load_cfg("budgetronrc.toml").expect("Category config won't load");
 
     let transactions = if let Some(files) = matches.values_of("file") {
         loading::load_from_files(files, &category_config).expect("Unable to load files")
@@ -72,19 +72,17 @@ fn main() {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
 
-    let tag_config: TagCollatorConfig = config::load_cfg("budgetronrc.yaml").expect(
-        "Unable to load tag config from budgetronrc.yaml",
-    );
+    let tag_config: TagCollatorConfig =
+        config::load_cfg("budgetronrc.toml").expect("Tag Collator config won't load");
     collations.push(Collator::Tags(TagCollator::new(tag_config)));
-    let owner_config: OwnersConfig = config::load_cfg("budgetronrc.yaml").expect(
-        "Unable to load tag config from budgetronrc.yaml",
-    );
+    let owner_config: OwnersConfig =
+        config::load_cfg("budgetronrc.toml").expect("Owners config won't load");
     collations.push(Collator::Owners(OwnersCollator::new(owner_config)));
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
     let rolling_budget_cfg: RollingBudgetConfig =
-        config::load_cfg("budgetronrc.yaml").expect("Unable to load rolling budget config");
+        config::load_cfg("budgetronrc.toml").expect("Unable to load rolling budget config");
 
     let cow_transactions = transactions
         .iter()

@@ -1,0 +1,33 @@
+ignored_accounts = ["Mortgage"]
+
+[categories]
+"Auto Payment" = []
+Automobile = ["Auto & Transport", "Gas & Fuel"]
+Entertainment = ["Movies & DVDs", "Music", "Arts"]
+
+[owners.joint]
+accounts = ["Joint.*"]
+categories = ["Gas & Fuel"]
+descriptions = ["WASTE MGMT"]
+
+[owners.Person1]
+accounts = ["Person1Account"]
+
+[owners.Person3]
+descriptions = ["OWNER 2"]
+
+[rolling_budget]
+  start_date = '10/01/2017'
+  split = 'joint'
+  skip_tags = ['essential', 'recurring', 'ach']
+  amounts = { Person1 = 100, Person2 = 100 }
+
+[tag.category.essential]
+description = ["COMCAST", "COSTCO WHSE"]
+category = ["Home Projects"]
+
+[tag.category.recurring]
+description = ["Hulu", "Google *Music"]
+
+[tags.category.ach]
+description = ["ACH"]
