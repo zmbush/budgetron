@@ -37,11 +37,7 @@ struct StdinSource<'a> {
 
 impl<'a> StdinSource<'a> {
     fn new(stdin: &'a Stdin) -> StdinSource<'a> {
-        StdinSource {
-            buf: Vec::new(),
-            loc: 0,
-            stdin: stdin.lock(),
-        }
+        StdinSource { buf: Vec::new(), loc: 0, stdin: stdin.lock() }
     }
 }
 
@@ -76,10 +72,7 @@ impl<'a> Seek for Source<'a> {
                         }
                     },
                     io::SeekFrom::End(_) => {
-                        Err(io::Error::new(
-                            io::ErrorKind::InvalidInput,
-                            "Stdin has no end",
-                        ))
+                        Err(io::Error::new(io::ErrorKind::InvalidInput, "Stdin has no end"))
                     },
                 }
             },
@@ -137,12 +130,7 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(
             }
         })*)
     }
-    parse_exports!(
-        Transaction,
-        mint::MintExport,
-        logix::LogixExport,
-        alliant::AlliantExport
-    );
+    parse_exports!(Transaction, mint::MintExport, logix::LogixExport, alliant::AlliantExport);
     Err(BudgetError::Multi(errors))
 }
 

@@ -42,9 +42,8 @@ impl Collate for TransferCollator {
 
                 let mut mindelta = i64::MAX;
                 let mut found_transfer = (0, 0);
-                let debits = candidates.iter().filter(|&i| {
-                    transactions[*i].transaction_type.is_debit()
-                });
+                let debits =
+                    candidates.iter().filter(|&i| transactions[*i].transaction_type.is_debit());
 
                 for debit_ix in debits {
                     let ref debit = transactions[*debit_ix];

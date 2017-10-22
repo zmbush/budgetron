@@ -47,15 +47,11 @@ fn main() {
                 .short("t")
                 .long("transfers")
                 .value_name("HORIZON")
-                .help(
-                    "The number of transactions to look through to find transfer.",
-                )
+                .help("The number of transactions to look through to find transfer.")
                 .default_value("100")
                 .takes_value(true),
         )
-        .arg(Arg::with_name("serve").long("serve").help(
-            "Start server to view reports",
-        ))
+        .arg(Arg::with_name("serve").long("serve").help("Start server to view reports"))
         .get_matches();
 
     let category_config: CategoryConfig =
@@ -84,22 +80,15 @@ fn main() {
     let rolling_budget_cfg: RollingBudgetConfig =
         config::load_cfg("budgetronrc.toml").expect("Unable to load rolling budget config");
 
-    let cow_transactions = transactions
-        .iter()
-        .map(|t| Cow::Borrowed(t))
-        .collect::<Vec<_>>();
+    let cow_transactions = transactions.iter().map(|t| Cow::Borrowed(t)).collect::<Vec<_>>();
     let report = (
         Database,
         Cashflow.by_month(),
         RollingBudget::new(rolling_budget_cfg),
         NetWorth,
         // RepeatedTransactions::new(100.0),
-        (
-            Cashflow.by_month(),
-            Cashflow.by_quarter(),
-            Cashflow.by_quarters(2),
-            NetWorth,
-        ).for_account("Joint Expense Account".to_owned()),
+        (Cashflow.by_month(), Cashflow.by_quarter(), Cashflow.by_quarters(2), NetWorth)
+            .for_account("Joint Expense Account".to_owned()),
         NetWorth.for_account("Personal Savings Account".to_owned()),
     ).report(cow_transactions.into_iter());
 
@@ -117,9 +106,6 @@ struct JsonHandler<T: Serialize> {
 
 impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
-        Ok(Response::with((
-            iron::status::Ok,
-            serde_json::to_string_pretty(&self.data).unwrap(),
-        )))
+        Ok(Response::with((iron::status::Ok, serde_json::to_string_pretty(&self.data).unwrap())))
     }
 }

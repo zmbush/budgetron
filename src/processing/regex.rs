@@ -19,9 +19,7 @@ impl<'de> Visitor<'de> for RegexVisitor {
     {
         match regex::Regex::new(value) {
             Ok(re) => Ok(Regex(re)),
-            Err(e) => Err(E::custom(
-                format!("Unable to parse `{}` as regex {}", value, e),
-            )),
+            Err(e) => Err(E::custom(format!("Unable to parse `{}` as regex {}", value, e))),
         }
     }
 }

@@ -36,20 +36,14 @@ impl Collate for TagCollator {
         for transaction in transactions.iter_mut() {
             for (key, value) in self.config.tag.category.iter() {
                 if let Some(ref description) = value.description {
-                    if description.iter().any(|v| {
-                        v.0.is_match(&transaction.original_description)
-                    })
-                    {
+                    if description.iter().any(|v| v.0.is_match(&transaction.original_description)) {
                         transaction.tags.push(key.clone());
                         continue;
                     }
                 }
 
                 if let Some(ref category) = value.category {
-                    if category.iter().any(|v| {
-                        v.0.is_match(&transaction.original_category)
-                    })
-                    {
+                    if category.iter().any(|v| v.0.is_match(&transaction.original_category)) {
                         transaction.tags.push(key.clone());
                         continue;
                     }

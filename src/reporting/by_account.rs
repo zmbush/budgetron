@@ -101,11 +101,7 @@ where
     fn key(&self) -> Option<String> {
         Some(format!(
             "for_{}",
-            self.account
-                .to_lowercase()
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join("_")
+            self.account.to_lowercase().split_whitespace().collect::<Vec<_>>().join("_")
         ))
     }
 }

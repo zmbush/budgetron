@@ -42,10 +42,7 @@ impl RollingBudget {
 
     fn proportions(&self) -> HashMap<&str, f64> {
         let total: f64 = self.amounts.values().sum();
-        self.amounts
-            .iter()
-            .map(|(k, v)| (k.as_ref(), v / total))
-            .collect()
+        self.amounts.iter().map(|(k, v)| (k.as_ref(), v / total)).collect()
     }
 
     fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, f64> {
