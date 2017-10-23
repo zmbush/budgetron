@@ -1,20 +1,17 @@
 use budgetronlib::error::BResult;
 use loading::Transaction;
 
+pub mod config;
 mod regex;
 mod transfers;
-mod tags;
-mod owner;
 
 pub enum Collator {
     Transfers(transfers::TransferCollator),
-    Tags(tags::TagCollator),
-    Owners(owner::OwnersCollator),
+    Config(config::ConfiguredProcessors),
 }
 
-pub use processing::owner::{OwnersCollator, OwnersConfig};
-pub use processing::tags::{TagCollator, TagCollatorConfig};
 pub use processing::transfers::TransferCollator;
+pub use processing::config::ConfiguredProcessors;
 
 pub trait Collate {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;
@@ -24,8 +21,7 @@ impl Collate for Collator {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>> {
         match *self {
             Collator::Transfers(ref tc) => tc.collate(transactions),
-            Collator::Tags(ref tc) => tc.collate(transactions),
-            Collator::Owners(ref oc) => oc.collate(transactions),
+            Collator::Config(ref cfg) => cfg.collate(transactions),
         }
     }
 }

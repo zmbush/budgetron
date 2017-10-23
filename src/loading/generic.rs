@@ -1,4 +1,3 @@
-use budgetronlib::config;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 
@@ -47,11 +46,11 @@ pub struct Transaction {
 }
 
 pub trait Genericize {
-    fn genericize(self, &config::CategoryConfig) -> BResult<Transaction>;
+    fn genericize(self) -> BResult<Transaction>;
 }
 
 impl Genericize for Transaction {
-    fn genericize(self, _: &config::CategoryConfig) -> BResult<Transaction> {
+    fn genericize(self) -> BResult<Transaction> {
         Ok(self)
     }
 }

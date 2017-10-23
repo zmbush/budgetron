@@ -12,10 +12,9 @@ extern crate mount;
 extern crate staticfile;
 
 use budgetron::loading;
-use budgetron::processing::{collate_all, Collator, OwnersCollator, OwnersConfig, TagCollator,
-                            TagCollatorConfig, TransferCollator};
+use budgetron::processing::{collate_all, Collator, ConfiguredProcessors, TransferCollator};
 use budgetron::reporting::{ConfiguredReports, Database, Reporter};
-use budgetronlib::config::{self, CategoryConfig};
+use budgetronlib::config;
 use clap::{App, Arg};
 use iron::prelude::*;
 use mount::Mount;
@@ -55,11 +54,8 @@ fn main() {
         )
         .get_matches();
 
-    let category_config: CategoryConfig =
-        config::load_cfg("budgetronrc.toml").expect("Category config won't load");
-
     let transactions = if let Some(files) = matches.values_of("file") {
-        loading::load_from_files(files, &category_config).expect("Unable to load files")
+        loading::load_from_files(files).expect("Unable to load files")
     } else {
         Vec::new()
     };
@@ -68,24 +64,18 @@ fn main() {
     if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
         collations.push(Collator::Transfers(TransferCollator::new(horizon)));
     }
-
-    let tag_config: TagCollatorConfig =
-        config::load_cfg("budgetronrc.toml").expect("Tag Collator config won't load");
-    collations.push(Collator::Tags(TagCollator::new(tag_config)));
-    let owner_config: OwnersConfig =
-        config::load_cfg("budgetronrc.toml").expect("Owners config won't load");
-    collations.push(Collator::Owners(OwnersCollator::new(owner_config)));
+    let processors: ConfiguredProcessors =
+        config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
+    collations.push(Collator::Config(processors));
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
-
-
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
 
     let reports: ConfiguredReports =
-        config::load_cfg("budgetronrc.toml").expect("Unable to load reporting config");
+        config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
     let report = (Database, reports).report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {

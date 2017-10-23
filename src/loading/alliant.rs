@@ -1,4 +1,3 @@
-use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
@@ -40,7 +39,7 @@ pub struct AlliantExport {
 }
 
 impl Genericize for AlliantExport {
-    fn genericize(self, cfg: &CategoryConfig) -> BResult<Transaction> {
+    fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
             date: self.posted_at,
             person: "".to_owned(),
@@ -48,7 +47,7 @@ impl Genericize for AlliantExport {
             original_description: self.original_name,
             amount: self.amount,
             transaction_type: self.transaction_type.into(),
-            category: cfg.find_category(&self.tags)?.to_owned(),
+            category: self.tags.clone(),
             original_category: self.tags,
             account_name: self.account_name,
             labels: "".to_owned(),

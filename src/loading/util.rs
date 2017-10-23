@@ -1,4 +1,3 @@
-use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::{BResult, BudgetError};
 use csv::Reader;
 use loading::alliant;
@@ -13,10 +12,7 @@ use std::io;
 use std::io::{Read, Seek, Stdin, StdinLock};
 use std::path::Path;
 
-fn from_reader<TransactionType, R>(
-    file: &mut R,
-    config: &CategoryConfig,
-) -> BResult<Vec<Transaction>>
+fn from_reader<TransactionType, R>(file: &mut R) -> BResult<Vec<Transaction>>
 where
     TransactionType: Genericize + DeserializeOwned,
     R: io::Read,
@@ -24,7 +20,7 @@ where
     let mut transactions = Vec::new();
     for record in Reader::from_reader(file).deserialize() {
         let record: TransactionType = record?;
-        transactions.push(record.genericize(config)?);
+        transactions.push(record.genericize()?);
     }
     Ok(transactions)
 }
@@ -109,10 +105,7 @@ impl<'a> Read for Source<'a> {
     }
 }
 
-fn from_file_inferred<P: AsRef<Path> + Copy>(
-    filename: P,
-    config: &CategoryConfig,
-) -> BResult<Vec<Transaction>> {
+fn from_file_inferred<P: AsRef<Path> + Copy>(filename: P) -> BResult<Vec<Transaction>> {
     // If the file doesn't exist. Don't bother.
     let stdin = io::stdin();
     let mut reader = match filename.as_ref().to_str() {
@@ -123,7 +116,7 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(
     let mut errors = Vec::new();
 
     macro_rules! parse_exports {
-        ($($type:path),*) => ($(match from_reader::<$type, _>(&mut reader, config) {
+        ($($type:path),*) => ($(match from_reader::<$type, _>(&mut reader) {
             Ok(result) => return Ok(result),
             Err(e) => {
                 errors.push(e);
@@ -142,12 +135,11 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(
 
 pub fn load_from_files<P: AsRef<Path> + Display, Files: Iterator<Item = P>>(
     filenames: Files,
-    config: &CategoryConfig,
 ) -> BResult<Vec<Transaction>> {
     let mut transactions = Vec::new();
     for filename in filenames {
         info!("Opening file: {}", filename);
-        transactions.append(&mut from_file_inferred(&filename, &config)?);
+        transactions.append(&mut from_file_inferred(&filename)?);
     }
 
     transactions.sort_by(|a, b| a.date.cmp(&b.date));

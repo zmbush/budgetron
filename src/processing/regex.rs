@@ -34,3 +34,9 @@ impl<'de> Deserialize<'de> for Regex {
         deserializer.deserialize_str(RegexVisitor)
     }
 }
+
+impl Regex {
+    pub fn is_match(&self, text: &str) -> bool {
+        self.0.is_match(text)
+    }
+}

@@ -1,4 +1,3 @@
-use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
@@ -74,7 +73,7 @@ impl<'de> Deserialize<'de> for LogixTransactionAmount {
 }
 
 impl Genericize for LogixExport {
-    fn genericize(self, cfg: &CategoryConfig) -> BResult<Transaction> {
+    fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
             date: self.date,
             person: "".to_owned(),
@@ -86,7 +85,7 @@ impl Genericize for LogixExport {
             } else {
                 TransactionType::Credit
             },
-            category: cfg.find_category(&self.category)?.to_owned(),
+            category: self.category.clone(),
             original_category: self.category,
             account_name: self.account,
             labels: self.memo,

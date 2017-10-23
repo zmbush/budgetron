@@ -1,4 +1,3 @@
-use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
@@ -33,7 +32,7 @@ pub struct MintExport {
 }
 
 impl Genericize for MintExport {
-    fn genericize(self, cfg: &CategoryConfig) -> BResult<Transaction> {
+    fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
             date: self.date,
             person: "".to_owned(),
@@ -41,7 +40,7 @@ impl Genericize for MintExport {
             original_description: self.original_description,
             amount: self.amount,
             transaction_type: self.transaction_type.into(),
-            category: cfg.find_category(&self.category)?.to_owned(),
+            category: self.category.clone(),
             original_category: self.category,
             account_name: self.account_name,
             labels: self.labels,

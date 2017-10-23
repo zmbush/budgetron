@@ -1,33 +1,41 @@
-ignored_accounts = ["Mortgage"]
-
-[categories]
+[[processor]]
+[processor.categories]
 "Auto Payment" = []
 Automobile = ["Auto & Transport", "Gas & Fuel"]
 Entertainment = ["Movies & DVDs", "Music", "Arts"]
 
-[owners.joint]
-accounts = ["Joint.*"]
-categories = ["Gas & Fuel"]
-descriptions = ["WASTE MGMT"]
+[[processor]]
+[processor.owners.joint]
+account = ["Joint.*"]
+category = ["Gas & Fuel"]
+description = ["WASTE MGMT"]
 
-[owners.Person1]
-accounts = ["Person1Account"]
+[processor.owners.Person1]
+account = ["Person1Account"]
 
-[owners.Person3]
-descriptions = ["OWNER 2"]
+[processor.owners.Person3]
+description = ["OWNER 2"]
 
-[rolling_budget]
-  start_date = '10/01/2017'
-  split = 'joint'
-  skip_tags = ['essential', 'recurring', 'ach']
-  amounts = { Person1 = 100, Person2 = 100 }
-
-[tag.category.essential]
+[[processor]]
+[processor.tags.essential]
 description = ["COMCAST", "COSTCO WHSE"]
 category = ["Home Projects"]
 
-[tag.category.recurring]
+[processor.tags.recurring]
 description = ["Hulu", "Google *Music"]
 
-[tags.category.ach]
+[processor.tags..ach]
 description = ["ACH"]
+
+
+[reports.rolling_budget]
+skip_tags = ['essential', 'recurring', 'ach']
+[reports.rolling_budget.report]
+  type = "RollingBudget"
+  start_date = '10/01/2017'
+  split = 'joint'
+  amounts = { Person1 = 100, Person2 = 100 }
+
+[reports.cashflow]
+report = { type = "Cashflow" }
+by_month = true
