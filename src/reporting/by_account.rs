@@ -54,30 +54,30 @@ where
     where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
-        let (transactions, _): (Vec<_>, Vec<_>) =
-            transactions
-                .into_iter()
-                .map(|t| if let TransactionType::Transfer = t.transaction_type {
-                    if t.account_name == self.account {
-                        let mut t = t.into_owned();
-                        t.transaction_type = TransactionType::Debit;
-                        t.transfer_destination_account = None;
-                        Cow::Owned(t)
-                    } else if *t.transfer_destination_account.as_ref().expect(
-                        "all transfers should have destinations",
-                    ) == self.account
-                    {
-                        let mut t = t.into_owned();
-                        t.transaction_type = TransactionType::Credit;
-                        t.account_name = t.transfer_destination_account.take().unwrap();
-                        Cow::Owned(t)
-                    } else {
-                        t
-                    }
+        let (transactions, _): (Vec<_>, Vec<_>) = transactions
+            .into_iter()
+            .map(|t| if let TransactionType::Transfer = t.transaction_type {
+                if t.account_name == self.account {
+                    let mut t = t.into_owned();
+                    t.transaction_type = TransactionType::Debit;
+                    t.transfer_destination_account = None;
+                    Cow::Owned(t)
+                } else if *t.transfer_destination_account
+                    .as_ref()
+                    .expect("all transfers should have destinations")
+                    == self.account
+                {
+                    let mut t = t.into_owned();
+                    t.transaction_type = TransactionType::Credit;
+                    t.account_name = t.transfer_destination_account.take().unwrap();
+                    Cow::Owned(t)
                 } else {
                     t
-                })
-                .partition(|t| t.account_name == self.account);
+                }
+            } else {
+                t
+            })
+            .partition(|t| t.account_name == self.account);
 
         let mut retval = serde_json::map::Map::new();
         retval.insert("account".to_owned(), Value::String(self.account.clone()));
@@ -85,10 +85,8 @@ where
             retval.insert(v.to_owned(), self.inner.report(transactions.into_iter()));
         } else {
             match self.inner.report(transactions.into_iter()) {
-                Value::Object(o) => {
-                    for (k, v) in o {
-                        retval.insert(k, v);
-                    }
+                Value::Object(o) => for (k, v) in o {
+                    retval.insert(k, v);
                 },
                 other => {
                     retval.insert("by_account".to_owned(), other);
@@ -101,7 +99,11 @@ where
     fn key(&self) -> Option<String> {
         Some(format!(
             "for_{}",
-            self.account.to_lowercase().split_whitespace().collect::<Vec<_>>().join("_")
+            self.account
+                .to_lowercase()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join("_")
         ))
     }
 }

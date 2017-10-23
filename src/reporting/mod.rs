@@ -30,15 +30,25 @@ pub trait Reporter: Sized {
         ByTimeframe::new(self, Timeframe::Quarters(quarters))
     }
 
+    fn by_year(&self) -> ByTimeframe<Self> {
+        ByTimeframe::new(self, Timeframe::Years(1))
+    }
+
     fn for_account(&self, account: String) -> ByAccount<Self> {
         ByAccount::new(self, account)
+    }
+
+    fn excluding_tags(&self, tags: Vec<String>) -> ExcludingTags<Self> {
+        ExcludingTags::new(self, tags)
     }
 }
 
 pub trait Report: fmt::Display + serde::Serialize {}
 
+mod config;
 mod by_account;
 mod by_timeframe;
+mod excluding_tags;
 mod cashflow;
 mod database;
 mod multi;
@@ -53,3 +63,5 @@ pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;
 pub use reporting::repeats::RepeatedTransactions;
 pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};
+pub use reporting::excluding_tags::ExcludingTags;
+pub use reporting::config::ConfiguredReports;

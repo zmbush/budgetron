@@ -57,9 +57,11 @@ impl<'de> Visitor<'de> for LogixTransactionAmountVisitor {
     fn visit_str<E: de::Error>(self, s: &str) -> Result<LogixTransactionAmount, E> {
         let negative = s.starts_with("(") && s.ends_with(")");
         Ok(LogixTransactionAmount {
-            amount: if negative { s[1..s.len() - 1].parse() } else { s.parse() }.map_err(
-                |e| E::custom(e),
-            )?,
+            amount: if negative {
+                s[1..s.len() - 1].parse()
+            } else {
+                s.parse()
+            }.map_err(|e| E::custom(e))?,
             negative,
         })
     }

@@ -12,7 +12,7 @@ pub enum Collator {
     Owners(owner::OwnersCollator),
 }
 
-pub use processing::owner::{OwnersConfig, OwnersCollator};
+pub use processing::owner::{OwnersCollator, OwnersConfig};
 pub use processing::tags::{TagCollator, TagCollatorConfig};
 pub use processing::transfers::TransferCollator;
 

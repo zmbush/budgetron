@@ -3,22 +3,33 @@ use loading::{Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct RollingBudgetConfig {
     rolling_budget: RollingBudget,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct RollingBudget {
     start_date: Date,
     split: String,
-    skip_tags: HashSet<String>,
     amounts: HashMap<String, f64>,
 }
 
 impl RollingBudget {
+    pub fn new_param(
+        start_date: Date,
+        split: String,
+        amounts: HashMap<String, f64>,
+    ) -> RollingBudget {
+        RollingBudget {
+            start_date,
+            split,
+            amounts,
+        }
+    }
+
     pub fn new(cfg: RollingBudgetConfig) -> RollingBudget {
         cfg.rolling_budget
     }
@@ -35,14 +46,16 @@ impl RollingBudget {
     }
 
     fn should_include(&self, transaction: &Transaction) -> bool {
-        transaction.date >= self.start_date &&
-            transaction.tags.iter().all(|t| !self.skip_tags.contains(t)) &&
-            TransactionType::Transfer != transaction.transaction_type
+        transaction.date >= self.start_date
+            && TransactionType::Transfer != transaction.transaction_type
     }
 
     fn proportions(&self) -> HashMap<&str, f64> {
         let total: f64 = self.amounts.values().sum();
-        self.amounts.iter().map(|(k, v)| (k.as_ref(), v / total)).collect()
+        self.amounts
+            .iter()
+            .map(|(k, v)| (k.as_ref(), v / total))
+            .collect()
     }
 
     fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, f64> {
@@ -64,7 +77,9 @@ impl Reporter for RollingBudget {
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {
-        let mut report = RollingBudgetReport { budgets: self.amounts.clone() };
+        let mut report = RollingBudgetReport {
+            budgets: self.amounts.clone(),
+        };
         let mut month = self.start_date.month();
 
         for transaction in transactions {

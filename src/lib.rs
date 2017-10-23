@@ -1,17 +1,18 @@
-#[deny(unused)]
-#[macro_use]
-extern crate serde_derive;
-extern crate data_store;
-#[macro_use]
-extern crate log;
-extern crate serde;
+#![deny(unused, unused_extern_crates)]
+
 extern crate budgetronlib;
 extern crate csv;
-extern crate serde_json;
+extern crate data_store;
 extern crate handlebars;
-extern crate ordered_float;
+#[macro_use]
+extern crate log;
 extern crate num_traits;
+extern crate ordered_float;
 extern crate regex;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 
 pub mod loading;
 pub mod processing;

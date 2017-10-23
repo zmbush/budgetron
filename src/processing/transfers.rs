@@ -24,10 +24,10 @@ impl Collate for TransferCollator {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
                     .filter_map(|j| {
                         let ref tn = transactions[j];
-                        if tn.amount == t.amount && !to_delete.contains(&i) &&
-                            !to_delete.contains(&j) &&
-                            !to_update.contains_key(&i) &&
-                            !to_update.contains_key(&j)
+                        if tn.amount == t.amount && !to_delete.contains(&i)
+                            && !to_delete.contains(&j)
+                            && !to_update.contains_key(&i)
+                            && !to_update.contains_key(&j)
                         {
                             Some(j)
                         } else {
@@ -42,14 +42,15 @@ impl Collate for TransferCollator {
 
                 let mut mindelta = i64::MAX;
                 let mut found_transfer = (0, 0);
-                let debits =
-                    candidates.iter().filter(|&i| transactions[*i].transaction_type.is_debit());
+                let debits = candidates
+                    .iter()
+                    .filter(|&i| transactions[*i].transaction_type.is_debit());
 
                 for debit_ix in debits {
                     let ref debit = transactions[*debit_ix];
-                    let credits = candidates.iter().filter(|&i| {
-                        transactions[*i].transaction_type.is_credit()
-                    });
+                    let credits = candidates
+                        .iter()
+                        .filter(|&i| transactions[*i].transaction_type.is_credit());
                     for credit_ix in credits {
                         let ref credit = transactions[*credit_ix];
                         if (debit.date - credit.date).abs() < mindelta {

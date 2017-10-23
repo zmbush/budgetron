@@ -1,23 +1,20 @@
-#[deny(unused_extern_crates)]
+#![deny(unused_extern_crates, unused)]
 
-extern crate budgetronlib;
-extern crate env_logger;
-extern crate clap;
-extern crate csv;
 extern crate budgetron;
-extern crate serde_json;
-extern crate handlebars;
+extern crate budgetronlib;
+extern crate clap;
+extern crate env_logger;
 extern crate serde;
+extern crate serde_json;
 
 extern crate iron;
-extern crate staticfile;
 extern crate mount;
+extern crate staticfile;
 
 use budgetron::loading;
-use budgetron::processing::{collate_all, TransferCollator, Collator, TagCollator,
-                            TagCollatorConfig, OwnersConfig, OwnersCollator};
-use budgetron::reporting::{Database, Cashflow, Reporter, NetWorth, RollingBudget,
-                           RollingBudgetConfig};
+use budgetron::processing::{collate_all, Collator, OwnersCollator, OwnersConfig, TagCollator,
+                            TagCollatorConfig, TransferCollator};
+use budgetron::reporting::{ConfiguredReports, Database, Reporter};
 use budgetronlib::config::{self, CategoryConfig};
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -51,7 +48,11 @@ fn main() {
                 .default_value("100")
                 .takes_value(true),
         )
-        .arg(Arg::with_name("serve").long("serve").help("Start server to view reports"))
+        .arg(
+            Arg::with_name("serve")
+                .long("serve")
+                .help("Start server to view reports"),
+        )
         .get_matches();
 
     let category_config: CategoryConfig =
@@ -77,20 +78,15 @@ fn main() {
 
     let transactions = collate_all(transactions, collations).expect("Unable to collate");
 
-    let rolling_budget_cfg: RollingBudgetConfig =
-        config::load_cfg("budgetronrc.toml").expect("Unable to load rolling budget config");
 
-    let cow_transactions = transactions.iter().map(|t| Cow::Borrowed(t)).collect::<Vec<_>>();
-    let report = (
-        Database,
-        Cashflow.by_month(),
-        RollingBudget::new(rolling_budget_cfg),
-        NetWorth,
-        // RepeatedTransactions::new(100.0),
-        (Cashflow.by_month(), Cashflow.by_quarter(), Cashflow.by_quarters(2), NetWorth)
-            .for_account("Joint Expense Account".to_owned()),
-        NetWorth.for_account("Personal Savings Account".to_owned()),
-    ).report(cow_transactions.into_iter());
+    let cow_transactions = transactions
+        .iter()
+        .map(|t| Cow::Borrowed(t))
+        .collect::<Vec<_>>();
+
+    let reports: ConfiguredReports =
+        config::load_cfg("budgetronrc.toml").expect("Unable to load reporting config");
+    let report = (Database, reports).report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
         let mut mount = Mount::new();
@@ -106,6 +102,9 @@ struct JsonHandler<T: Serialize> {
 
 impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
-        Ok(Response::with((iron::status::Ok, serde_json::to_string_pretty(&self.data).unwrap())))
+        Ok(Response::with((
+            iron::status::Ok,
+            serde_json::to_string_pretty(&self.data).unwrap(),
+        )))
     }
 }

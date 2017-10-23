@@ -1,7 +1,7 @@
 use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use loading::generic::{Transaction, TransactionType, Genericize};
+use loading::generic::{Genericize, Transaction, TransactionType};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -23,14 +23,11 @@ impl Into<TransactionType> for MintTransactionType {
 pub struct MintExport {
     date: Date,
     description: String,
-    #[serde(rename = "Original Description")]
-    original_description: String,
+    #[serde(rename = "Original Description")] original_description: String,
     amount: f64,
-    #[serde(rename = "Transaction Type")]
-    transaction_type: MintTransactionType,
+    #[serde(rename = "Transaction Type")] transaction_type: MintTransactionType,
     category: String,
-    #[serde(rename = "Account Name")]
-    account_name: String,
+    #[serde(rename = "Account Name")] account_name: String,
     labels: String,
     notes: String,
 }
@@ -52,6 +49,5 @@ impl Genericize for MintExport {
             transfer_destination_account: None,
             tags: vec![],
         })
-
     }
 }

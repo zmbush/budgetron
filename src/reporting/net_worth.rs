@@ -21,9 +21,12 @@ impl Reporter for NetWorth {
                 };
             if let TransactionType::Transfer = transaction.transaction_type {
                 *worth
-                    .entry(transaction.transfer_destination_account.clone().expect(
-                        "transfer records should have a transfer_destination_account",
-                    ))
+                    .entry(
+                        transaction
+                            .transfer_destination_account
+                            .clone()
+                            .expect("transfer records should have a transfer_destination_account"),
+                    )
                     .or_insert(0.0) += transaction.amount;
             }
         }

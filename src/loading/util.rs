@@ -2,7 +2,7 @@ use budgetronlib::config::CategoryConfig;
 use budgetronlib::error::{BResult, BudgetError};
 use csv::Reader;
 use loading::alliant;
-use loading::generic::{Transaction, Genericize};
+use loading::generic::{Genericize, Transaction};
 use loading::logix;
 use loading::mint;
 use serde::de::DeserializeOwned;
@@ -10,7 +10,7 @@ use std::cmp::min;
 use std::fmt::Display;
 use std::fs::File;
 use std::io;
-use std::io::{Stdin, StdinLock, Seek, Read};
+use std::io::{Read, Seek, Stdin, StdinLock};
 use std::path::Path;
 
 fn from_reader<TransactionType, R>(
@@ -37,7 +37,11 @@ struct StdinSource<'a> {
 
 impl<'a> StdinSource<'a> {
     fn new(stdin: &'a Stdin) -> StdinSource<'a> {
-        StdinSource { buf: Vec::new(), loc: 0, stdin: stdin.lock() }
+        StdinSource {
+            buf: Vec::new(),
+            loc: 0,
+            stdin: stdin.lock(),
+        }
     }
 }
 
@@ -50,31 +54,30 @@ impl<'a> Seek for Source<'a> {
     fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
         match *self {
             Source::File(ref mut f) => f.seek(pos),
-            Source::Stdin(ref mut source) => {
-                match pos {
-                    io::SeekFrom::Start(loc) => {
-                        source.loc = loc as usize;
+            Source::Stdin(ref mut source) => match pos {
+                io::SeekFrom::Start(loc) => {
+                    source.loc = loc as usize;
+                    Ok(source.loc as u64)
+                },
+                io::SeekFrom::Current(diff) => {
+                    if diff >= 0 {
+                        source.loc += diff as usize;
+                    } else {
+                        source.loc -= (-diff) as usize;
+                    }
+                    if source.loc >= source.buf.len() {
+                        Err(io::Error::new(
+                            io::ErrorKind::UnexpectedEof,
+                            "Tried to seek past internal buffer",
+                        ))
+                    } else {
                         Ok(source.loc as u64)
-                    },
-                    io::SeekFrom::Current(diff) => {
-                        if diff >= 0 {
-                            source.loc += diff as usize;
-                        } else {
-                            source.loc -= (-diff) as usize;
-                        }
-                        if source.loc >= source.buf.len() {
-                            Err(io::Error::new(
-                                io::ErrorKind::UnexpectedEof,
-                                "Tried to seek past internal buffer",
-                            ))
-                        } else {
-                            Ok(source.loc as u64)
-                        }
-                    },
-                    io::SeekFrom::End(_) => {
-                        Err(io::Error::new(io::ErrorKind::InvalidInput, "Stdin has no end"))
-                    },
-                }
+                    }
+                },
+                io::SeekFrom::End(_) => Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "Stdin has no end",
+                )),
             },
         }
     }
@@ -84,25 +87,23 @@ impl<'a> Read for Source<'a> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         match *self {
             Source::File(ref mut f) => f.read(buf),
-            Source::Stdin(ref mut source) => {
-                if source.loc >= source.buf.len() {
-                    let ret = source.stdin.read(buf);
-                    if let Ok(size) = ret {
-                        source.buf.extend_from_slice(&buf[..size]);
-                        source.loc += size;
-                        Ok(size)
-                    } else {
-                        ret
-                    }
+            Source::Stdin(ref mut source) => if source.loc >= source.buf.len() {
+                let ret = source.stdin.read(buf);
+                if let Ok(size) = ret {
+                    source.buf.extend_from_slice(&buf[..size]);
+                    source.loc += size;
+                    Ok(size)
                 } else {
-                    let len = buf.len();
-                    let start = source.loc;
-                    let end = min(start + len, source.buf.len());
-                    let readlen = end - start;
-                    buf[..readlen].copy_from_slice(&source.buf[start..end]);
-                    source.loc = end;
-                    Ok(readlen)
+                    ret
                 }
+            } else {
+                let len = buf.len();
+                let start = source.loc;
+                let end = min(start + len, source.buf.len());
+                let readlen = end - start;
+                buf[..readlen].copy_from_slice(&source.buf[start..end]);
+                source.loc = end;
+                Ok(readlen)
             },
         }
     }
@@ -130,7 +131,12 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(
             }
         })*)
     }
-    parse_exports!(Transaction, mint::MintExport, logix::LogixExport, alliant::AlliantExport);
+    parse_exports!(
+        Transaction,
+        mint::MintExport,
+        logix::LogixExport,
+        alliant::AlliantExport
+    );
     Err(BudgetError::Multi(errors))
 }
 

@@ -65,8 +65,11 @@ where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let mut transactions: Vec<_> = transactions.collect();
-        let mut date =
-            transactions.get(0).map(|t| t.date).clone().unwrap_or_else(|| Date::ymd(2000, 1, 1));
+        let mut date = transactions
+            .get(0)
+            .map(|t| t.date)
+            .clone()
+            .unwrap_or_else(|| Date::ymd(2000, 1, 1));
 
         match self.timeframe {
             Timeframe::Days(_) => {},
@@ -81,24 +84,22 @@ where
             by_timeframe.insert(v.to_owned(), BTreeMap::new());
         }
         while transactions.len() > 0 {
-            let (current, remaining): (Vec<_>, Vec<_>) = transactions.into_iter().partition(|t| {
-                t.date >= date && t.date < date + self.timeframe
-            });
+            let (current, remaining): (Vec<_>, Vec<_>) = transactions
+                .into_iter()
+                .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
             if let Some(v) = self.inner.key() {
-                by_timeframe.entry(v.to_owned()).or_insert_with(|| BTreeMap::new()).insert(
-                    date,
-                    self.inner.report(current.into_iter()),
-                );
+                by_timeframe
+                    .entry(v.to_owned())
+                    .or_insert_with(|| BTreeMap::new())
+                    .insert(date, self.inner.report(current.into_iter()));
             } else {
                 match self.inner.report(current.into_iter()) {
-                    Value::Object(o) => {
-                        for (k, v) in o {
-                            by_timeframe.entry(k).or_insert_with(|| BTreeMap::new()).insert(
-                                date,
-                                v,
-                            );
-                        }
+                    Value::Object(o) => for (k, v) in o {
+                        by_timeframe
+                            .entry(k)
+                            .or_insert_with(|| BTreeMap::new())
+                            .insert(date, v);
                     },
                     other => {
                         by_timeframe
@@ -123,7 +124,12 @@ where
     fn key(&self) -> Option<String> {
         Some(format!(
             "{}",
-            self.timeframe.ly().to_lowercase().split_whitespace().collect::<Vec<_>>().join("_")
+            self.timeframe
+                .ly()
+                .to_lowercase()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join("_")
         ))
     }
 }
