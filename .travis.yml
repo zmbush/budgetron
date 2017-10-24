@@ -10,14 +10,15 @@ before_install:
   - rustup run nightly cargo install --force rustfmt-nightly
   - nvm install 6
   - npm install -g yarn
+  - cargo install --force diesel_cli
 install:
   - cd web && yarn
 before_script:
-  - psql -c 'create role budgetron with createdb;' -U postgres
-  - psql -c 'create database budgetron;' -U budgetron
+  - psql -c 'create database budgetron;' -U postgres
   - cp .env.travis .env
 script:
   - cd web && yarn run webpack
   - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
+  - diesel migration run
   - cargo build
   - cargo test
