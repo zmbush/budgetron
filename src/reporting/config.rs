@@ -7,17 +7,19 @@ use loading::Transaction;
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredReports {
-    reports: HashMap<String, Report>,
+    reports: Vec<Report>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Report {
+    name: String,
+    #[serde(default)] by_week: bool,
     #[serde(default)] by_month: bool,
     #[serde(default)] by_quarter: bool,
     #[serde(default)] by_year: bool,
 
     skip_tags: Option<Vec<String>>,
-    report: ReportType,
+    config: ReportType,
 }
 
 #[derive(Debug, Deserialize)]
@@ -40,29 +42,26 @@ impl Report {
         R: Reporter,
     {
         let mut retval = serde_json::map::Map::new();
-        if self.by_month {
-            retval.insert(
-                "by_month".to_owned(),
-                reporter.by_month().report(transactions.clone()),
-            );
-        }
-        if self.by_quarter {
-            retval.insert(
-                "by_quarter".to_owned(),
-                reporter.by_quarter().report(transactions.clone()),
-            );
-        }
-        if self.by_year {
-            retval.insert(
-                "by_year".to_owned(),
-                reporter.by_year().report(transactions.clone()),
-            );
+
+        macro_rules! check_by {
+            ($($name:ident),*) => {
+                $(if self.$name {
+                    retval.insert(
+                        stringify!($name).to_owned(),
+                        reporter.$name().report(transactions.clone()),
+                    );
+                })*
+
+                if !($(self.$name)||*) {
+                    reporter.report(transactions)
+                } else {
+                    Value::Object(retval)
+                }
+            }
         }
 
-        if !(self.by_month || self.by_quarter | self.by_year) {
-            reporter.report(transactions)
-        } else {
-            Value::Object(retval)
+        check_by! {
+            by_week, by_month, by_quarter, by_year
         }
     }
 
@@ -85,23 +84,32 @@ impl Reporter for ConfiguredReports {
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
         let mut retval = serde_json::map::Map::new();
-        for (name, report_config) in &self.reports {
-            retval.insert(
-                name.to_owned(),
-                match &report_config.report {
-                    &ReportType::RollingBudget {
-                        start_date,
-                        ref split,
-                        ref amounts,
-                    } => report_config.run_report(
-                        RollingBudget::new_param(start_date, split.clone(), amounts.clone()),
-                        transactions.clone(),
-                    ),
-                    &ReportType::Cashflow => {
-                        report_config.run_report(Cashflow, transactions.clone())
-                    },
+        for report_config in &self.reports {
+            let report_key = report_config
+                .name
+                .to_lowercase()
+                .split(" ")
+                .collect::<Vec<_>>()
+                .join("_");
+            let value = match &report_config.config {
+                &ReportType::RollingBudget {
+                    start_date,
+                    ref split,
+                    ref amounts,
+                } => report_config.run_report(
+                    RollingBudget::new_param(start_date, split.clone(), amounts.clone()),
+                    transactions.clone(),
+                ),
+                &ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
+            };
+            let value = match value {
+                Value::Object(mut o) => {
+                    o.insert("name".to_owned(), Value::String(report_config.name.clone()));
+                    Value::Object(o)
                 },
-            );
+                other => other,
+            };
+            retval.insert(report_key, value);
         }
         Value::Object(retval)
     }

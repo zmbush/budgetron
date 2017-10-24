@@ -80,45 +80,16 @@ where
         }
 
         let mut by_timeframe = BTreeMap::new();
-        if let Some(v) = self.inner.key() {
-            by_timeframe.insert(v.to_owned(), BTreeMap::new());
-        }
         while transactions.len() > 0 {
             let (current, remaining): (Vec<_>, Vec<_>) = transactions
                 .into_iter()
                 .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
-            if let Some(v) = self.inner.key() {
-                by_timeframe
-                    .entry(v.to_owned())
-                    .or_insert_with(|| BTreeMap::new())
-                    .insert(date, self.inner.report(current.into_iter()));
-            } else {
-                match self.inner.report(current.into_iter()) {
-                    Value::Object(o) => for (k, v) in o {
-                        by_timeframe
-                            .entry(k)
-                            .or_insert_with(|| BTreeMap::new())
-                            .insert(date, v);
-                    },
-                    other => {
-                        by_timeframe
-                            .entry("by_timeframe".to_owned())
-                            .or_insert_with(|| BTreeMap::new())
-                            .insert(date, other);
-                    },
-                }
-            }
+            by_timeframe.insert(date, self.inner.report(current.into_iter()));
             date += self.timeframe;
         }
-        let mut retval = serde_json::to_value(by_timeframe).expect("shitballs");
-        if let Some(obj) = retval.as_object_mut() {
-            obj.insert(
-                "timeframe".to_owned(),
-                serde_json::to_value(self.timeframe).expect("shibble"),
-            );
-        }
-        retval
+
+        serde_json::to_value(by_timeframe).expect("Unable to serialize by_timeframe")
     }
 
     fn key(&self) -> Option<String> {

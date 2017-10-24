@@ -28,14 +28,17 @@ description = ["Hulu", "Google *Music"]
 description = ["ACH"]
 
 
-[reports.rolling_budget]
+[[reports]]
+name = "Rolling Budget"
 skip_tags = ['essential', 'recurring', 'ach']
-[reports.rolling_budget.report]
+
+[reports.config]
   type = "RollingBudget"
   start_date = '10/01/2017'
   split = 'joint'
   amounts = { Person1 = 100, Person2 = 100 }
 
-[reports.cashflow]
-report = { type = "Cashflow" }
+[[reports]]
+name = "Cashflow"
+config = { type = "Cashflow" }
 by_month = true
