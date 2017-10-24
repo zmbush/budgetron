@@ -9,7 +9,7 @@ pub struct Cashflow;
 #[derive(Default, Serialize)]
 pub struct CashflowReport {
     pub credit: f64,
-    pub debit: f64,
+    pub debit:  f64,
 }
 
 impl Reporter for Cashflow {

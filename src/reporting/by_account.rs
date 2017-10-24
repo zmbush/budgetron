@@ -8,7 +8,7 @@ pub struct ByAccount<'a, T>
 where
     T: 'a + Reporter,
 {
-    inner: &'a T,
+    inner:   &'a T,
     account: String,
 }
 
@@ -23,7 +23,7 @@ where
 
 #[derive(Debug, Serialize)]
 pub struct ByAccountReport<T> {
-    account: String,
+    account:    String,
     by_account: T,
 }
 

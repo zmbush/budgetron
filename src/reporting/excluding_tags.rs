@@ -8,7 +8,7 @@ where
     T: 'a + Reporter,
 {
     inner: &'a T,
-    tags: Vec<String>,
+    tags:  Vec<String>,
 }
 
 impl<'a, T> ExcludingTags<'a, T>

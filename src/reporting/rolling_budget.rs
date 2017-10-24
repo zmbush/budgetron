@@ -13,8 +13,8 @@ pub struct RollingBudgetConfig {
 #[derive(Debug, Deserialize)]
 pub struct RollingBudget {
     start_date: Date,
-    split: String,
-    amounts: HashMap<String, f64>,
+    split:      String,
+    amounts:    HashMap<String, f64>,
 }
 
 impl RollingBudget {

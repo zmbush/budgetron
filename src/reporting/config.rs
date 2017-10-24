@@ -1,25 +1,26 @@
 use std::collections::HashMap;
 use budgetronlib::fintime::Date;
-use reporting::{Cashflow, Reporter, RollingBudget};
+use reporting::{Cashflow, Categories, Reporter, RollingBudget};
 use std::borrow::Cow;
 use serde_json::{self, Value};
-use loading::Transaction;
+use loading::{Transaction, TransactionType};
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredReports {
-    reports: Vec<Report>,
+    report: Vec<Report>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Report {
-    name: String,
-    #[serde(default)] by_week: bool,
-    #[serde(default)] by_month: bool,
-    #[serde(default)] by_quarter: bool,
-    #[serde(default)] by_year: bool,
-
+    name:      String,
+    only_type: Option<TransactionType>,
     skip_tags: Option<Vec<String>>,
-    config: ReportType,
+    config:    ReportType,
+
+    #[serde(default)] by_week:    bool,
+    #[serde(default)] by_month:   bool,
+    #[serde(default)] by_quarter: bool,
+    #[serde(default)] by_year:    bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -27,11 +28,11 @@ pub struct Report {
 pub enum ReportType {
     RollingBudget {
         start_date: Date,
-        split: String,
-        amounts: HashMap<String, f64>,
+        split:      String,
+        amounts:    HashMap<String, f64>,
     },
     Cashflow,
-    //Categories,
+    Categories,
 }
 
 
@@ -70,10 +71,16 @@ impl Report {
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
-        if let Some(ref tags) = self.skip_tags {
-            self.inner_run_report(reporter.excluding_tags(tags.clone()), transactions)
-        } else {
-            self.inner_run_report(reporter, transactions)
+        match (&self.skip_tags, self.only_type) {
+            (&Some(ref tags), Some(t)) => self.inner_run_report(
+                reporter.only_type(t).excluding_tags(tags.clone()),
+                transactions,
+            ),
+            (&Some(ref tags), None) => {
+                self.inner_run_report(reporter.excluding_tags(tags.clone()), transactions)
+            },
+            (&None, Some(t)) => self.inner_run_report(reporter.only_type(t), transactions),
+            (&None, None) => self.inner_run_report(reporter, transactions),
         }
     }
 }
@@ -84,7 +91,7 @@ impl Reporter for ConfiguredReports {
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
         let mut retval = serde_json::map::Map::new();
-        for report_config in &self.reports {
+        for report_config in &self.report {
             let report_key = report_config
                 .name
                 .to_lowercase()
@@ -101,13 +108,9 @@ impl Reporter for ConfiguredReports {
                     transactions.clone(),
                 ),
                 &ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
-            };
-            let value = match value {
-                Value::Object(mut o) => {
-                    o.insert("name".to_owned(), Value::String(report_config.name.clone()));
-                    Value::Object(o)
+                &ReportType::Categories => {
+                    report_config.run_report(Categories, transactions.clone())
                 },
-                other => other,
             };
             retval.insert(report_key, value);
         }

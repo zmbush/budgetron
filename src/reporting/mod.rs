@@ -1,5 +1,5 @@
 use budgetronlib::fintime::Timeframe;
-use loading::Transaction;
+use loading::{Transaction, TransactionType};
 use reporting::by_account::ByAccount;
 use reporting::by_timeframe::ByTimeframe;
 use serde;
@@ -41,6 +41,10 @@ pub trait Reporter: Sized {
     fn excluding_tags(&self, tags: Vec<String>) -> ExcludingTags<Self> {
         ExcludingTags::new(self, tags)
     }
+
+    fn only_type(&self, t: TransactionType) -> OnlyType<Self> {
+        OnlyType::new(self, t)
+    }
 }
 
 pub trait Report: fmt::Display + serde::Serialize {}
@@ -49,12 +53,14 @@ mod config;
 mod by_account;
 mod by_timeframe;
 mod excluding_tags;
+mod categories;
 mod cashflow;
 mod database;
 mod multi;
 mod net_worth;
 mod repeats;
 mod rolling_budget;
+mod only_type;
 
 pub use reporting::by_account::ByAccountReport;
 pub use reporting::by_timeframe::ByTimeframeReport;
@@ -65,3 +71,5 @@ pub use reporting::repeats::RepeatedTransactions;
 pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};
 pub use reporting::excluding_tags::ExcludingTags;
 pub use reporting::config::ConfiguredReports;
+pub use reporting::categories::Categories;
+pub use reporting::only_type::OnlyType;

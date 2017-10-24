@@ -10,7 +10,7 @@ pub struct ByTimeframe<'a, T>
 where
     T: 'a + Reporter,
 {
-    inner: &'a T,
+    inner:     &'a T,
     timeframe: Timeframe,
 }
 
@@ -25,7 +25,7 @@ where
 
 #[derive(Debug, Serialize)]
 pub struct ByTimeframeReport<T> {
-    timeframe: Timeframe,
+    timeframe:    Timeframe,
     by_timeframe: BTreeMap<Date, T>,
 }
 

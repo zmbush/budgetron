@@ -18,14 +18,14 @@ impl RepeatedTransactions {
 
 #[derive(Debug, Serialize)]
 struct Report {
-    transactions: Vec<Transaction>,
+    transactions:       Vec<Transaction>,
     average_date_delta: i64,
 }
 
 #[derive(Debug)]
 struct NearbyFloatsBucket<F: Float> {
     high: NotNaN<F>,
-    low: NotNaN<F>,
+    low:  NotNaN<F>,
 }
 
 impl<F: Float> NearbyFloatsBucket<F> {
@@ -35,14 +35,14 @@ impl<F: Float> NearbyFloatsBucket<F> {
 }
 
 struct NearbyFloatsBuilder<F: Float> {
-    margin: F,
+    margin:  F,
     buckets: Vec<(NotNaN<F>, NotNaN<F>)>,
 }
 
 impl<F: Float> NearbyFloatsBuilder<F> {
     fn new() -> NearbyFloatsBuilder<F> {
         NearbyFloatsBuilder {
-            margin: F::epsilon(),
+            margin:  F::epsilon(),
             buckets: Vec::new(),
         }
     }
