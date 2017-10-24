@@ -13,6 +13,7 @@ before_install:
 install:
   - cd web && yarn
 before_script:
+  - psql -c 'create role budgetron with createdb;' -U postgres
   - psql -c 'create database budgetron;' -U budgetron
   - cp .env.travis .env
 script:
