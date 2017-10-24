@@ -1,0 +1,17 @@
+language: rust
+rust:
+  - stable
+  - 1.21.0
+cache: cargo
+before_install:
+  - rustup install nightly
+  - rustup run nightly cargo install --force rustfmt-nightly
+  - nvm install 6
+  - npm install -g yarn
+install:
+  - yarn
+script:
+  - yarn run webpack
+  - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
+  - cargo build
+  - cargo test
