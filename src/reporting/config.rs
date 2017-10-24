@@ -5,25 +5,29 @@ use std::borrow::Cow;
 use serde_json::{self, Value};
 use loading::{Transaction, TransactionType};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {
     report: Vec<Report>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Report {
-    name:      String,
-    only_type: Option<TransactionType>,
-    skip_tags: Option<Vec<String>>,
-    config:    ReportType,
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
+    #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
+    config: ReportType,
 
-    #[serde(default)] by_week:    bool,
-    #[serde(default)] by_month:   bool,
-    #[serde(default)] by_quarter: bool,
-    #[serde(default)] by_year:    bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_week:    bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_month:   bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_quarter: bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_year:    bool,
 }
 
-#[derive(Debug, Deserialize)]
+fn is_false(value: &bool) -> bool {
+    !value
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "type")]
 pub enum ReportType {
     RollingBudget {
@@ -112,7 +116,13 @@ impl Reporter for ConfiguredReports {
                     report_config.run_report(Categories, transactions.clone())
                 },
             };
-            retval.insert(report_key, value);
+            let mut report_data = serde_json::map::Map::new();
+            report_data.insert("data".to_string(), value);
+            report_data.insert(
+                "config".to_string(),
+                serde_json::to_value(report_config).expect("Could not write config"),
+            );
+            retval.insert(report_key, Value::Object(report_data));
         }
         Value::Object(retval)
     }

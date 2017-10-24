@@ -7,7 +7,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: [
-    'babel-polyfill', "./src/entry.js"
+    'babel-polyfill', "./src/entry.jsx"
   ],
   output: {
     path: path.resolve('./static'),
