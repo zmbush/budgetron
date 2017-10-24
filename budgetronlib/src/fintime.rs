@@ -172,7 +172,9 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date { date: chrono::Utc.ymd(y, m as u32, d as u32) }
+        Date {
+            date: chrono::Utc.ymd(y, m as u32, d as u32),
+        }
     }
 
     pub fn year(&self) -> i32 {
