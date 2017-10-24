@@ -2,6 +2,7 @@ use std::str::FromStr;
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use serde::ser::{Serialize, Serializer};
 use std::fmt;
+use serde_json;
 use std::ops;
 use std::iter;
 
@@ -17,13 +18,25 @@ impl ops::Sub<Money> for Money {
 
 impl ops::SubAssign for Money {
     fn sub_assign(&mut self, other: Money) {
-        self.0 -= other.0;
+        *self = *self - other;
     }
 }
 
 impl ops::AddAssign for Money {
     fn add_assign(&mut self, other: Money) {
-        self.0 += other.0;
+        *self = *self + other;
+    }
+}
+
+impl ops::MulAssign for Money {
+    fn mul_assign(&mut self, other: Money) {
+        *self = *self * other;
+    }
+}
+
+impl ops::DivAssign for Money {
+    fn div_assign(&mut self, other: Money) {
+        *self = *self / other;
     }
 }
 
@@ -81,15 +94,25 @@ impl<'a> ops::Div<Money> for &'a Money {
     }
 }
 
-impl fmt::Display for Money {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:.02}", self.to_f64())
-    }
-}
-
 impl Money {
     pub fn to_f64(&self) -> f64 {
         (self.0 as f64) / 10000.0
+    }
+
+    pub fn from_f64(v: f64) -> Money {
+        Money((v * 100.0) as i64 * 100)
+    }
+
+    pub fn from_i64(v: i64) -> Money {
+        Money(v * 10000)
+    }
+
+    pub fn abs(&self) -> Money {
+        Money(self.0.abs())
+    }
+
+    pub fn is_negative(&self) -> bool {
+        self.0 < 0
     }
 
     pub fn zero() -> Money {
@@ -101,15 +124,8 @@ impl FromStr for Money {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Money, String> {
-        if s.starts_with("$") {
-            Ok(Money(if let Ok(amt) = s[1..].parse::<f64>() {
-                (amt * 10000.0) as i64
-            } else {
-                return Err(format!("unable to parse number '{}'", s));
-            }))
-        } else {
-            Err(format!("'{}' does not look like money", s))
-        }
+        serde_json::from_str(&format!("\"{}\"", s))
+            .map_err(|_| format!("Unable to parse money {}", s))
     }
 }
 
@@ -125,35 +141,35 @@ impl<'de> Visitor<'de> for MoneyVisitor {
     where
         E: de::Error,
     {
-        Ok(Money(value as i64 * 10000))
+        Ok(Money::from_i64(value as i64))
     }
 
     fn visit_i32<E>(self, value: i32) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money(value as i64 * 10000))
+        Ok(Money::from_i64(value as i64))
     }
 
     fn visit_i64<E>(self, value: i64) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money(value * 10000))
+        Ok(Money::from_i64(value))
     }
 
     fn visit_f32<E>(self, value: f32) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money((value * 100.0) as i64 * 100))
+        Ok(Money::from_f64(value as f64))
     }
 
     fn visit_f64<E>(self, value: f64) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money((value * 100.0) as i64 * 100))
+        Ok(Money::from_f64(value))
     }
 
     fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Money, E>
@@ -163,8 +179,12 @@ impl<'de> Visitor<'de> for MoneyVisitor {
         let negative = v.starts_with("(") && v.ends_with(")");
         let v = if negative { &v[1..v.len() - 1] } else { v };
         let v = v.replace('$', "").replace(',', "");
+        let mut parsed: f64 = v.parse().map_err(|_| E::custom("Could not parse money"))?;
+        if negative {
+            parsed = -parsed;
+        }
 
-        self.visit_f64(v.parse().map_err(|_| E::custom("Could not parse money"))?)
+        self.visit_f64(parsed)
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Money, E>
@@ -197,5 +217,70 @@ impl Serialize for Money {
         S: Serializer,
     {
         serializer.serialize_str(&format!("{:.02}", self.to_f64()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json;
+
+    #[test]
+    fn basic_operations() {
+        assert_eq!(Money(10) + Money(10), Money(20));
+        assert_eq!(Money(100) - Money(100), Money(0));
+        assert_eq!(Money(1000) / Money(10), Money(100));
+        assert_eq!(Money(10) * Money(5), Money(50));
+    }
+
+    #[test]
+    fn assign_operations() {
+        let mut mon = Money(10);
+        mon += Money(30);
+        assert_eq!(mon, Money(40));
+        mon -= Money(12);
+        assert_eq!(mon, Money(28));
+        mon *= Money(2);
+        assert_eq!(mon, Money(56));
+        mon /= Money(2);
+        assert_eq!(mon, Money(28));
+    }
+
+    #[test]
+    fn iter_operations() {
+        let monies = vec![Money(10), Money(5)];
+        assert_eq!(monies.iter().sum::<Money>(), Money(15));
+    }
+
+    macro_rules! test_conversion {
+        ($name:ident, $($s:expr => $o:expr),+) => {
+            #[test]
+            fn $name() {
+                $(
+                    let money_str = format!(r#""{}""#, $s);
+                    let parsed_money: Money = serde_json::from_str(&money_str).unwrap();
+                    assert_eq!(parsed_money, Money::from_f64($o));
+                )+
+            }
+        }
+    }
+
+    test_conversion!(
+        parse_complex_numbers,
+        "($100.0)" => -100.0,
+        "$100.0" => 100.0,
+        "-$100.0" => -100.0
+    );
+
+    test_conversion!(
+        parse_simpler_numbers,
+        "$150.0" => 150.0,
+        "-125.50" => -125.50
+    );
+}
+
+impl fmt::Display for Money {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:.02}", self.to_f64())
     }
 }
