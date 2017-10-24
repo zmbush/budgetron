@@ -3,6 +3,8 @@ rust:
   - stable
   - 1.21.0
 cache: cargo
+services:
+  - postgresql
 before_install:
   - rustup install nightly
   - rustup run nightly cargo install --force rustfmt-nightly
@@ -10,6 +12,9 @@ before_install:
   - npm install -g yarn
 install:
   - cd web && yarn
+before_script:
+  - psql -c 'create database budgetron;' -U budgetron
+  - cp .env.travis .env
 script:
   - cd web && yarn run webpack
   - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
