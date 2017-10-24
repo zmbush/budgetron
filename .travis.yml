@@ -12,12 +12,12 @@ before_install:
   - npm install -g yarn
   - cargo install --force diesel_cli
 install:
-  - cd web && yarn
+  - cd web && yarn && cd -
 before_script:
   - psql -c 'create database budgetron;' -U postgres
   - cp .env.travis .env
 script:
-  - cd web && yarn run webpack
+  - cd web && yarn run webpack && cd -
   - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
   - diesel migration run
   - cargo build
