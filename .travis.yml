@@ -9,9 +9,9 @@ before_install:
   - nvm install 6
   - npm install -g yarn
 install:
-  - yarn
+  - cd web && yarn
 script:
-  - yarn run webpack
+  - cd web && yarn run webpack
   - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
   - cargo build
   - cargo test

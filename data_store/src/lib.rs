@@ -1,4 +1,4 @@
-#![recursion_limit="128"]
+#![recursion_limit = "128"]
 
 #[macro_use]
 extern crate diesel_codegen;
@@ -6,10 +6,10 @@ extern crate diesel_codegen;
 pub mod schema;
 pub mod models;
 
+extern crate chrono;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
-extern crate chrono;
 extern crate itertools;
 
 use diesel::pg::PgConnection;
@@ -31,10 +31,8 @@ impl Transactions {
 
     pub fn new(database_url: &str) -> Transactions {
         Transactions {
-            db: PgConnection::establish(database_url).expect(&format!(
-                "Error connecting to {}",
-                database_url
-            )),
+            db: PgConnection::establish(database_url)
+                .expect(&format!("Error connecting to {}", database_url)),
         }
     }
 
