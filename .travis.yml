@@ -5,13 +5,12 @@ rust:
 cache: cargo
 services:
   - postgresql
-before_install:
+install:
   - rustup install nightly
   - rustup run nightly cargo install --force rustfmt-nightly
   - nvm install 6
   - npm install -g yarn
   - cargo install --force diesel_cli
-install:
   - (cd web && yarn)
 before_script:
   - psql -c 'create database budgetron;' -U postgres
