@@ -15,9 +15,9 @@ install:
 before_script:
   - psql -c 'create database budgetron;' -U postgres
   - cp .env.travis .env
+  - diesel migration run
+  - cargo build
 script:
   - (cd web && yarn run webpack)
   - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
-  - diesel migration run
-  - cargo build
   - cargo test
