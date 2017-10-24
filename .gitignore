@@ -10,3 +10,4 @@ output
 *.swm
 *.rs.bk
 budgetronrc.toml
+.trigger
