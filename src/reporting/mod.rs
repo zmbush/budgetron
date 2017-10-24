@@ -58,7 +58,6 @@ mod cashflow;
 mod database;
 mod multi;
 mod net_worth;
-mod repeats;
 mod rolling_budget;
 mod only_type;
 
@@ -67,7 +66,6 @@ pub use reporting::by_timeframe::ByTimeframeReport;
 pub use reporting::cashflow::Cashflow;
 pub use reporting::database::Database;
 pub use reporting::net_worth::NetWorth;
-pub use reporting::repeats::RepeatedTransactions;
 pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};
 pub use reporting::excluding_tags::ExcludingTags;
 pub use reporting::config::ConfiguredReports;

@@ -3,7 +3,7 @@ use budgetronlib::fintime::Date;
 use reporting::{Cashflow, Categories, Reporter, RollingBudget};
 use std::borrow::Cow;
 use serde_json::{self, Value};
-use loading::{Transaction, TransactionType};
+use loading::{Money, Transaction, TransactionType};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {
@@ -33,7 +33,7 @@ pub enum ReportType {
     RollingBudget {
         start_date: Date,
         split:      String,
-        amounts:    HashMap<String, f64>,
+        amounts:    HashMap<String, Money>,
     },
     Cashflow,
     Categories,

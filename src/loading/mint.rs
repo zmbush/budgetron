@@ -1,6 +1,7 @@
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
+use loading::money::Money;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -23,7 +24,7 @@ pub struct MintExport {
     date: Date,
     description: String,
     #[serde(rename = "Original Description")] original_description: String,
-    amount: f64,
+    amount: Money,
     #[serde(rename = "Transaction Type")] transaction_type: MintTransactionType,
     category: String,
     #[serde(rename = "Account Name")] account_name: String,

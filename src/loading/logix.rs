@@ -1,48 +1,26 @@
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
+use loading::money::Money;
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use std::fmt;
-use std::str::FromStr;
-
-#[derive(Debug)]
-struct LogixMoney {
-    amount: f64,
-}
 
 #[derive(Debug)]
 struct LogixTransactionAmount {
-    amount: LogixMoney,
+    amount:   Money,
     negative: bool,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LogixExport {
-    account: String,
-    date: Date,
-    amount: LogixTransactionAmount,
-    balance: LogixTransactionAmount,
-    category: String,
+    account:     String,
+    date:        Date,
+    amount:      LogixTransactionAmount,
+    balance:     LogixTransactionAmount,
+    category:    String,
     description: String,
-    memo: String,
-    notes: String,
-}
-
-impl FromStr for LogixMoney {
-    type Err = String;
-    fn from_str(s: &str) -> Result<LogixMoney, String> {
-        if s.starts_with("$") {
-            Ok(LogixMoney {
-                amount: if let Ok(amt) = s[1..].parse() {
-                    amt
-                } else {
-                    return Err(format!("unable to parse number'{} '", s));
-                },
-            })
-        } else {
-            Err(format!("'{}' does not look like money", s))
-        }
-    }
+    memo:        String,
+    notes:       String,
 }
 
 struct LogixTransactionAmountVisitor;
@@ -79,7 +57,7 @@ impl Genericize for LogixExport {
             person: "".to_owned(),
             description: self.description.clone(),
             original_description: self.description,
-            amount: self.amount.amount.amount,
+            amount: self.amount.amount,
             transaction_type: if self.amount.negative {
                 TransactionType::Debit
             } else {

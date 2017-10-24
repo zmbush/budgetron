@@ -1,6 +1,7 @@
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
 use loading::generic::{Genericize, Transaction, TransactionType};
+use loading::money::Money;
 
 // "id","account_id","reference_id","transaction_type","amount","posted_at",
 // "created_at","nickname","original_name","merchant_id","updated_at",
@@ -22,20 +23,20 @@ impl Into<TransactionType> for AlliantTransactionType {
 
 #[derive(Debug, Deserialize)]
 pub struct AlliantExport {
-    id: String,
-    account_id: i64,
-    reference_id: i64,
+    id:               String,
+    account_id:       i64,
+    reference_id:     i64,
     transaction_type: AlliantTransactionType,
-    amount: f64,
-    posted_at: Date,
-    created_at: Date,
-    nickname: String,
-    original_name: String,
-    merchant_id: String,
-    updated_at: Date,
-    check_number: Option<i32>,
-    account_name: String,
-    tags: String,
+    amount:           Money,
+    posted_at:        Date,
+    created_at:       Date,
+    nickname:         String,
+    original_name:    String,
+    merchant_id:      String,
+    updated_at:       Date,
+    check_number:     Option<i32>,
+    account_name:     String,
+    tags:             String,
 }
 
 impl Genericize for AlliantExport {

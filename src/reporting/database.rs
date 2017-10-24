@@ -20,7 +20,7 @@ impl Reporter for Database {
                 person: t.person,
                 description: t.description,
                 original_description: t.original_description,
-                amount: t.amount,
+                amount: t.amount.to_f64(),
                 transaction_type: match t.transaction_type {
                     TransactionType::Debit => "Debit",
                     TransactionType::Credit => "Credit",

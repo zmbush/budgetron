@@ -1,4 +1,4 @@
-use loading::{Transaction, TransactionType};
+use loading::{Money, Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
@@ -15,10 +15,10 @@ impl Reporter for Categories {
         for transaction in transactions {
             *categories
                 .entry(transaction.category.clone())
-                .or_insert(0.0) += match transaction.transaction_type {
+                .or_insert(Money::zero()) += match transaction.transaction_type {
                 TransactionType::Credit => transaction.amount,
                 TransactionType::Debit => -transaction.amount,
-                _ => 0.0,
+                _ => Money::zero(),
             }
         }
 

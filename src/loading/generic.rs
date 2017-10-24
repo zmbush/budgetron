@@ -1,4 +1,5 @@
 use budgetronlib::error::BResult;
+use loading::money::Money;
 use budgetronlib::fintime::Date;
 
 #[derive(Debug, Serialize, Copy, Deserialize, PartialEq, Clone, Eq, PartialOrd, Ord)]
@@ -32,7 +33,7 @@ impl TransactionType {
 pub struct Transaction {
     pub date: Date,
     pub description: String,
-    pub amount: f64,
+    pub amount: Money,
     pub transaction_type: TransactionType,
     pub person: String,
     pub original_description: String,

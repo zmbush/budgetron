@@ -1,4 +1,4 @@
-use loading::{Transaction, TransactionType};
+use loading::{Money, Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
@@ -8,8 +8,8 @@ pub struct Cashflow;
 
 #[derive(Default, Serialize)]
 pub struct CashflowReport {
-    pub credit: f64,
-    pub debit:  f64,
+    pub credit: Money,
+    pub debit:  Money,
 }
 
 impl Reporter for Cashflow {

@@ -1,5 +1,5 @@
 use budgetronlib::fintime::Date;
-use loading::{Transaction, TransactionType};
+use loading::{Money, Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
@@ -14,14 +14,14 @@ pub struct RollingBudgetConfig {
 pub struct RollingBudget {
     start_date: Date,
     split:      String,
-    amounts:    HashMap<String, f64>,
+    amounts:    HashMap<String, Money>,
 }
 
 impl RollingBudget {
     pub fn new_param(
         start_date: Date,
         split: String,
-        amounts: HashMap<String, f64>,
+        amounts: HashMap<String, Money>,
     ) -> RollingBudget {
         RollingBudget {
             start_date,
@@ -37,7 +37,7 @@ impl RollingBudget {
 
 #[derive(Debug, Serialize)]
 pub struct RollingBudgetReport {
-    budgets: HashMap<String, f64>,
+    budgets: HashMap<String, Money>,
 }
 
 impl RollingBudget {
@@ -50,20 +50,20 @@ impl RollingBudget {
             && TransactionType::Transfer != transaction.transaction_type
     }
 
-    fn proportions(&self) -> HashMap<&str, f64> {
-        let total: f64 = self.amounts.values().sum();
+    fn proportions(&self) -> HashMap<&str, Money> {
+        let total: Money = self.amounts.values().sum();
         self.amounts
             .iter()
             .map(|(k, v)| (k.as_ref(), v / total))
             .collect()
     }
 
-    fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, f64> {
+    fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, Money> {
         let mut splits = HashMap::new();
         if self.should_split(transaction) {
             splits = self.proportions()
                 .iter()
-                .map(|(k, v)| (k.to_string(), transaction.amount * v))
+                .map(|(k, v)| (k.to_string(), transaction.amount * *v))
                 .collect();
         } else {
             splits.insert(transaction.person.clone(), transaction.amount);
@@ -87,11 +87,17 @@ impl Reporter for RollingBudget {
                 if transaction.date.month() != month {
                     month = transaction.date.month();
                     for (name, amount) in &self.amounts {
-                        *report.budgets.entry(name.to_string()).or_insert(0.0) += *amount;
+                        *report
+                            .budgets
+                            .entry(name.to_string())
+                            .or_insert(Money::zero()) += *amount;
                     }
                 }
                 for (name, amount) in self.split_transaction(&transaction) {
-                    let entry = report.budgets.entry(name.to_string()).or_insert(0.0);
+                    let entry = report
+                        .budgets
+                        .entry(name.to_string())
+                        .or_insert(Money::zero());
                     match transaction.transaction_type {
                         TransactionType::Debit => *entry -= amount,
                         TransactionType::Credit => *entry += amount,

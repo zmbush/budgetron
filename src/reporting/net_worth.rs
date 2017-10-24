@@ -1,4 +1,4 @@
-use loading::{Transaction, TransactionType};
+use loading::{Money, Transaction, TransactionType};
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
@@ -13,12 +13,13 @@ impl Reporter for NetWorth {
     {
         let mut worth = BTreeMap::new();
         for transaction in transactions {
-            *worth.entry(transaction.account_name.clone()).or_insert(0.0) +=
-                match transaction.transaction_type {
-                    TransactionType::Credit => transaction.amount,
-                    TransactionType::Debit => -transaction.amount,
-                    TransactionType::Transfer => -transaction.amount,
-                };
+            *worth
+                .entry(transaction.account_name.clone())
+                .or_insert(Money::zero()) += match transaction.transaction_type {
+                TransactionType::Credit => transaction.amount,
+                TransactionType::Debit => -transaction.amount,
+                TransactionType::Transfer => -transaction.amount,
+            };
             if let TransactionType::Transfer = transaction.transaction_type {
                 *worth
                     .entry(
@@ -27,7 +28,7 @@ impl Reporter for NetWorth {
                             .clone()
                             .expect("transfer records should have a transfer_destination_account"),
                     )
-                    .or_insert(0.0) += transaction.amount;
+                    .or_insert(Money::zero()) += transaction.amount;
             }
         }
 

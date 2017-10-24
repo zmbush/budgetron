@@ -1,7 +1,7 @@
 use processing::Collate;
 use std::collections::HashMap;
 use budgetronlib::error::BResult;
-use loading::Transaction;
+use loading::{Money, Transaction};
 use processing::regex::Regex;
 
 #[derive(Debug, Deserialize)]
@@ -25,10 +25,10 @@ pub enum Processor {
 
 #[derive(Debug, Deserialize)]
 pub struct TransactionMatcher {
-    account: Option<Vec<Regex>>,
+    account:     Option<Vec<Regex>>,
     description: Option<Vec<Regex>>,
-    category: Option<Vec<Regex>>,
-    range: Option<MoneyRange>,
+    category:    Option<Vec<Regex>>,
+    range:       Option<MoneyRange>,
 }
 
 impl TransactionMatcher {
@@ -62,8 +62,8 @@ impl TransactionMatcher {
 
 #[derive(Debug, Deserialize)]
 pub struct MoneyRange {
-    low: f64,
-    high: f64,
+    low:  Money,
+    high: Money,
 }
 
 

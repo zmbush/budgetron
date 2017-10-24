@@ -26,16 +26,16 @@ where
 }
 
 struct StdinSource<'a> {
-    buf: Vec<u8>,
-    loc: usize,
+    buf:   Vec<u8>,
+    loc:   usize,
     stdin: StdinLock<'a>,
 }
 
 impl<'a> StdinSource<'a> {
     fn new(stdin: &'a Stdin) -> StdinSource<'a> {
         StdinSource {
-            buf: Vec::new(),
-            loc: 0,
+            buf:   Vec::new(),
+            loc:   0,
             stdin: stdin.lock(),
         }
     }

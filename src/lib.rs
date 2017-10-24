@@ -6,8 +6,6 @@ extern crate data_store;
 extern crate handlebars;
 #[macro_use]
 extern crate log;
-extern crate num_traits;
-extern crate ordered_float;
 extern crate regex;
 extern crate serde;
 #[macro_use]
