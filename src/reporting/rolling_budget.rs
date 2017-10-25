@@ -45,7 +45,8 @@ impl RollingBudget {
 
 #[derive(Debug, Serialize)]
 pub struct RollingBudgetReport {
-    budgets: HashMap<String, Money>,
+    budgets:      HashMap<String, Money>,
+    transactions: Vec<String>,
 }
 
 impl RollingBudget {
@@ -58,19 +59,19 @@ impl RollingBudget {
             && TransactionType::Transfer != transaction.transaction_type
     }
 
-    fn proportions(&self) -> HashMap<&str, Money> {
-        let total: Money = self.amounts.values().sum();
+    fn proportions(&self) -> HashMap<&str, f64> {
+        let total = self.amounts.values().sum::<Money>().to_f64();
         self.amounts
             .iter()
-            .map(|(k, v)| (k.as_ref(), v / total))
+            .map(|(k, v)| (k.as_ref(), v.to_f64() / total))
             .collect()
     }
 
     fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, Money> {
         if self.should_split(transaction) {
             self.proportions()
-                .iter()
-                .map(|(k, &v)| (k.to_string(), transaction.amount * v))
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), transaction.amount * v))
                 .collect()
         } else {
             let mut s = HashMap::new();
@@ -86,7 +87,8 @@ impl Reporter for RollingBudget {
         I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let mut report = RollingBudgetReport {
-            budgets: self.amounts.clone(),
+            budgets:      self.amounts.clone(),
+            transactions: Vec::new(),
         };
         let mut month = self.start_date.month();
 
@@ -112,6 +114,7 @@ impl Reporter for RollingBudget {
                         _ => {},
                     }
                 }
+                report.transactions.push(transaction.uid());
             }
         }
         serde_json::to_value(&report).expect("Couldn't serialize")

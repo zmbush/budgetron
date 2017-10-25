@@ -68,6 +68,7 @@ mod multi;
 mod net_worth;
 mod rolling_budget;
 mod only_type;
+mod list;
 
 pub use reporting::by_account::ByAccountReport;
 pub use reporting::by_timeframe::ByTimeframeReport;
@@ -79,3 +80,4 @@ pub use reporting::excluding_tags::ExcludingTags;
 pub use reporting::config::ConfiguredReports;
 pub use reporting::categories::Categories;
 pub use reporting::only_type::OnlyType;
+pub use reporting::list::List;

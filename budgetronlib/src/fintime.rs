@@ -121,6 +121,15 @@ impl Date {
         self.date.month()
     }
 
+    pub fn uid(&self) -> String {
+        format!(
+            "{:04}{:02}{:02}",
+            self.date.year(),
+            self.date.month(),
+            self.date.day()
+        )
+    }
+
     fn move_days(&mut self, days: i64) {
         self.date = self.date + chrono::Duration::days(days);
     }

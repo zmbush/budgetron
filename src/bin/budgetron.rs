@@ -21,7 +21,7 @@ extern crate staticfile;
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, Collator, ConfiguredProcessors, TransferCollator};
-use budgetron::reporting::{ConfiguredReports, Database, Reporter};
+use budgetron::reporting::{ConfiguredReports, Database, List, Reporter};
 use budgetronlib::config;
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -86,10 +86,22 @@ fn main() {
         config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
     let report = (Database, reports).report(cow_transactions.into_iter());
 
+    let cow_transactions = transactions
+        .iter()
+        .map(|t| Cow::Borrowed(t))
+        .collect::<Vec<_>>();
+    let transaction_list = List.report(cow_transactions.into_iter());
+
     if matches.is_present("serve") {
         let mut mount = Mount::new();
         mount.mount("/", staticfile::Static::new(Path::new("web/static")));
         mount.mount("__/data.json", JsonHandler { data: report });
+        mount.mount(
+            "__/transactions.json",
+            JsonHandler {
+                data: transaction_list,
+            },
+        );
         Iron::new(mount).http("0.0.0.0:3000").unwrap();
     }
 }
