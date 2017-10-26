@@ -11,7 +11,6 @@
 extern crate budgetronlib;
 extern crate csv;
 extern crate data_store;
-extern crate handlebars;
 #[macro_use]
 extern crate log;
 extern crate regex;

@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![recursion_limit = "128"]
+#![deny(unused, unused_extern_crates)]
 
 #[macro_use]
 extern crate diesel_codegen;

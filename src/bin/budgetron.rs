@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(unused_extern_crates, unused)]
+#![deny(unused, unused_extern_crates)]
 
 extern crate budgetron;
 extern crate budgetronlib;
