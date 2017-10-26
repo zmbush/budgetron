@@ -91,7 +91,7 @@ impl Collate for Processor {
             Categorize { ref categories } => for transaction in &mut transactions {
                 let cat = &transaction.original_category;
                 for (key, values) in categories {
-                    if key == cat || (values.len() > 0 && values.contains(&cat.to_owned())) {
+                    if key == cat || (!values.is_empty() && values.contains(&cat.to_owned())) {
                         transaction.category = key.clone();
                     }
                 }

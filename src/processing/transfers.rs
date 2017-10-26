@@ -31,7 +31,7 @@ impl Collate for TransferCollator {
             loop {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
                     .filter_map(|j| {
-                        let ref tn = transactions[j];
+                        let tn = &transactions[j];
                         if tn.amount == t.amount && !to_delete.contains(&i)
                             && !to_delete.contains(&j)
                             && !to_update.contains_key(&i)
@@ -55,12 +55,12 @@ impl Collate for TransferCollator {
                     .filter(|&i| transactions[*i].transaction_type.is_debit());
 
                 for debit_ix in debits {
-                    let ref debit = transactions[*debit_ix];
+                    let debit = &transactions[*debit_ix];
                     let credits = candidates
                         .iter()
                         .filter(|&i| transactions[*i].transaction_type.is_credit());
                     for credit_ix in credits {
-                        let ref credit = transactions[*credit_ix];
+                        let credit = &transactions[*credit_ix];
                         if (debit.date - credit.date).abs() < mindelta {
                             found_transfer = (*debit_ix, *credit_ix);
                             mindelta = (debit.date - credit.date).abs();
@@ -69,7 +69,7 @@ impl Collate for TransferCollator {
                 }
 
                 if found_transfer != (0, 0) {
-                    let ref tn = transactions[found_transfer.1];
+                    let tn = &transactions[found_transfer.1];
 
                     to_delete.insert(found_transfer.1);
                     to_update.insert(found_transfer.0, tn.account_name.clone());

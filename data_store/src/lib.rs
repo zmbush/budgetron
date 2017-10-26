@@ -50,7 +50,7 @@ impl Transactions {
         diesel::delete(transactions::table)
             .execute(&self.db)
             .expect("Unable to delete the old transactions table");
-        for group in transactions.into_iter().chunks(1000).into_iter() {
+        for group in &transactions.into_iter().chunks(1000) {
             let group = group.collect::<Vec<models::NewTransaction>>();
             diesel::insert(&group)
                 .into(transactions::table)

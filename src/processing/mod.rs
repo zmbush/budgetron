@@ -36,9 +36,9 @@ impl Collate for Collator {
 
 pub fn collate_all(
     mut transactions: Vec<Transaction>,
-    collators: Vec<Collator>,
+    collators: &[Collator],
 ) -> BResult<Vec<Transaction>> {
-    for ref collator in collators {
+    for collator in collators {
         transactions = collator.collate(transactions)?
     }
     Ok(transactions)

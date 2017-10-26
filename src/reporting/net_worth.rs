@@ -23,10 +23,9 @@ impl Reporter for NetWorth {
         for transaction in transactions {
             *worth
                 .entry(transaction.account_name.clone())
-                .or_insert(Money::zero()) += match transaction.transaction_type {
+                .or_insert_with(Money::zero) += match transaction.transaction_type {
                 TransactionType::Credit => transaction.amount,
-                TransactionType::Debit => -transaction.amount,
-                TransactionType::Transfer => -transaction.amount,
+                TransactionType::Debit | TransactionType::Transfer => -transaction.amount,
             };
             if let TransactionType::Transfer = transaction.transaction_type {
                 *worth
@@ -36,7 +35,7 @@ impl Reporter for NetWorth {
                             .clone()
                             .expect("transfer records should have a transfer_destination_account"),
                     )
-                    .or_insert(Money::zero()) += transaction.amount;
+                    .or_insert_with(Money::zero) += transaction.amount;
             }
         }
 

@@ -23,7 +23,7 @@ impl Reporter for Categories {
         for transaction in transactions {
             *categories
                 .entry(transaction.category.clone())
-                .or_insert(Money::zero()) += match transaction.transaction_type {
+                .or_insert_with(Money::zero) += match transaction.transaction_type {
                 TransactionType::Credit => transaction.amount,
                 TransactionType::Debit => -transaction.amount,
                 _ => Money::zero(),

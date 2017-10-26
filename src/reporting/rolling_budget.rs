@@ -67,16 +67,16 @@ impl RollingBudget {
     }
 
     fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, Money> {
-        let mut splits = HashMap::new();
         if self.should_split(transaction) {
-            splits = self.proportions()
+            self.proportions()
                 .iter()
-                .map(|(k, v)| (k.to_string(), transaction.amount * *v))
-                .collect();
+                .map(|(k, &v)| (k.to_string(), transaction.amount * v))
+                .collect()
         } else {
-            splits.insert(transaction.person.clone(), transaction.amount);
+            let mut s = HashMap::new();
+            s.insert(transaction.person.clone(), transaction.amount);
+            s
         }
-        splits
     }
 }
 
@@ -98,14 +98,14 @@ impl Reporter for RollingBudget {
                         *report
                             .budgets
                             .entry(name.to_string())
-                            .or_insert(Money::zero()) += *amount;
+                            .or_insert_with(Money::zero) += *amount;
                     }
                 }
                 for (name, amount) in self.split_transaction(&transaction) {
                     let entry = report
                         .budgets
                         .entry(name.to_string())
-                        .or_insert(Money::zero());
+                        .or_insert_with(Money::zero);
                     match transaction.transaction_type {
                         TransactionType::Debit => *entry -= amount,
                         TransactionType::Credit => *entry += amount,

@@ -107,11 +107,11 @@ impl Reporter for ConfiguredReports {
             let report_key = report_config
                 .name
                 .to_lowercase()
-                .split(" ")
+                .split(' ')
                 .collect::<Vec<_>>()
                 .join("_");
-            let value = match &report_config.config {
-                &ReportType::RollingBudget {
+            let value = match report_config.config {
+                ReportType::RollingBudget {
                     start_date,
                     ref split,
                     ref amounts,
@@ -119,8 +119,8 @@ impl Reporter for ConfiguredReports {
                     RollingBudget::new_param(start_date, split.clone(), amounts.clone()),
                     transactions.clone(),
                 ),
-                &ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
-                &ReportType::Categories => {
+                ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
+                ReportType::Categories => {
                     report_config.run_report(Categories, transactions.clone())
                 },
             };

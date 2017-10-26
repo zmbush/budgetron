@@ -76,7 +76,7 @@ fn main() {
         config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
     collations.push(Collator::Config(processors));
 
-    let transactions = collate_all(transactions, collations).expect("Unable to collate");
+    let transactions = collate_all(transactions, &collations).expect("Unable to collate");
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
