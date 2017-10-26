@@ -104,7 +104,7 @@ impl<'a> ops::Div<Money> for &'a Money {
 
 impl Money {
     pub fn to_f64(&self) -> f64 {
-        (self.0 as f64) / 10000.0
+        (self.0 as f64) / 10_000.0
     }
 
     pub fn from_f64(v: f64) -> Money {
@@ -112,7 +112,7 @@ impl Money {
     }
 
     pub fn from_i64(v: i64) -> Money {
-        Money(v * 10000)
+        Money(v * 10_000)
     }
 
     pub fn abs(&self) -> Money {
@@ -149,14 +149,14 @@ impl<'de> Visitor<'de> for MoneyVisitor {
     where
         E: de::Error,
     {
-        Ok(Money::from_i64(value as i64))
+        Ok(Money::from_i64(i64::from(value)))
     }
 
     fn visit_i32<E>(self, value: i32) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money::from_i64(value as i64))
+        Ok(Money::from_i64(i64::from(value)))
     }
 
     fn visit_i64<E>(self, value: i64) -> Result<Money, E>
@@ -170,7 +170,7 @@ impl<'de> Visitor<'de> for MoneyVisitor {
     where
         E: de::Error,
     {
-        Ok(Money::from_f64(value as f64))
+        Ok(Money::from_f64(f64::from(value)))
     }
 
     fn visit_f64<E>(self, value: f64) -> Result<Money, E>
@@ -184,7 +184,7 @@ impl<'de> Visitor<'de> for MoneyVisitor {
     where
         E: de::Error,
     {
-        let negative = v.starts_with("(") && v.ends_with(")");
+        let negative = v.starts_with('(') && v.ends_with(')');
         let v = if negative { &v[1..v.len() - 1] } else { v };
         let v = v.replace('$', "").replace(',', "");
         let mut parsed: f64 = v.parse().map_err(|_| E::custom("Could not parse money"))?;

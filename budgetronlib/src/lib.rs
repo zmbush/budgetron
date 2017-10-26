@@ -7,8 +7,8 @@
 // except according to those terms.
 
 extern crate chrono;
-extern crate csv;
 extern crate serde;
+extern crate csv;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;

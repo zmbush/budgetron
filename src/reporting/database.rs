@@ -21,7 +21,7 @@ impl Reporter for Database {
     {
         let db = data_store::Transactions::new_from_env();
         let mut all_transactions = Vec::new();
-        for t in transactions.into_iter() {
+        for t in transactions {
             let t = t.into_owned();
             all_transactions.push(data_store::models::NewTransaction {
                 date: t.date.date.naive_utc(),
@@ -47,7 +47,7 @@ impl Reporter for Database {
             db.set_transactions(all_transactions);
         }
 
-        return Value::Null;
+        Value::Null
     }
 
     fn key(&self) -> Option<String> {

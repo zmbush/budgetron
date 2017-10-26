@@ -7,7 +7,8 @@ services:
   - postgresql
 install:
   - rustup install nightly
-  - rustup run nightly cargo install --force rustfmt-nightly
+  - cargo +nightly install --force rustfmt-nightly
+  - cargo +nightly install --force clippy
   - nvm install 6
   - npm install -g yarn
   - cargo install --force diesel_cli
@@ -19,5 +20,6 @@ before_script:
   - cargo build
 script:
   - (cd web && yarn run webpack)
-  - rustup run nightly rustfmt --write-mode=diff src/lib.rs src/bin/budgetron.rs budgetronlib/src/lib.rs data_store/src/lib.rs
+  - cargo +nightly fmt --all -- --write-mode=diff
+  - cargo +nightly clippy -- -D clippy
   - cargo test

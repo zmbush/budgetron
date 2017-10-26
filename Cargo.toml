@@ -33,3 +33,6 @@ toml = "*"
 iron = "*"
 staticfile = "*"
 mount = "*"
+
+[workspace]
+members = ["budgetronlib", "data_store"]

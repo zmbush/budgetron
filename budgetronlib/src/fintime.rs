@@ -48,12 +48,10 @@ impl fmt::Display for Timeframe {
 
         if f.alternate() {
             write!(f, "{}{}", v, d)
+        } else if v == 1 {
+            write!(f, "{}", name)
         } else {
-            if v == 1 {
-                write!(f, "{}", name)
-            } else {
-                write!(f, "{} {}s", v, name)
-            }
+            write!(f, "{} {}s", v, name)
         }
     }
 }
@@ -129,8 +127,8 @@ impl Date {
 
     fn move_one_month(&mut self, forward: bool) {
         let days = days_in_month(
-            self.date.month() as i64 - if forward { 0 } else { 1 },
-            self.date.year() as i64,
+            i64::from(self.date.month()) - if forward { 0 } else { 1 },
+            i64::from(self.date.year()),
         );
         self.move_days(days * if forward { 1 } else { -1 });
     }
@@ -154,19 +152,19 @@ impl Date {
     }
 
     pub fn align_to_month(&mut self) {
-        let days = self.date.day0() as i64;
+        let days = i64::from(self.date.day0());
         *self -= Days(days);
     }
 
 
     pub fn align_to_quarter(&mut self) {
         self.align_to_month();
-        let months = self.date.month0() as i64 % 3;
+        let months = i64::from(self.date.month0()) % 3;
         *self -= Months(months);
     }
 
     pub fn day_of_week(&self) -> i64 {
-        self.date.weekday().num_days_from_monday() as i64
+        i64::from(self.date.weekday().num_days_from_monday())
     }
 
     pub fn align_to_week(&mut self) {
@@ -310,13 +308,13 @@ impl<'de> de::Visitor<'de> for DateVisitor {
             }
         }
 
-        let val = if value.contains(" ") {
-            value.split(" ").next().expect("Value contains lies")
+        let val = if value.contains(' ') {
+            value.split(' ').next().expect("Value contains lies")
         } else {
             value
         };
 
-        let mut parts = val.split("/");
+        let mut parts = val.split('/');
         let m = get_num!(parts);
         let d = get_num!(parts);
         let y = get_num!(parts);
@@ -339,7 +337,6 @@ impl Serialize for Date {
 #[cfg(test)]
 mod test {
     use super::*;
-    use super::Timeframe::*;
 
     #[test]
     fn test_date() {
@@ -383,14 +380,14 @@ mod test {
     #[test]
     fn test_days_in_month() {
         macro_rules! tests {
-            ($(year $y:expr {
+            ($(year $y:expr => {
                 $($m:expr => $count:expr),*
             }),*) => {{
                 $($(assert!(days_in_month($m, $y) == $count));*);*
             }}
         }
         tests! {
-            year 2016 {
+            year 2016 => {
                 1 => 31,
                 2 => 29,
                 3 => 31,
@@ -404,7 +401,7 @@ mod test {
                 11 => 30,
                 12 => 31
             },
-            year 2015 {
+            year 2015 => {
                 1 => 31,
                 2 => 28,
                 3 => 31,

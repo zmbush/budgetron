@@ -76,7 +76,6 @@ where
         let mut date = transactions
             .get(0)
             .map(|t| t.date)
-            .clone()
             .unwrap_or_else(|| Date::ymd(2000, 1, 1));
 
         match self.timeframe {
@@ -88,7 +87,7 @@ where
         }
 
         let mut by_timeframe = BTreeMap::new();
-        while transactions.len() > 0 {
+        while !transactions.is_empty() {
             let (current, remaining): (Vec<_>, Vec<_>) = transactions
                 .into_iter()
                 .partition(|t| t.date >= date && t.date < date + self.timeframe);
@@ -101,14 +100,13 @@ where
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!(
-            "{}",
+        Some(
             self.timeframe
                 .ly()
                 .to_lowercase()
                 .split_whitespace()
                 .collect::<Vec<_>>()
-                .join("_")
-        ))
+                .join("_"),
+        )
     }
 }
