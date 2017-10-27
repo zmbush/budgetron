@@ -20,6 +20,6 @@ before_script:
   - cargo build
 script:
   - (cd web && yarn run webpack)
+  - cargo +nightly clippy --all -- -D clippy
   - cargo +nightly fmt --all -- --write-mode=diff
-  - cargo +nightly clippy -- -D clippy
   - cargo test
