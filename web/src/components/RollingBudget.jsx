@@ -1,11 +1,12 @@
 import React from 'react';
 import Money from 'components/Money';
 import PropTypes from 'prop-types';
+import Transactions from 'components/Transactions';
 
 export default class RollingBudget extends React.Component {
-  propTypes = {
+  static propTypes = {
     data: PropTypes.object, // eslint-disable-line react/forbid-prop-types
-  }
+  };
 
   renderBudgets() {
     return Object.entries(this.props.data.budgets).map(([person, budget]) => (
@@ -15,31 +16,13 @@ export default class RollingBudget extends React.Component {
     ));
   }
 
-  renderTransactions() {
-    return <table>
-      <tbody>{
-        this.props.data.transactions
-          .map((tid) => this.props.transactions[tid])
-          .sort((a,b) => a.amount - b.amount)
-          .reverse()
-          .map((transaction) => (
-          <tr>
-            <td>{ transaction.person }</td>
-            <td>{ transaction.description }</td>
-            <td>{ transaction.amount }</td>
-            <td>{ transaction.transaction_type }</td>
-            <td>{ transaction.original_description }</td>
-          </tr>
-        ))
-      }</tbody>
-    </table>;
-  }
-
   render() {
     return (
       <div>
         { this.renderBudgets() }
-        { this.renderTransactions() }
+        <Transactions
+          transaction_ids={ this.props.data.transactions }
+          transactions={this.props.transactions} />
       </div>
     );
   }

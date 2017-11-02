@@ -14,6 +14,12 @@ use std::collections::HashMap;
 
 pub struct Categories;
 
+#[derive(Default, Serialize)]
+pub struct CategoryEntry {
+    amount:       Money,
+    transactions: Vec<String>,
+}
+
 impl Reporter for Categories {
     fn report<'a, I>(&self, transactions: I) -> Value
     where
@@ -21,13 +27,15 @@ impl Reporter for Categories {
     {
         let mut categories = HashMap::new();
         for transaction in transactions {
-            *categories
+            let entry: &mut CategoryEntry = categories
                 .entry(transaction.category.clone())
-                .or_insert_with(Money::zero) += match transaction.transaction_type {
+                .or_insert_with(Default::default);
+            entry.amount += match transaction.transaction_type {
                 TransactionType::Credit => transaction.amount,
                 TransactionType::Debit => -transaction.amount,
                 _ => Money::zero(),
-            }
+            };
+            entry.transactions.push(transaction.uid());
         }
 
         serde_json::to_value(categories).expect("Unable to serialize categories")

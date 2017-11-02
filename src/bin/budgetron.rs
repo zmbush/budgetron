@@ -114,7 +114,7 @@ impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHan
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
         Ok(Response::with((
             iron::status::Ok,
-            serde_json::to_string_pretty(&self.data).unwrap(),
+            serde_json::to_string(&self.data).unwrap(),
         )))
     }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import Page from 'components/Page';
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
@@ -40,17 +41,24 @@ export default class ByTimeframe extends React.Component {
       }).sort((a, b) => a[0] - b[0]).reverse();
       if (!this.state.expanded) {
         timeframes = timeframes.slice(0, 4);
-}
+      }
 
-      return <div>
-        <h2>By {this.props.timeframe}</h2>
-        <h3><a onClick={ this.toggleExpanded }>{ this.state.expanded ? 'Collapse' : 'Expand' }</a></h3>
+      let title = this.props.title + " By " + this.props.timeframe;
+      if (this.state.expanded) {
+        title += " ↑";
+      } else {
+        title += " ↓";
+      }
+      return <Page className={ this.props.className } title={ title } onClick={ this.toggleExpanded }>
         { timeframes.map(([date, content]) => {
           return <div key={date}>
-            <b>{ this.printDate(date) }</b> <this.props.Component data={ content } config={ this.props.config }/>
+            <b>{ this.printDate(date) }</b> <this.props.Component
+              data={ content }
+              transactions={ this.props.transactions }
+              config={ this.props.config }/>
           </div>;
         }) }
-      </div>
+      </Page>
     }
     return null;
   }
