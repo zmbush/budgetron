@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use budgetronlib::error::BResult;
 use loading::{Money, Transaction};
 use processing::regex::Regex;
+use processing::TransferCollator;
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredProcessors {
@@ -26,9 +27,12 @@ pub enum Processor {
     AssignOwners {
         owners: HashMap<String, TransactionMatcher>,
     },
+    OverrideOwners { owner_override: Regex },
     AddTags {
         tags: HashMap<String, TransactionMatcher>,
     },
+    HideAccount { hide_accounts: Vec<String> },
+    Transfers { transfer_horizon: usize },
 }
 
 #[derive(Debug, Deserialize)]
@@ -103,12 +107,25 @@ impl Collate for Processor {
                     }
                 }
             },
+            OverrideOwners { ref owner_override } => for transaction in &mut transactions {
+                if let Some(captures) = owner_override.captures(&transaction.notes) {
+                    if let Some(new_owner) = captures.get(1) {
+                        transaction.person = new_owner.as_str().to_owned();
+                    }
+                }
+            },
             AddTags { ref tags } => for transaction in &mut transactions {
                 for (tag, matcher) in tags {
                     if matcher.matches(transaction) {
                         transaction.tags.push(tag.to_owned());
                     }
                 }
+            },
+            HideAccount { ref hide_accounts } => {
+                transactions.retain(|t| !hide_accounts.contains(&t.account_name))
+            },
+            Transfers { transfer_horizon } => {
+                transactions = TransferCollator::new(transfer_horizon).collate(transactions)?;
             },
         }
         Ok(transactions)

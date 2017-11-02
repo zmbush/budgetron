@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use regex;
+use regex::{self, Captures};
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use std::fmt;
 
@@ -46,5 +46,9 @@ impl<'de> Deserialize<'de> for Regex {
 impl Regex {
     pub fn is_match(&self, text: &str) -> bool {
         self.0.is_match(text)
+    }
+
+    pub fn captures<'t>(&self, text: &'t str) -> Option<Captures<'t>> {
+        self.0.captures(text)
     }
 }

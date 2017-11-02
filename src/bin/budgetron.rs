@@ -20,7 +20,7 @@ extern crate mount;
 extern crate staticfile;
 
 use budgetron::loading;
-use budgetron::processing::{collate_all, Collator, ConfiguredProcessors, TransferCollator};
+use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};
 use budgetron::reporting::{ConfiguredReports, Database, List, Reporter};
 use budgetronlib::config;
 use clap::{App, Arg};
@@ -47,15 +47,6 @@ fn main() {
                 .multiple(true),
         )
         .arg(
-            Arg::with_name("transfers")
-                .short("t")
-                .long("transfers")
-                .value_name("HORIZON")
-                .help("The number of transactions to look through to find transfer.")
-                .default_value("100")
-                .takes_value(true),
-        )
-        .arg(
             Arg::with_name("serve")
                 .long("serve")
                 .help("Start server to view reports"),
@@ -68,15 +59,10 @@ fn main() {
         Vec::new()
     };
 
-    let mut collations = Vec::new();
-    if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
-        collations.push(Collator::Transfers(TransferCollator::new(horizon)));
-    }
     let processors: ConfiguredProcessors =
         config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
-    collations.push(Collator::Config(processors));
-
-    let transactions = collate_all(transactions, &collations).expect("Unable to collate");
+    let transactions =
+        collate_all(transactions, &[Collator::Config(processors)]).expect("Unable to collate");
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
