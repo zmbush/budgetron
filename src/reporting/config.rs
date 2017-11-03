@@ -102,7 +102,7 @@ impl Reporter for ConfiguredReports {
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
-        let mut retval = serde_json::map::Map::new();
+        let mut retval = Vec::new();
         for report_config in &self.report {
             let report_key = report_config
                 .name
@@ -127,15 +127,16 @@ impl Reporter for ConfiguredReports {
             let mut report_data = serde_json::map::Map::new();
             report_data.insert("data".to_string(), value);
             report_data.insert(
-                "config".to_string(),
+                "report".to_string(),
                 serde_json::to_value(report_config).expect("Could not write config"),
             );
-            retval.insert(report_key, Value::Object(report_data));
+            report_data.insert("key".to_string(), Value::String(report_key));
+            retval.push(Value::Object(report_data));
         }
-        Value::Object(retval)
+        Value::Array(retval)
     }
 
     fn key(&self) -> Option<String> {
-        None
+        Some("reports".to_owned())
     }
 }

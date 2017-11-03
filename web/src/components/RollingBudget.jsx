@@ -5,7 +5,11 @@ import Transactions from 'components/Transactions';
 
 export default class RollingBudget extends React.Component {
   static propTypes = {
-    data: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+    data: PropTypes.shape({
+      budgets: PropTypes.shape({}),
+      transactions: PropTypes.arrayOf(PropTypes.string),
+    }).isRequired,
+    transactions: PropTypes.shape({}).isRequired,
   };
 
   renderBudgets() {
@@ -21,8 +25,9 @@ export default class RollingBudget extends React.Component {
       <div>
         { this.renderBudgets() }
         <Transactions
-          transaction_ids={ this.props.data.transactions }
-          transactions={this.props.transactions} />
+          transaction_ids={this.props.data.transactions}
+          transactions={this.props.transactions}
+        />
       </div>
     );
   }

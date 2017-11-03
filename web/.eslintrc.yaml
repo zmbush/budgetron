@@ -1,0 +1,7 @@
+extends: "airbnb"
+parser: "babel-eslint"
+plugins: ["react"]
+settings:
+  import/resolver: "webpack"
+env:
+  browser: true

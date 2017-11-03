@@ -70,13 +70,13 @@ fn main() {
 
     let reports: ConfiguredReports =
         config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
-    let report = (Database, reports).report(cow_transactions.into_iter());
+    let report = reports.report(cow_transactions.into_iter());
 
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
-    let transaction_list = List.report(cow_transactions.into_iter());
+    let transaction_list = (List, Database).report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
         let mut mount = Mount::new();

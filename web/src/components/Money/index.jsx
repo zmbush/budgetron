@@ -10,7 +10,7 @@ const Money = (props) => {
     style: 'currency',
     currency: 'USD',
   });
-  return <span className={ styles[className] }>{ dollars }</span>;
+  return <span className={styles[className]}>{ dollars }</span>;
 };
 
 Money.propTypes = {

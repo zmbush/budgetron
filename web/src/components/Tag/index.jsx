@@ -1,8 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import style from './style.scss';
 
-export default class Tag extends React.Component {
-  render() {
-    return <span className={ style.tag }>{ this.props.text }</span>;
-  }
-}
+const Tag = props => <span className={style.tag}>{ props.text }</span>;
+
+Tag.propTypes = {
+  text: PropTypes.string.isRequired,
+};
+
+export default Tag;
