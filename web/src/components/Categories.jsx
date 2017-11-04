@@ -15,7 +15,7 @@ const CategoryEntry = props => [
 
 export default class Categories extends React.Component {
   static propTypes = {
-    config: PropTypes.shape({
+    report: PropTypes.shape({
       only_type: PropTypes.string,
     }).isRequired,
     data: PropTypes.shape({}).isRequired,
@@ -37,7 +37,7 @@ export default class Categories extends React.Component {
   }
 
   render() {
-    const reverse = this.props.config.only_type !== 'Debit';
+    const reverse = this.props.report.only_type !== 'Debit';
     let categories = Object.entries(this.props.data).sort((a, b) => a[1].amount - b[1].amount);
     if (reverse) { categories = categories.reverse(); }
 

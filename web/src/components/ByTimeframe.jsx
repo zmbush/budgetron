@@ -13,14 +13,16 @@ export default class ByTimeframe extends React.Component {
     data: PropTypes.shape({}).isRequired,
     title: PropTypes.string.isRequired,
     transactions: PropTypes.shape({}).isRequired,
-    config: PropTypes.shape({
+    report: PropTypes.shape({
       name: PropTypes.string,
     }).isRequired,
     className: PropTypes.string,
+    count: PropTypes.number,
   };
 
   static defaultProps = {
     className: null,
+    count: 1,
   };
 
   constructor(props) {
@@ -52,15 +54,10 @@ export default class ByTimeframe extends React.Component {
         .map(([dateStr, content]) => [new Date(dateStr), content])
         .sort((a, b) => a[0] - b[0]).reverse();
       if (!this.state.expanded) {
-        timeframes = timeframes.slice(0, 4);
+        timeframes = timeframes.slice(0, this.props.count);
       }
 
-      let title = `${this.props.title} By ${this.props.timeframe}`;
-      if (this.state.expanded) {
-        title += ' ↑';
-      } else {
-        title += ' ↓';
-      }
+      const title = `${this.props.title} By ${this.props.timeframe}`;
       return (
         <Page className={this.props.className} title={title} onClick={this.toggleExpanded}>
           { timeframes.map(([date, content]) => (
@@ -68,7 +65,7 @@ export default class ByTimeframe extends React.Component {
               <b>{ this.printDate(date) }</b> <this.props.Component
                 data={content}
                 transactions={this.props.transactions}
-                config={this.props.config}
+                report={this.props.report}
               />
             </div>
           )) }

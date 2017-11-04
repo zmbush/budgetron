@@ -7,7 +7,7 @@ let data = [];
 let transactions = {};
 const render = () => {
   ReactDOM.render(
-    <Budgetron data={data} transactions={transactions} />,
+    <Budgetron data={data} transactions={transactions.transactions} />,
     document.getElementById('root'),
   );
 };

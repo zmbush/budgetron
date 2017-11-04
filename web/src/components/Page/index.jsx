@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import style from './style.scss';
 
 const Page = props => (
   <div className={props.className}>
-    <button onClick={props.onClick}>Click</button>
-    { props.title ? <h2>{ props.title }</h2> : null }
+    { props.title ? <h2 className={style.title}>{ props.title }</h2> : null }
+    <button className={style.button} onClick={props.onClick}>*</button>
     { props.children }
   </div>
 );
@@ -13,7 +14,7 @@ Page.propTypes = {
   title: PropTypes.string,
   className: PropTypes.string,
   onClick: PropTypes.func,
-  children: PropTypes.element.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 Page.defaultProps = {
