@@ -7,17 +7,17 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: [
-    'babel-polyfill', "./src/entry.jsx"
+    'babel-polyfill', "./web/src/entry.jsx"
   ],
   output: {
-    path: path.resolve('./static'),
+    path: path.resolve('./web/static'),
     filename: 'assets/js/[name]-[chunkhash].js',
     sourceMapFilename: '[file].map'
   },
   devtool: 'source-map',
   resolve: {
     modules: [
-      path.resolve('./src/'),
+      path.resolve('./web/src/'),
       'node_modules'
     ],
     extensions: ['.js', '.jsx']
@@ -25,11 +25,11 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
       {
-        from: './src/images/',
+        from: './web/src/images/',
         to: 'images'
       }
     ]),
-    new HtmlWebpackPlugin({title: 'Budgetron', inject: false, template: './src/index.ejs'}),
+    new HtmlWebpackPlugin({title: 'Budgetron', inject: false, template: './web/src/index.ejs'}),
     new webpack
       .optimize
       .CommonsChunkPlugin({

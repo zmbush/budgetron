@@ -11,3 +11,5 @@ output
 *.rs.bk
 budgetronrc.toml
 .trigger
+node_modules/
+web/static
