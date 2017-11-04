@@ -1,17 +1,22 @@
+// @flow
+
 import React from 'react';
 import Money from 'components/Money';
-import AirbnbPropTypes from 'airbnb-prop-types';
-import BudgetronTypes from 'budgetron-types';
+import type { RollingBudgetData, ReportInfo, Transaction } from 'util/budgetron-types';
 import Transactions from 'components/Transactions';
 
-export default class RollingBudget extends React.Component {
-  static propTypes = {
-    data: BudgetronTypes.RollingBudgetData.isRequired,
-    report: BudgetronTypes.ReportInfo.isRequired,
-    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
-  };
+type Props = {
+  data: RollingBudgetData,
+  report: ReportInfo,
+  transactions: { [uid: string]: Transaction },
+};
 
-  constructor(props) {
+type State = {
+  show: { [person: string]: bool },
+};
+
+export default class RollingBudget extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -19,7 +24,7 @@ export default class RollingBudget extends React.Component {
     };
   }
 
-  toggleTable(person) {
+  toggleTable(person: string) {
     const { show } = this.state;
     show[person] = !show[person];
     this.setState({ show });

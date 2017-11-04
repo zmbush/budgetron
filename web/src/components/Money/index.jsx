@@ -1,8 +1,14 @@
-import PropTypes from 'prop-types';
+// @flow
+
 import React from 'react';
 import styles from './style.scss';
 
-const Money = (props) => {
+type Props = {
+  invert?: bool,
+  amount: string | number,
+};
+
+const Money = (props: Props) => {
   let amount = parseFloat(props.amount);
   if (props.invert) { amount = -amount; }
   const className = (amount > 0) ? 'positive' : 'negative';
@@ -11,11 +17,6 @@ const Money = (props) => {
     currency: 'USD',
   });
   return <span className={styles[className]}>{ dollars }</span>;
-};
-
-Money.propTypes = {
-  invert: PropTypes.bool,
-  amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 Money.defaultProps = {

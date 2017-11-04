@@ -1,27 +1,31 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import style from './style.scss';
+// @flow
 
-const Page = props => (
-  <div className={props.className}>
-    <div className={style.page}>
-      { props.title ? <h2 className={style.title}>{ props.title }</h2> : null }
-      { props.onClick ? <button className={style.button} onClick={props.onClick}>*</button> : null }
-      { props.children }
-    </div>
-  </div>
-);
+import * as React from 'react';
+import { Card, CardTitle, CardActions, CardText } from 'material-ui/Card';
+import { FlatButton } from 'material-ui/FlatButton';
 
-Page.propTypes = {
-  title: PropTypes.string,
-  className: PropTypes.string,
-  onClick: PropTypes.func,
-  children: PropTypes.node.isRequired,
+type Props = {
+  title?: string,
+  onClick?: (e: Event) => void,
+  children: React.Node,
 };
+
+const Page = (props: Props) => (
+  <Card>
+    { props.title
+        ? <CardTitle title={props.title} />
+        : null }
+    { props.onClick
+        ? <CardActions><FlatButton onClick={props.onClick} label="Expand" /></CardActions>
+        : null }
+    <CardText>
+      { props.children }
+    </CardText>
+  </Card>
+);
 
 Page.defaultProps = {
   title: null,
-  className: null,
   onClick: null,
 };
 

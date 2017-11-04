@@ -1,7 +1,8 @@
+// @flow
+
 import React from 'react';
-import PropTypes from 'prop-types';
-import AirbnbPropTypes from 'airbnb-prop-types';
-import BudgetronTypes from 'budgetron-types';
+import type { ComponentType } from 'react';
+import type { ReportData, ReportInfo, Transaction } from 'util/budgetron-types';
 import Page from 'components/Page';
 
 const monthNames = [
@@ -9,23 +10,33 @@ const monthNames = [
   'September', 'October', 'November', 'December',
 ];
 
-export default class ByTimeframe extends React.Component {
-  static propTypes = {
-    timeframe: PropTypes.oneOf(['Year', 'Quarter', 'Month']).isRequired,
-    data: BudgetronTypes.ReportData.isRequired,
-    title: PropTypes.string.isRequired,
-    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
-    report: BudgetronTypes.ReportInfo.isRequired,
-    className: PropTypes.string,
-    count: PropTypes.number,
-  };
+type Props = {
+  timeframe: 'Year' | 'Quarter' | 'Month',
+  data: ReportData,
+  title: string,
+  transactions: { [uid: string]: Transaction },
+  report: ReportInfo,
+  className?: string,
+  count?: number,
+  Component: ComponentType<{
+    data: ReportData,
+    transactions: { [uid: string]: Transaction },
+    report: ReportInfo,
+  }>,
+};
 
+type State = {
+  expanded: bool,
+};
+
+
+export default class ByTimeframe extends React.Component<Props, State> {
   static defaultProps = {
     className: null,
     count: 1,
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -33,7 +44,7 @@ export default class ByTimeframe extends React.Component {
     };
   }
 
-  printDate(date) {
+  printDate(date: Date) {
     if (this.props.timeframe === 'Year') {
       return date.getFullYear();
     } else if (this.props.timeframe === 'Quarter') {
@@ -58,11 +69,12 @@ export default class ByTimeframe extends React.Component {
       }
 
       const title = `${this.props.title} By ${this.props.timeframe}`;
+      const { Component } = this.props;
       return (
         <Page className={this.props.className} title={title} onClick={this.toggleExpanded}>
           { timeframes.map(([date, content]) => (
             <div key={date}>
-              <b>{ this.printDate(date) }</b> <this.props.Component
+              <b>{ this.printDate(date) }</b> <Component
                 data={content}
                 transactions={this.props.transactions}
                 report={this.props.report}

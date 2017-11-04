@@ -1,7 +1,8 @@
+// @flow
+
 import React from 'react';
 import Money from 'components/Money';
-import AirbnbPropTypes from 'airbnb-prop-types';
-import BudgetronTypes from 'budgetron-types';
+import type { ReportInfo, CategoriesData, Transaction } from 'util/budgetron-types';
 import Transactions from 'components/Transactions';
 
 const CategoryEntry = props => [
@@ -14,14 +15,18 @@ const CategoryEntry = props => [
   </tr>,
 ];
 
-export default class Categories extends React.Component {
-  static propTypes = {
-    report: BudgetronTypes.ReportInfo.isRequired,
-    data: BudgetronTypes.CategoriesData.isRequired,
-    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
-  };
+type Props = {
+  report: ReportInfo,
+  data: CategoriesData,
+  transactions: { [uid: string]: Transaction },
+};
 
-  constructor(props) {
+type State = {
+  expanded: { [category: string]: bool },
+};
+
+export default class Categories extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -29,7 +34,7 @@ export default class Categories extends React.Component {
     };
   }
 
-  toggleExpanded(category) {
+  toggleExpanded(category: string) {
     const { expanded } = this.state;
     expanded[category] = !expanded[category];
     this.setState({ expanded });
@@ -37,7 +42,9 @@ export default class Categories extends React.Component {
 
   render() {
     const reverse = this.props.report.only_type !== 'Debit';
-    let categories = Object.entries(this.props.data).sort((a, b) => a[1].amount - b[1].amount);
+    let categories: Array<[string, Transaction]> = Object.entries(this.props.data);
+
+    categories.sort((a, b) => a[1].amount - b[1].amount);
     if (reverse) { categories = categories.reverse(); }
 
     return (

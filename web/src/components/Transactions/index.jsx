@@ -1,9 +1,9 @@
+// @flow
+
 import React from 'react';
 import Money from 'components/Money';
 import Tag from 'components/Tag';
-import PropTypes from 'prop-types';
-import BudgetronTypes from 'budgetron-types';
-import AirbnbPropTypes from 'airbnb-prop-types';
+import type { Transaction } from 'util/budgetron-types';
 import style from './style.scss';
 
 const COLUMNS = {
@@ -43,7 +43,13 @@ const getColumn = (id) => {
   return col;
 };
 
-const DetailsTable = (props) => {
+type DetailsTableProps = {
+  show?: bool,
+  colSpan?: number,
+  transaction: Transaction,
+};
+
+const DetailsTable = (props: DetailsTableProps) => {
   if (!props.show) return null;
   return (
     <tr>
@@ -74,34 +80,32 @@ const DetailsTable = (props) => {
   );
 };
 
-DetailsTable.propTypes = {
-  show: PropTypes.bool,
-  colSpan: PropTypes.number,
-  transaction: BudgetronTypes.Transaction.isRequired,
-};
-
 DetailsTable.defaultProps = {
   show: false,
   colSpan: 1,
 };
 
-export default class Transactions extends React.Component {
-  static propTypes = {
-    columns: PropTypes.arrayOf(PropTypes.string),
-    transaction_ids: PropTypes.arrayOf(PropTypes.string).isRequired,
-    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
+type Props = {
+  columns: Array<string>,
+  transaction_ids: Array<string>,
+  transactions: { [uid: string]: Transaction },
 
-    filter: PropTypes.func,
-    transform: PropTypes.func,
-  };
+  filter: (t: Transaction) => bool,
+  transform: (t: Transaction) => Transaction,
+};
 
+type State = {
+  show: { [uid: string]: bool },
+};
+
+export default class Transactions extends React.Component<Props, State> {
   static defaultProps = {
     columns: ['date', 'amount', 'person', 'description'],
     filter: () => true,
     transform: t => t,
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -109,13 +113,13 @@ export default class Transactions extends React.Component {
     };
   }
 
-  toggleDetails(tid) {
+  toggleDetails(tid: string) {
     const { show } = this.state;
     show[tid] = !show[tid];
     this.setState({ show });
   }
 
-  fetchTransactionDetails(tid) {
+  fetchTransactionDetails(tid: string) {
     if (tid in this.props.transactions) {
       return this.props.transactions[tid];
     }
@@ -151,7 +155,7 @@ export default class Transactions extends React.Component {
     return this.props.columns.map(id => <th key={id}>{ getColumn(id).name }</th>);
   }
 
-  renderRowCells(t) {
+  renderRowCells(t: Transaction) {
     return this.props.columns.map(id => <td key={id}>{ getColumn(id).render(t) }</td>);
   }
 
