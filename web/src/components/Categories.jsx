@@ -1,6 +1,7 @@
 import React from 'react';
 import Money from 'components/Money';
-import PropTypes from 'prop-types';
+import AirbnbPropTypes from 'airbnb-prop-types';
+import BudgetronTypes from 'budgetron-types';
 import Transactions from 'components/Transactions';
 
 const CategoryEntry = props => [
@@ -15,11 +16,9 @@ const CategoryEntry = props => [
 
 export default class Categories extends React.Component {
   static propTypes = {
-    report: PropTypes.shape({
-      only_type: PropTypes.string,
-    }).isRequired,
-    data: PropTypes.shape({}).isRequired,
-    transactions: PropTypes.shape({}).isRequired,
+    report: BudgetronTypes.ReportInfo.isRequired,
+    data: BudgetronTypes.CategoriesData.isRequired,
+    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
   };
 
   constructor(props) {

@@ -6,6 +6,7 @@
   "author": "Zach Bush <zach@zmbush.com>",
   "license": "MIT",
   "dependencies": {
+    "airbnb-prop-types": "^2.8.1",
     "babel-core": "^6.24.0",
     "babel-eslint": "^7.2.1",
     "babel-loader": "^6.4.1",

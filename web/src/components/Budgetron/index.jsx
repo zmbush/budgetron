@@ -5,6 +5,8 @@ import React from 'react';
 import RollingBudget from 'components/RollingBudget';
 import ByTimeframe from 'components/ByTimeframe';
 import PropTypes from 'prop-types';
+import AirbnbPropTypes from 'airbnb-prop-types';
+import BudgetronTypes from 'budgetron-types';
 import Page from 'components/Page';
 import style from './style.scss';
 
@@ -25,32 +27,32 @@ const componentConfig = (type) => {
   return config;
 };
 
-const TimeframeReports = props => (
-  <div className={style.reports}>
-    { props.data.map(({ data, report, key }) => {
-      const timeframeKey = `by_${props.timeframe.toLocaleLowerCase()}`;
-      if (report[timeframeKey]) {
-        return (
-          <ByTimeframe
-            key={key}
-            title={report.name}
-            timeframe={props.timeframe}
-            transactions={props.transactions}
-            report={report}
-            data={data[timeframeKey]}
-            className={style.report}
-            {...componentConfig(report.config.type)}
-          />
-        );
-      }
-      return null;
-    }) }
-  </div>
-);
+const TimeframeReports = (props) => {
+  const timeframeKey = `by_${props.timeframe.toLocaleLowerCase()}`;
+  const reports = props.data.filter(({ report }) => report[timeframeKey]);
+  return (
+    <div className={style.reports}>
+      { reports.map(({ data, report, key }, i) => [
+        (i > 0) ? <div key="spacer" className={style.spacer} /> : null,
+        <ByTimeframe
+          key={key}
+          title={report.name}
+          timeframe={props.timeframe}
+          transactions={props.transactions}
+          report={report}
+          data={data[timeframeKey]}
+          className={style.report}
+          {...componentConfig(report.config.type)}
+        />,
+      ]) }
+    </div>
+  );
+};
 
 TimeframeReports.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  data: PropTypes.arrayOf(BudgetronTypes.Report).isRequired,
   timeframe: PropTypes.oneOf(['Year', 'Quarter', 'Month']).isRequired,
+  transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
 };
 
 const SimpleReports = props => (
@@ -73,11 +75,7 @@ const SimpleReports = props => (
 );
 
 SimpleReports.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape({
-    key: PropTypes.string.isRequired,
-    data: PropTypes.shape({}).isRequired,
-    report: PropTypes.shape({}).isRequired,
-  })).isRequired,
+  data: PropTypes.arrayOf(BudgetronTypes.Report).isRequired,
 };
 
 export default class Budgetron extends React.Component {
@@ -87,19 +85,16 @@ export default class Budgetron extends React.Component {
   };
 
   static propTypes = {
-    data: PropTypes.arrayOf(PropTypes.shape({})),
-    transactions: PropTypes.shape({}),
+    data: PropTypes.arrayOf(BudgetronTypes.Report).isRequired,
+    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
   };
 
   render() {
     return (
       <div>
         <SimpleReports {...this.props} />
-        <hr />
         <TimeframeReports timeframe="Month" {...this.props} />
-        <hr />
         <TimeframeReports timeframe="Quarter" {...this.props} />
-        <hr />
         <TimeframeReports timeframe="Year" {...this.props} />
       </div>
     );

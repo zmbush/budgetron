@@ -1,48 +1,44 @@
 // @flow
 
-var path = require('path');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
-var webpack = require('webpack');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: [
-    'babel-polyfill', "./web/src/entry.jsx"
+    'babel-polyfill', './web/src/entry.jsx',
   ],
   output: {
     path: path.resolve('./web/static'),
     filename: 'assets/js/[name]-[chunkhash].js',
-    sourceMapFilename: '[file].map'
+    sourceMapFilename: '[file].map',
   },
   devtool: 'source-map',
   resolve: {
     modules: [
       path.resolve('./web/src/'),
-      'node_modules'
+      'node_modules',
     ],
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx'],
   },
   plugins: [
     new CopyWebpackPlugin([
       {
         from: './web/src/images/',
-        to: 'images'
-      }
+        to: 'images',
+      },
     ]),
-    new HtmlWebpackPlugin({title: 'Budgetron', inject: false, template: './web/src/index.ejs'}),
+    new HtmlWebpackPlugin({ title: 'Budgetron', inject: false, template: './web/src/index.ejs' }),
     new webpack
       .optimize
       .CommonsChunkPlugin({
         name: 'vendor',
-        minChunks: function(module) {
-          return module.context && module
-            .context
-            .indexOf('node_modules') !== -1;
-        }
+        minChunks: module => module.context && module.context.indexOf('node_modules') !== -1,
       }),
     new webpack
       .optimize
-      .CommonsChunkPlugin({name: 'manifest'})
+      .CommonsChunkPlugin({ name: 'manifest' }),
   ],
   module: {
     rules: [
@@ -53,7 +49,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-              'env', 'react', 'flow'
+              'env', 'react', 'flow',
             ],
             plugins: ['transform-object-rest-spread', 'transform-class-properties'],
           },
@@ -61,17 +57,17 @@ module.exports = {
       }, {
         test: /\.s?css$/,
         use: [{
-          loader: 'style-loader'
+          loader: 'style-loader',
         }, {
           loader: 'css-loader',
           query: {
             modules: true,
-            localIdentName: '[name]_[local]_[hash:base64:5]'
-          }
+            localIdentName: '[path][name]_[local]--[hash:base64:5]',
+          },
         }, {
-          loader: 'sass-loader'
-        }]
-      }
-    ]
-  }
+          loader: 'sass-loader',
+        }],
+      },
+    ],
+  },
 };

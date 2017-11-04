@@ -4,9 +4,11 @@ import style from './style.scss';
 
 const Page = props => (
   <div className={props.className}>
-    { props.title ? <h2 className={style.title}>{ props.title }</h2> : null }
-    <button className={style.button} onClick={props.onClick}>*</button>
-    { props.children }
+    <div className={style.page}>
+      { props.title ? <h2 className={style.title}>{ props.title }</h2> : null }
+      { props.onClick ? <button className={style.button} onClick={props.onClick}>*</button> : null }
+      { props.children }
+    </div>
   </div>
 );
 

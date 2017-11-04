@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import BudgetronTypes from 'budgetron-types';
 import Money from 'components/Money';
 
 const Cashflow = (props) => {
@@ -12,10 +12,7 @@ const Cashflow = (props) => {
 };
 
 Cashflow.propTypes = {
-  data: PropTypes.shape({
-    credit: PropTypes.string,
-    debit: PropTypes.string,
-  }).isRequired,
+  data: BudgetronTypes.CashflowData.isRequired,
 };
 
 export default Cashflow;

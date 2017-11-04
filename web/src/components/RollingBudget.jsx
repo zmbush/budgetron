@@ -1,21 +1,14 @@
 import React from 'react';
 import Money from 'components/Money';
-import PropTypes from 'prop-types';
+import AirbnbPropTypes from 'airbnb-prop-types';
+import BudgetronTypes from 'budgetron-types';
 import Transactions from 'components/Transactions';
 
 export default class RollingBudget extends React.Component {
   static propTypes = {
-    data: PropTypes.shape({
-      budgets: PropTypes.shape({}),
-      transactions: PropTypes.arrayOf(PropTypes.string),
-    }).isRequired,
-    report: PropTypes.shape({
-      config: PropTypes.shape({
-        split: PropTypes.string.isRequired,
-        amounts: PropTypes.shape({}),
-      }).isRequired,
-    }).isRequired,
-    transactions: PropTypes.shape({}).isRequired,
+    data: BudgetronTypes.RollingBudgetData.isRequired,
+    report: BudgetronTypes.ReportInfo.isRequired,
+    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
   };
 
   constructor(props) {

@@ -2,6 +2,8 @@ import React from 'react';
 import Money from 'components/Money';
 import Tag from 'components/Tag';
 import PropTypes from 'prop-types';
+import BudgetronTypes from 'budgetron-types';
+import AirbnbPropTypes from 'airbnb-prop-types';
 import style from './style.scss';
 
 const COLUMNS = {
@@ -75,19 +77,7 @@ const DetailsTable = (props) => {
 DetailsTable.propTypes = {
   show: PropTypes.bool,
   colSpan: PropTypes.number,
-  transaction: PropTypes.shape({
-    date: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    transaction_type: PropTypes.string.isRequired,
-    person: PropTypes.string.isRequired,
-    original_description: PropTypes.string.isRequired,
-    account_name: PropTypes.string.isRequired,
-    labels: PropTypes.string.isRequired,
-    notes: PropTypes.string.isReqiured,
-    transfer_destination_account: PropTypes.string,
-    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  }).isRequired,
+  transaction: BudgetronTypes.Transaction.isRequired,
 };
 
 DetailsTable.defaultProps = {
@@ -99,7 +89,7 @@ export default class Transactions extends React.Component {
   static propTypes = {
     columns: PropTypes.arrayOf(PropTypes.string),
     transaction_ids: PropTypes.arrayOf(PropTypes.string).isRequired,
-    transactions: PropTypes.shape({}).isRequired,
+    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
 
     filter: PropTypes.func,
     transform: PropTypes.func,

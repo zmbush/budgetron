@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import AirbnbPropTypes from 'airbnb-prop-types';
+import BudgetronTypes from 'budgetron-types';
 import Page from 'components/Page';
 
 const monthNames = [
@@ -10,12 +12,10 @@ const monthNames = [
 export default class ByTimeframe extends React.Component {
   static propTypes = {
     timeframe: PropTypes.oneOf(['Year', 'Quarter', 'Month']).isRequired,
-    data: PropTypes.shape({}).isRequired,
+    data: BudgetronTypes.ReportData.isRequired,
     title: PropTypes.string.isRequired,
-    transactions: PropTypes.shape({}).isRequired,
-    report: PropTypes.shape({
-      name: PropTypes.string,
-    }).isRequired,
+    transactions: AirbnbPropTypes.valuesOf(BudgetronTypes.Transaction).isRequired,
+    report: BudgetronTypes.ReportInfo.isRequired,
     className: PropTypes.string,
     count: PropTypes.number,
   };
