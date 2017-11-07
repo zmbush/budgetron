@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Money from 'components/Money';
-import type { ReportInfo, CategoriesData, Transaction } from 'util/budgetron-types';
+import { ReportInfo, CategoriesData, Transaction } from 'util/data';
 import Transactions from 'components/Transactions';
 
 const CategoryEntry = props => [
@@ -18,7 +18,7 @@ const CategoryEntry = props => [
 type Props = {
   report: ReportInfo,
   data: CategoriesData,
-  transactions: { [uid: string]: Transaction },
+  transactions: Map<string, Transaction>,
 };
 
 type State = {
@@ -41,10 +41,10 @@ export default class Categories extends React.Component<Props, State> {
   }
 
   render() {
-    const reverse = this.props.report.only_type !== 'Debit';
-    let categories: Array<[string, Transaction]> = Object.entries(this.props.data);
+    const reverse = this.props.report.onlyType !== 'Debit';
+    let categories = [...this.props.data.data.entries()]
+      .sort((a, b) => parseFloat(a[1].amount) - parseFloat(b[1].amount));
 
-    categories.sort((a, b) => a[1].amount - b[1].amount);
     if (reverse) { categories = categories.reverse(); }
 
     return (

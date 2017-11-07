@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { ComponentType } from 'react';
-import type { ReportData, ReportInfo, Transaction } from 'util/budgetron-types';
+import { ReportInfo, type ReportData, type Transaction } from 'util/data';
 import Page from 'components/Page';
 
 const monthNames = [
@@ -12,13 +12,13 @@ const monthNames = [
 
 type Props = {
   timeframe: 'Year' | 'Quarter' | 'Month',
-  data: ReportData,
+  data: Map<Date, ReportData>,
   title: string,
   transactions: { [uid: string]: Transaction },
   report: ReportInfo,
   className?: string,
   count?: number,
-  Component: ComponentType<{
+  Component: string | ComponentType<{
     data: ReportData,
     transactions: { [uid: string]: Transaction },
     report: ReportInfo,
@@ -61,9 +61,9 @@ export default class ByTimeframe extends React.Component<Props, State> {
 
   render() {
     if (this.props.data) {
-      let timeframes = Object.entries(this.props.data)
-        .map(([dateStr, content]) => [new Date(dateStr), content])
-        .sort((a, b) => a[0] - b[0]).reverse();
+      let timeframes = [...this.props.data.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .reverse();
       if (!this.state.expanded) {
         timeframes = timeframes.slice(0, this.props.count);
       }

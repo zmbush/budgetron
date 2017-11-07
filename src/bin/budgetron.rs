@@ -51,6 +51,15 @@ fn main() {
                 .long("serve")
                 .help("Start server to view reports"),
         )
+        .arg(
+            Arg::with_name("port")
+                .short("p")
+                .value_name("PORT")
+                .long("port")
+                .help("Port to host the server at")
+                .default_value("3000")
+                .takes_value(true),
+        )
         .get_matches();
 
     let transactions = if let Some(files) = matches.values_of("file") {
@@ -88,7 +97,8 @@ fn main() {
                 data: transaction_list,
             },
         );
-        Iron::new(mount).http("0.0.0.0:3000").unwrap();
+        let port = matches.value_of("port").unwrap();
+        Iron::new(mount).http(format!("0.0.0.0:{}", port)).unwrap();
     }
 }
 

@@ -2,21 +2,24 @@
 
 import * as React from 'react';
 import { Card, CardTitle, CardActions, CardText } from 'material-ui/Card';
-import { FlatButton } from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
+import Toggle from 'material-ui/Toggle';
+
+import style from './style.scss';
 
 type Props = {
-  title?: string,
-  onClick?: (e: Event) => void,
+  title: string,
+  onClick?: null | (e: Event) => void,
   children: React.Node,
 };
 
 const Page = (props: Props) => (
-  <Card>
-    { props.title
-        ? <CardTitle title={props.title} />
-        : null }
+  <Card className={style.page}>
+    <CardTitle>
+      { props.title } <Toggle />
+    </CardTitle>
     { props.onClick
-        ? <CardActions><FlatButton onClick={props.onClick} label="Expand" /></CardActions>
+        ? <CardActions><RaisedButton onClick={props.onClick} label="Expand" /></CardActions>
         : null }
     <CardText>
       { props.children }
@@ -25,7 +28,6 @@ const Page = (props: Props) => (
 );
 
 Page.defaultProps = {
-  title: null,
   onClick: null,
 };
 

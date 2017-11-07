@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import type { CashflowData } from 'util/budgetron-types';
+import { CashflowData } from 'util/data';
 import Money from 'components/Money';
 
 type Props = {
@@ -10,9 +10,10 @@ type Props = {
 
 const Cashflow = (props: Props) => {
   const { credit, debit } = props.data;
+  const delta = parseInt(credit, 10) - parseInt(debit, 10);
   return (
     <span>
-      <Money amount={credit} /> - <Money amount={debit} /> = <Money amount={credit - debit} />
+      <Money amount={credit} /> - <Money amount={debit} /> = <Money amount={delta} />
     </span>
   );
 };

@@ -51,7 +51,11 @@ module.exports = {
             presets: [
               'env', 'react', 'flow',
             ],
-            plugins: ['transform-object-rest-spread', 'transform-class-properties'],
+            plugins: [
+              'transform-object-rest-spread',
+              'transform-class-properties',
+              'flow-react-proptypes',
+            ],
           },
         }, 'eslint-loader'],
       }, {

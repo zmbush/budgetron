@@ -24,6 +24,7 @@ pub struct Report {
     #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
     #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
     config: ReportType,
+    #[serde(default)] ui_config: UIConfig,
 
     #[serde(skip_serializing_if = "is_false", default)] by_week:    bool,
     #[serde(skip_serializing_if = "is_false", default)] by_month:   bool,
@@ -45,6 +46,15 @@ pub enum ReportType {
     },
     Cashflow,
     Categories,
+}
+
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub struct UIConfig {
+    #[serde(skip_serializing_if = "is_false", default = "default_true")] show_diff: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 
