@@ -11,8 +11,15 @@ use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::HashMap;
+use reporting::config::ReportOptions;
 
 pub struct Categories;
+
+impl Categories {
+    pub fn with_options(_: ReportOptions) -> Categories {
+        Categories
+    }
+}
 
 #[derive(Default, Serialize)]
 pub struct CategoryEntry {

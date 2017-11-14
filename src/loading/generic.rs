@@ -67,14 +67,15 @@ impl Genericize for Transaction {
 impl Transaction {
     pub fn uid(&self) -> String {
         format!(
-            "{}{}{}",
+            "{}{}{}{}",
             self.date.uid(),
             self.amount.uid(),
             match self.transaction_type {
                 TransactionType::Credit => "C",
                 TransactionType::Debit => "D",
                 TransactionType::Transfer => "T",
-            }
+            },
+            &self.description.get(0..3).unwrap_or("unk"),
         )
     }
 }

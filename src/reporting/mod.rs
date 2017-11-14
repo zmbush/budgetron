@@ -57,18 +57,19 @@ pub trait Reporter: Sized {
 
 pub trait Report: fmt::Display + serde::Serialize {}
 
-mod config;
 mod by_account;
 mod by_timeframe;
-mod excluding_tags;
-mod categories;
 mod cashflow;
+mod categories;
+mod config;
 mod database;
+mod excluding_tags;
+mod list;
 mod multi;
 mod net_worth;
-mod rolling_budget;
 mod only_type;
-mod list;
+mod rolling_budget;
+mod timeseries;
 
 pub use reporting::by_account::ByAccountReport;
 pub use reporting::by_timeframe::ByTimeframeReport;

@@ -1,19 +1,36 @@
 // @flow
 
 import React from 'react';
-import { CashflowData } from 'util/data';
+import { CashflowData, ReportInfo } from 'util/data';
 import Money from 'components/Money';
+import TimeseriesChart from 'components/TimeseriesChart';
 
 type Props = {
   data: CashflowData,
+  report: ReportInfo,
 };
 
 const Cashflow = (props: Props) => {
   const { credit, debit } = props.data;
   const delta = parseInt(credit, 10) - parseInt(debit, 10);
+  if (props.report.uiConfig.showDiff) {
+    return (
+      <span>
+        <Money amount={credit} /> - <Money amount={debit} /> = <Money amount={delta} />
+        { props.data.timeseries ? <TimeseriesChart
+          timeseries={props.data.timeseries}
+          lineNames={['credit', 'debit', 'net']}
+        /> : null }
+      </span>
+    );
+  }
   return (
     <span>
-      <Money amount={credit} /> - <Money amount={debit} /> = <Money amount={delta} />
+      Income: <Money amount={credit} /> Expense: <Money amount={debit} />
+      { props.data.timeseries ? <TimeseriesChart
+        timeseries={props.data.timeseries}
+        lineNames={['credit', 'debit']}
+      /> : null }
     </span>
   );
 };

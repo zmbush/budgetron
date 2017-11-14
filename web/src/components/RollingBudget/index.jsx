@@ -4,6 +4,9 @@ import React from 'react';
 import Money from 'components/Money';
 import { RollingBudgetData, RollingBudgetConfig, ReportInfo, Transaction } from 'util/data';
 import Transactions from 'components/Transactions';
+import TimeseriesChart from 'components/TimeseriesChart';
+
+import style from './style.scss';
 
 type Props = {
   data: RollingBudgetData,
@@ -72,9 +75,17 @@ export default class RollingBudget extends React.Component<Props, State> {
   }
 
   render() {
+    const { timeseries } = this.props.data;
     return (
-      <div>
-        { this.renderBudgets() }
+      <div className={style.main}>
+        <div className={style.data}>
+          { this.renderBudgets() }
+        </div>
+        <TimeseriesChart
+          className={style.graph}
+          timeseries={timeseries}
+          lineNames={[...this.props.report.config.amounts.keys()]}
+        />
       </div>
     );
   }

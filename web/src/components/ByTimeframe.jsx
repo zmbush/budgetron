@@ -71,7 +71,12 @@ export default class ByTimeframe extends React.Component<Props, State> {
       const title = `${this.props.title} By ${this.props.timeframe}`;
       const { Component } = this.props;
       return (
-        <Page className={this.props.className} title={title} onClick={this.toggleExpanded}>
+        <Page
+          className={this.props.className}
+          expanded={this.state.expanded}
+          title={title}
+          onClick={this.toggleExpanded}
+        >
           { timeframes.map(([date, content]) => (
             <div key={date}>
               <b>{ this.printDate(date) }</b> <Component

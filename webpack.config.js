@@ -57,7 +57,7 @@ module.exports = {
               'flow-react-proptypes',
             ],
           },
-        }, 'eslint-loader'],
+        }],
       }, {
         test: /\.s?css$/,
         use: [{

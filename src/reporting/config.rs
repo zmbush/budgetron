@@ -40,17 +40,33 @@ fn is_false(value: &bool) -> bool {
 #[serde(tag = "type")]
 pub enum ReportType {
     RollingBudget {
-        start_date: Date,
-        split:      String,
-        amounts:    HashMap<String, Money>,
+        start_date:                Date,
+        split:                     String,
+        amounts:                   HashMap<String, Money>,
+        #[serde(default)] options: ReportOptions,
     },
-    Cashflow,
-    Categories,
+    Cashflow {
+        #[serde(default)] options: ReportOptions,
+    },
+    Categories {
+        #[serde(default)] options: ReportOptions,
+    },
 }
 
-#[derive(Debug, Deserialize, Serialize, Default)]
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+pub struct ReportOptions {
+    pub include_graph: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UIConfig {
-    #[serde(skip_serializing_if = "is_false", default = "default_true")] show_diff: bool,
+    #[serde(default = "default_true")] show_diff: bool,
+}
+
+impl Default for UIConfig {
+    fn default() -> Self {
+        UIConfig { show_diff: true }
+    }
 }
 
 fn default_true() -> bool {
@@ -125,14 +141,24 @@ impl Reporter for ConfiguredReports {
                     start_date,
                     ref split,
                     ref amounts,
+                    ref options,
                 } => report_config.run_report(
-                    RollingBudget::new_param(start_date, split.clone(), amounts.clone()),
+                    RollingBudget::new_param(
+                        start_date,
+                        split.clone(),
+                        amounts.clone(),
+                        (*options).clone(),
+                    ),
                     transactions.clone(),
                 ),
-                ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
-                ReportType::Categories => {
-                    report_config.run_report(Categories, transactions.clone())
-                },
+                ReportType::Cashflow { ref options } => report_config.run_report(
+                    Cashflow::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
+                ReportType::Categories { ref options } => report_config.run_report(
+                    Categories::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
             };
             let mut report_data = serde_json::map::Map::new();
             report_data.insert("data".to_string(), value);

@@ -40,6 +40,7 @@ pub struct TransactionMatcher {
     account:     Option<Vec<Regex>>,
     description: Option<Vec<Regex>>,
     category:    Option<Vec<Regex>>,
+    note:        Option<Vec<Regex>>,
     range:       Option<MoneyRange>,
 }
 
@@ -60,6 +61,11 @@ impl TransactionMatcher {
         }
         if let Some(ref account) = self.account {
             if account.iter().any(|v| v.is_match(&t.account_name)) {
+                return true;
+            }
+        }
+        if let Some(ref note) = self.note {
+            if note.iter().any(|v| v.is_match(&t.notes)) {
                 return true;
             }
         }

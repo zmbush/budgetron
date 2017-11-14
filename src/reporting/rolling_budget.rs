@@ -12,6 +12,8 @@ use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::HashMap;
+use reporting::timeseries::Timeseries;
+use reporting::config::ReportOptions;
 
 #[derive(Debug, Deserialize)]
 pub struct RollingBudgetConfig {
@@ -23,6 +25,7 @@ pub struct RollingBudget {
     start_date: Date,
     split:      String,
     amounts:    HashMap<String, Money>,
+    options:    ReportOptions,
 }
 
 impl RollingBudget {
@@ -30,11 +33,13 @@ impl RollingBudget {
         start_date: Date,
         split: String,
         amounts: HashMap<String, Money>,
+        options: ReportOptions,
     ) -> RollingBudget {
         RollingBudget {
             start_date,
             split,
             amounts,
+            options,
         }
     }
 
@@ -47,6 +52,9 @@ impl RollingBudget {
 pub struct RollingBudgetReport {
     budgets:      HashMap<String, Money>,
     transactions: Vec<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    timeseries: Option<Timeseries<HashMap<String, Money>>>,
 }
 
 impl RollingBudget {
@@ -89,9 +97,17 @@ impl Reporter for RollingBudget {
         let mut report = RollingBudgetReport {
             budgets:      self.amounts.clone(),
             transactions: Vec::new(),
+            timeseries:   if self.options.include_graph {
+                Some(Timeseries::new())
+            } else {
+                None
+            },
         };
         let mut month = self.start_date.month();
 
+        if let Some(ref mut ts) = report.timeseries {
+            ts.add(self.start_date, self.amounts.clone());
+        }
         for transaction in transactions {
             if self.should_include(&transaction) {
                 if transaction.date.month() != month {
@@ -115,6 +131,9 @@ impl Reporter for RollingBudget {
                     }
                 }
                 report.transactions.push(transaction.uid());
+                if let Some(ref mut ts) = report.timeseries {
+                    ts.add(transaction.date, report.budgets.clone());
+                }
             }
         }
         serde_json::to_value(&report).expect("Couldn't serialize")
