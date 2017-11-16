@@ -42,6 +42,10 @@ export default function TimeseriesChart<T>(props: Props<T>) {
   if (lineNames.length > 10) {
     category = d3.schemeCategory20;
   }
+  if (data.length === 0) {
+    return <div>No Data</div>;
+  }
+
   return (
     <ResponsiveContainer className={className} width={width} height={height}>
       <LineChart data={data}>

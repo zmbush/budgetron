@@ -22,11 +22,13 @@ type Props = {
     data: ReportData,
     transactions: { [uid: string]: Transaction },
     report: ReportInfo,
+    showGraph: bool,
   }>,
 };
 
 type State = {
   expanded: bool,
+  showGraph: Map<Date, bool>,
 };
 
 
@@ -41,6 +43,7 @@ export default class ByTimeframe extends React.Component<Props, State> {
 
     this.state = {
       expanded: false,
+      showGraph: new Map(),
     };
   }
 
@@ -59,6 +62,12 @@ export default class ByTimeframe extends React.Component<Props, State> {
     this.setState({ expanded: !this.state.expanded });
   }
 
+  toggleGraph = (date: Date) => {
+    const { showGraph } = this.state;
+    showGraph.set(date, !showGraph.get(date));
+    this.setState({ showGraph });
+  }
+
   render() {
     if (this.props.data) {
       let timeframes = [...this.props.data.entries()]
@@ -69,11 +78,17 @@ export default class ByTimeframe extends React.Component<Props, State> {
       }
 
       const title = `${this.props.title} By ${this.props.timeframe}`;
-      const { Component } = this.props;
+      const {
+        Component,
+        className,
+        report,
+        transactions,
+      } = this.props;
+      const { showGraph, expanded } = this.state;
       return (
         <Page
-          className={this.props.className}
-          expanded={this.state.expanded}
+          className={className}
+          expanded={expanded}
           title={title}
           onClick={this.toggleExpanded}
         >
@@ -81,8 +96,9 @@ export default class ByTimeframe extends React.Component<Props, State> {
             <div key={date}>
               <b>{ this.printDate(date) }</b> <Component
                 data={content}
-                transactions={this.props.transactions}
-                report={this.props.report}
+                transactions={transactions}
+                report={report}
+                showGraph={!!showGraph.get(date)}
               />
             </div>
           )) }
