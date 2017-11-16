@@ -64,26 +64,28 @@ where
     {
         let (transactions, _): (Vec<_>, Vec<_>) = transactions
             .into_iter()
-            .map(|t| if let TransactionType::Transfer = t.transaction_type {
-                if t.account_name == self.account {
-                    let mut t = t.into_owned();
-                    t.transaction_type = TransactionType::Debit;
-                    t.transfer_destination_account = None;
-                    Cow::Owned(t)
-                } else if *t.transfer_destination_account
-                    .as_ref()
-                    .expect("all transfers should have destinations")
-                    == self.account
-                {
-                    let mut t = t.into_owned();
-                    t.transaction_type = TransactionType::Credit;
-                    t.account_name = t.transfer_destination_account.take().unwrap();
-                    Cow::Owned(t)
+            .map(|t| {
+                if let TransactionType::Transfer = t.transaction_type {
+                    if t.account_name == self.account {
+                        let mut t = t.into_owned();
+                        t.transaction_type = TransactionType::Debit;
+                        t.transfer_destination_account = None;
+                        Cow::Owned(t)
+                    } else if *t.transfer_destination_account
+                        .as_ref()
+                        .expect("all transfers should have destinations")
+                        == self.account
+                    {
+                        let mut t = t.into_owned();
+                        t.transaction_type = TransactionType::Credit;
+                        t.account_name = t.transfer_destination_account.take().unwrap();
+                        Cow::Owned(t)
+                    } else {
+                        t
+                    }
                 } else {
                     t
                 }
-            } else {
-                t
             })
             .partition(|t| t.account_name == self.account);
 

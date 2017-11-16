@@ -17,10 +17,12 @@ impl Reporter for List {
             transactions.last().map(|t| t.date).unwrap_or_default() - Timeframe::Years(1);
         let transaction_map = transactions
             .into_iter()
-            .filter_map(|t| if t.date >= start_date {
-                Some((t.uid(), t))
-            } else {
-                None
+            .filter_map(|t| {
+                if t.date >= start_date {
+                    Some((t.uid(), t))
+                } else {
+                    None
+                }
             })
             .collect::<HashMap<_, _>>();
         serde_json::to_value(&transaction_map).expect("Couldn't serialize")
