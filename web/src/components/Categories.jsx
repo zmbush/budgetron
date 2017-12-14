@@ -51,6 +51,7 @@ export default class Categories extends React.Component<Props, State> {
 
     return (
       <div>
+        <b>Total:</b> <Money amount={this.props.data.total()} invert={!reverse} />
         <table>
           <tbody>
             { categories.map(([category, amount]) => (

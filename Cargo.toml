@@ -26,5 +26,6 @@ env_logger = "*"
 iron = "*"
 mount = "*"
 staticfile = "*"
+toml = "*"
 
 [workspace]

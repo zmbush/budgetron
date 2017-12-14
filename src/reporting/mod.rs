@@ -50,6 +50,10 @@ pub trait Reporter: Sized {
         ExcludingTags::new(self, tags)
     }
 
+    fn only_tags(&self, tags: Vec<String>) -> OnlyTags<Self> {
+        OnlyTags::new(self, tags)
+    }
+
     fn only_type(&self, t: TransactionType) -> OnlyType<Self> {
         OnlyType::new(self, t)
     }
@@ -67,6 +71,7 @@ mod excluding_tags;
 mod list;
 mod multi;
 mod net_worth;
+mod only_tags;
 mod only_type;
 mod rolling_budget;
 mod timeseries;
@@ -74,11 +79,12 @@ mod timeseries;
 pub use reporting::by_account::ByAccountReport;
 pub use reporting::by_timeframe::ByTimeframeReport;
 pub use reporting::cashflow::Cashflow;
-pub use reporting::database::Database;
-pub use reporting::net_worth::NetWorth;
-pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};
-pub use reporting::excluding_tags::ExcludingTags;
-pub use reporting::config::ConfiguredReports;
 pub use reporting::categories::Categories;
-pub use reporting::only_type::OnlyType;
+pub use reporting::config::ConfiguredReports;
+pub use reporting::database::Database;
+pub use reporting::excluding_tags::ExcludingTags;
 pub use reporting::list::List;
+pub use reporting::net_worth::NetWorth;
+pub use reporting::only_tags::OnlyTags;
+pub use reporting::only_type::OnlyType;
+pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};

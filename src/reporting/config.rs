@@ -23,6 +23,7 @@ pub struct Report {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
     #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")] only_tags: Option<Vec<String>>,
     config: ReportType,
     #[serde(default)] ui_config: UIConfig,
 
@@ -61,11 +62,15 @@ pub struct ReportOptions {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UIConfig {
     #[serde(default = "default_true")] show_diff: bool,
+    #[serde(default)] expenses_only:              bool,
 }
 
 impl Default for UIConfig {
     fn default() -> Self {
-        UIConfig { show_diff: true }
+        UIConfig {
+            show_diff:     true,
+            expenses_only: false,
+        }
     }
 }
 
@@ -75,7 +80,7 @@ fn default_true() -> bool {
 
 
 impl Report {
-    fn inner_run_report<'a, I, R>(&self, reporter: R, transactions: I) -> Value
+    fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
@@ -104,22 +109,48 @@ impl Report {
         }
     }
 
-    fn run_report<'a, I, R>(&self, reporter: R, transactions: I) -> Value
+    fn filter_report_only_type<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
-        match (&self.skip_tags, self.only_type) {
-            (&Some(ref tags), Some(t)) => self.inner_run_report(
-                reporter.only_type(t).excluding_tags(tags.clone()),
-                transactions,
-            ),
-            (&Some(ref tags), None) => {
-                self.inner_run_report(reporter.excluding_tags(tags.clone()), transactions)
-            },
-            (&None, Some(t)) => self.inner_run_report(reporter.only_type(t), transactions),
-            (&None, None) => self.inner_run_report(reporter, transactions),
+        if let Some(only_type) = self.only_type {
+            self.inner_run_report(&reporter.only_type(only_type), transactions)
+        } else {
+            self.inner_run_report(reporter, transactions)
         }
+    }
+
+    fn filter_report_only_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        if let Some(ref only_tags) = self.only_tags {
+            self.filter_report_only_type(&reporter.only_tags(only_tags.clone()), transactions)
+        } else {
+            self.filter_report_only_type(reporter, transactions)
+        }
+    }
+
+    fn filter_report_skip_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        if let Some(ref skip_tags) = self.skip_tags {
+            self.filter_report_only_tags(&reporter.excluding_tags(skip_tags.clone()), transactions)
+        } else {
+            self.filter_report_only_tags(reporter, transactions)
+        }
+    }
+
+    fn run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        self.filter_report_skip_tags(reporter, transactions)
     }
 }
 
@@ -143,7 +174,7 @@ impl Reporter for ConfiguredReports {
                     ref amounts,
                     ref options,
                 } => report_config.run_report(
-                    RollingBudget::new_param(
+                    &RollingBudget::new_param(
                         start_date,
                         split.clone(),
                         amounts.clone(),
@@ -152,11 +183,11 @@ impl Reporter for ConfiguredReports {
                     transactions.clone(),
                 ),
                 ReportType::Cashflow { ref options } => report_config.run_report(
-                    Cashflow::with_options((*options).clone()),
+                    &Cashflow::with_options((*options).clone()),
                     transactions.clone(),
                 ),
                 ReportType::Categories { ref options } => report_config.run_report(
-                    Categories::with_options((*options).clone()),
+                    &Categories::with_options((*options).clone()),
                     transactions.clone(),
                 ),
             };

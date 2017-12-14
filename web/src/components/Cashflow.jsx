@@ -13,7 +13,13 @@ type Props = {
 const Cashflow = (props: Props) => {
   const { credit, debit } = props.data;
   const delta = parseInt(credit, 10) - parseInt(debit, 10);
-  if (props.report.uiConfig.showDiff) {
+  if (props.report.uiConfig.expensesOnly) {
+    return (
+      <span>
+        <Money amount={debit} />
+      </span>
+    );
+  } else if (props.report.uiConfig.showDiff) {
     return (
       <span>
         <Money amount={credit} /> - <Money amount={debit} /> = <Money amount={delta} />
@@ -23,8 +29,7 @@ const Cashflow = (props: Props) => {
         /> : null }
       </span>
     );
-  }
-  return (
+  } return (
     <span>
       Income: <Money amount={credit} /> Expense: <Money amount={debit} />
       { props.data.timeseries ? <TimeseriesChart
