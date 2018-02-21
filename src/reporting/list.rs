@@ -14,7 +14,7 @@ impl Reporter for List {
     {
         let transactions = transactions.collect::<Vec<_>>();
         let start_date =
-            transactions.last().map(|t| t.date).unwrap_or_default() - Timeframe::Years(1);
+            transactions.last().map(|t| t.date).unwrap_or_default() - Timeframe::Years(2);
         let transaction_map = transactions
             .into_iter()
             .filter_map(|t| {

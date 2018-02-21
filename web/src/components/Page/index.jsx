@@ -13,28 +13,49 @@ type Props = {
   children: React.Node,
 };
 
-const Page = (props: Props) => (
-  <Card className={style.page}>
-    <CardTitle title={props.title} />
-    { props.onClick ? (
-      <CardText>
-        <Toggle
-          onToggle={props.onClick}
-          toggled={props.expanded}
-          labelPosition="right"
-          label="Expand"
-        />
-      </CardText>
-    ) : null }
-    <CardText>
-      { props.children }
-    </CardText>
-  </Card>
-);
-
-Page.defaultProps = {
-  onClick: null,
-  expanded: null,
+type State = {
+  expanded: bool,
 };
+
+class Page extends React.Component<Props, State> {
+  static defaultProps = {
+    onClick: null,
+    expanded: null,
+  };
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      expanded: false,
+    };
+  }
+
+  render() {
+    return (
+      <Card
+        className={style.page}
+        expanded={this.state.expanded}
+        expandable
+        onExpandChange={expanded => this.setState({ expanded })}
+      >
+        <CardTitle title={this.props.title} actAsExpander />
+        { this.props.onClick ? (
+          <CardText expandable>
+            <Toggle
+              onToggle={this.props.onClick}
+              toggled={this.props.expanded}
+              labelPosition="right"
+              label="Expand"
+            />
+          </CardText>
+        ) : null }
+        <CardText expandable>
+          { this.props.children }
+        </CardText>
+      </Card>
+    );
+  }
+}
 
 export default Page;
