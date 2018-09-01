@@ -23,18 +23,17 @@ pub struct RollingBudgetConfig {
 #[derive(Debug, Deserialize)]
 pub struct RollingBudget {
     start_date: Date,
-    split:      String,
-    amounts:    HashMap<String, Money>,
-    options:    ReportOptions,
+    split: String,
+    amounts: HashMap<String, Money>,
+    options: ReportOptions,
 }
 
 impl RollingBudget {
-    pub fn new_param(
-        start_date: Date,
-        split: String,
-        amounts: HashMap<String, Money>,
-        options: ReportOptions,
-    ) -> RollingBudget {
+    pub fn new_param(start_date: Date,
+                     split: String,
+                     amounts: HashMap<String, Money>,
+                     options: ReportOptions)
+                     -> RollingBudget {
         RollingBudget {
             start_date,
             split,
@@ -50,7 +49,7 @@ impl RollingBudget {
 
 #[derive(Debug, Serialize)]
 pub struct RollingBudgetReport {
-    budgets:      HashMap<String, Money>,
+    budgets: HashMap<String, Money>,
     transactions: Vec<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -63,8 +62,8 @@ impl RollingBudget {
     }
 
     fn should_include(&self, transaction: &Transaction) -> bool {
-        transaction.date >= self.start_date
-            && TransactionType::Transfer != transaction.transaction_type
+        transaction.date >= self.start_date &&
+        TransactionType::Transfer != transaction.transaction_type
     }
 
     fn proportions(&self) -> HashMap<&str, f64> {
@@ -91,13 +90,12 @@ impl RollingBudget {
 
 impl Reporter for RollingBudget {
     fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
+        where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let mut report = RollingBudgetReport {
-            budgets:      self.amounts.clone(),
+            budgets: self.amounts.clone(),
             transactions: Vec::new(),
-            timeseries:   if self.options.include_graph {
+            timeseries: if self.options.include_graph {
                 Some(Timeseries::new())
             } else {
                 None
@@ -114,9 +112,9 @@ impl Reporter for RollingBudget {
                     month = transaction.date.month();
                     for (name, amount) in &self.amounts {
                         *report
-                            .budgets
-                            .entry(name.to_string())
-                            .or_insert_with(Money::zero) += *amount;
+                             .budgets
+                             .entry(name.to_string())
+                             .or_insert_with(Money::zero) += *amount;
                     }
                 }
                 for (name, amount) in self.split_transaction(&transaction) {

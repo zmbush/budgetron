@@ -20,17 +20,17 @@ pub struct Cashflow {
 
 #[derive(Default, Serialize)]
 pub struct CashflowReport {
-    credit:     Money,
-    debit:      Money,
-    net:        Money,
+    credit: Money,
+    debit: Money,
+    net: Money,
     timeseries: Option<Timeseries<CashflowDatum>>,
 }
 
 #[derive(Default, Serialize)]
 pub struct CashflowDatum {
     credit: Money,
-    debit:  Money,
-    net:    Money,
+    debit: Money,
+    net: Money,
 }
 
 impl Cashflow {
@@ -43,16 +43,15 @@ impl CashflowReport {
     fn datum(&self) -> CashflowDatum {
         CashflowDatum {
             credit: self.credit,
-            debit:  self.debit,
-            net:    self.net,
+            debit: self.debit,
+            net: self.net,
         }
     }
 }
 
 impl Reporter for Cashflow {
     fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
+        where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let report = CashflowReport {
             timeseries: if self.options.include_graph {
@@ -92,12 +91,10 @@ impl Reporter for Cashflow {
 
 impl fmt::Display for CashflowReport {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(
-            f,
-            "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
-            self.credit,
-            self.debit,
-            self.credit - self.debit
-        )
+        writeln!(f,
+                 "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
+                 self.credit,
+                 self.debit,
+                 self.credit - self.debit)
     }
 }

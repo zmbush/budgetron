@@ -13,7 +13,7 @@ pub struct Timeseries<V>(Vec<TimeseriesDatum<V>>);
 
 #[derive(Debug, Serialize)]
 pub struct TimeseriesDatum<V> {
-    date:  Date,
+    date: Date,
     value: V,
 }
 

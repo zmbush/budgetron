@@ -13,16 +13,14 @@ use std::borrow::Cow;
 use std::fmt;
 
 pub struct ByAccount<'a, T>
-where
-    T: 'a + Reporter,
+    where T: 'a + Reporter
 {
-    inner:   &'a T,
+    inner: &'a T,
     account: String,
 }
 
 impl<'a, T> ByAccount<'a, T>
-where
-    T: 'a + Reporter,
+    where T: 'a + Reporter
 {
     pub fn new(inner: &'a T, account: String) -> Self {
         ByAccount { inner, account }
@@ -31,13 +29,12 @@ where
 
 #[derive(Debug, Serialize)]
 pub struct ByAccountReport<T> {
-    account:    String,
+    account: String,
     by_account: T,
 }
 
 impl<T> ByAccountReport<T>
-where
-    T: fmt::Display,
+    where T: fmt::Display
 {
     pub fn print(&self) {
         println!("{}", self)
@@ -45,8 +42,7 @@ where
 }
 
 impl<T> fmt::Display for ByAccountReport<T>
-where
-    T: fmt::Display,
+    where T: fmt::Display
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "For the account {}", self.account)?;
@@ -55,27 +51,24 @@ where
 }
 
 impl<'a, T> Reporter for ByAccount<'a, T>
-where
-    T: Reporter,
+    where T: Reporter
 {
     fn report<'b, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'b, Transaction>>,
+        where I: Iterator<Item = Cow<'b, Transaction>>
     {
-        let (transactions, _): (Vec<_>, Vec<_>) = transactions
-            .into_iter()
-            .map(|t| {
-                if let TransactionType::Transfer = t.transaction_type {
-                    if t.account_name == self.account {
-                        let mut t = t.into_owned();
-                        t.transaction_type = TransactionType::Debit;
-                        t.transfer_destination_account = None;
-                        Cow::Owned(t)
-                    } else if *t.transfer_destination_account
-                        .as_ref()
-                        .expect("all transfers should have destinations")
-                        == self.account
-                    {
+        let (transactions, _): (Vec<_>, Vec<_>) =
+            transactions
+                .into_iter()
+                .map(|t| if let TransactionType::Transfer = t.transaction_type {
+                         if t.account_name == self.account {
+                             let mut t = t.into_owned();
+                             t.transaction_type = TransactionType::Debit;
+                             t.transfer_destination_account = None;
+                             Cow::Owned(t)
+                         } else if *t.transfer_destination_account
+                                   .as_ref()
+                                   .expect("all transfers should have destinations") ==
+                              self.account {
                         let mut t = t.into_owned();
                         t.transaction_type = TransactionType::Credit;
                         t.account_name = t.transfer_destination_account.take().unwrap();
@@ -83,11 +76,10 @@ where
                     } else {
                         t
                     }
-                } else {
-                    t
-                }
-            })
-            .partition(|t| t.account_name == self.account);
+                     } else {
+                         t
+                     })
+                .partition(|t| t.account_name == self.account);
 
         let mut retval = serde_json::map::Map::new();
         retval.insert("account".to_owned(), Value::String(self.account.clone()));
@@ -95,8 +87,10 @@ where
             retval.insert(v.to_owned(), self.inner.report(transactions.into_iter()));
         } else {
             match self.inner.report(transactions.into_iter()) {
-                Value::Object(o) => for (k, v) in o {
-                    retval.insert(k, v);
+                Value::Object(o) => {
+                    for (k, v) in o {
+                        retval.insert(k, v);
+                    }
                 },
                 other => {
                     retval.insert("by_account".to_owned(), other);
@@ -107,13 +101,11 @@ where
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!(
-            "for_{}",
-            self.account
-                .to_lowercase()
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join("_")
-        ))
+        Some(format!("for_{}",
+                     self.account
+                         .to_lowercase()
+                         .split_whitespace()
+                         .collect::<Vec<_>>()
+                         .join("_")))
     }
 }

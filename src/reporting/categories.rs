@@ -26,7 +26,7 @@ impl Categories {
 
 #[derive(Default, Serialize)]
 pub struct CategoryEntry {
-    amount:       Money,
+    amount: Money,
     transactions: Vec<String>,
 }
 
@@ -47,8 +47,7 @@ impl CategoriesReport {
 
 impl Reporter for Categories {
     fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
+        where I: Iterator<Item = Cow<'a, Transaction>>
     {
         let mut report = CategoriesReport {
             timeseries: if self.options.include_graph {

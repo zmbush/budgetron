@@ -17,8 +17,7 @@ use std::fmt;
 
 pub trait Reporter: Sized {
     fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone;
+        where I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 
     fn key(&self) -> Option<String>;
 
@@ -57,6 +56,10 @@ pub trait Reporter: Sized {
     fn only_type(&self, t: TransactionType) -> OnlyType<Self> {
         OnlyType::new(self, t)
     }
+
+    fn only_owners(&self, t: Vec<String>) -> OnlyOwners<Self> {
+        OnlyOwners::new(self, t)
+    }
 }
 
 pub trait Report: fmt::Display + serde::Serialize {}
@@ -73,6 +76,7 @@ mod multi;
 mod net_worth;
 mod only_tags;
 mod only_type;
+mod only_owners;
 mod rolling_budget;
 mod timeseries;
 
@@ -85,6 +89,7 @@ pub use reporting::database::Database;
 pub use reporting::excluding_tags::ExcludingTags;
 pub use reporting::list::List;
 pub use reporting::net_worth::NetWorth;
+pub use reporting::only_owners::OnlyOwners;
 pub use reporting::only_tags::OnlyTags;
 pub use reporting::only_type::OnlyType;
 pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};

@@ -1,4 +1,4 @@
-// Copyright 2017 Zachary Bush.
+// Copyright 2018 Zachary Bush.
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
@@ -6,40 +6,40 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use loading::Transaction;
 use reporting::Reporter;
-use std::borrow::Cow;
-use loading::{Transaction, TransactionType};
 use serde_json::Value;
+use std::borrow::Cow;
 
-pub struct OnlyType<'a, T>
+pub struct OnlyOwners<'a, T>
     where T: 'a + Reporter
 {
     inner: &'a T,
-    t: TransactionType,
+    owners: Vec<String>,
 }
 
-impl<'a, T> OnlyType<'a, T>
+impl<'a, T> OnlyOwners<'a, T>
     where T: 'a + Reporter
 {
-    pub fn new(inner: &'a T, t: TransactionType) -> Self {
-        OnlyType { inner, t }
+    pub fn new(inner: &'a T, owners: Vec<String>) -> Self {
+        OnlyOwners { inner, owners }
     }
 }
 
-impl<'a, T> Reporter for OnlyType<'a, T>
+impl<'a, T> Reporter for OnlyOwners<'a, T>
     where T: Reporter
 {
     fn report<'b, I>(&self, transactions: I) -> Value
         where I: Iterator<Item = Cow<'b, Transaction>>
     {
-        let (transactions, _): (Vec<_>, Vec<_>) = transactions
-            .into_iter()
-            .partition(|t| t.transaction_type == self.t);
-
+        let (transactions, _): (Vec<_>, Vec<_>) =
+            transactions
+                .into_iter()
+                .partition(|t| self.owners.iter().any(|owner| t.person == *owner));
         self.inner.report(transactions.into_iter())
     }
 
     fn key(&self) -> Option<String> {
-        Some(format!("only_type_{:?}", self.t))
+        Some(format!("only_owners_{}", self.owners.join("_")))
     }
 }

@@ -10,6 +10,7 @@ output
 *.swm
 *.rs.bk
 budgetronrc.toml
+budgetronrc.old.toml
 .trigger
 node_modules/
 web/static
