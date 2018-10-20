@@ -12,14 +12,17 @@ use loading::Transaction;
 pub mod config;
 mod regex;
 mod transfers;
+mod refunds;
 
 pub enum Collator {
     Transfers(transfers::TransferCollator),
+    Refund(refunds::RefundCollator),
     Config(config::ConfiguredProcessors),
 }
 
 pub use processing::transfers::TransferCollator;
 pub use processing::config::ConfiguredProcessors;
+pub use processing::refunds::RefundCollator;
 
 pub trait Collate {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;
@@ -30,14 +33,14 @@ impl Collate for Collator {
         match *self {
             Collator::Transfers(ref tc) => tc.collate(transactions),
             Collator::Config(ref cfg) => cfg.collate(transactions),
+            Collator::Refund(ref rc) => rc.collate(transactions),
         }
     }
 }
 
-pub fn collate_all(
-    mut transactions: Vec<Transaction>,
-    collators: &[Collator],
-) -> BResult<Vec<Transaction>> {
+pub fn collate_all(mut transactions: Vec<Transaction>,
+                   collators: &[Collator])
+                   -> BResult<Vec<Transaction>> {
     for collator in collators {
         transactions = collator.collate(transactions)?
     }

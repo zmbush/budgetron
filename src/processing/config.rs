@@ -12,6 +12,7 @@ use budgetronlib::error::BResult;
 use loading::{Money, Transaction};
 use processing::regex::Regex;
 use processing::TransferCollator;
+use processing::RefundCollator;
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredProcessors {
@@ -21,36 +22,30 @@ pub struct ConfiguredProcessors {
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Processor {
-    Categorize {
-        categories: HashMap<String, Vec<String>>,
-    },
-    AssignOwners {
-        owners: HashMap<String, TransactionMatcher>,
-    },
+    Categorize { categories: HashMap<String, Vec<String>>, },
+    AssignOwners { owners: HashMap<String, TransactionMatcher>, },
     OverrideOwners { owner_override: Regex },
-    AddTags {
-        tags: HashMap<String, TransactionMatcher>,
-    },
+    AddTags { tags: HashMap<String, TransactionMatcher>, },
     HideAccount { hide_accounts: Vec<String> },
     Transfers { transfer_horizon: usize },
+    Refunds { refund_horizon: usize },
 }
 
 #[derive(Debug, Deserialize)]
 pub struct TransactionMatcher {
-    account:     Option<Vec<Regex>>,
+    account: Option<Vec<Regex>>,
     description: Option<Vec<Regex>>,
-    category:    Option<Vec<Regex>>,
-    note:        Option<Vec<Regex>>,
-    range:       Option<MoneyRange>,
+    category: Option<Vec<Regex>>,
+    note: Option<Vec<Regex>>,
+    range: Option<MoneyRange>,
 }
 
 impl TransactionMatcher {
     fn matches(&self, t: &Transaction) -> bool {
         if let Some(ref description) = self.description {
             if description
-                .iter()
-                .any(|v| v.is_match(&t.original_description))
-            {
+                   .iter()
+                   .any(|v| v.is_match(&t.original_description)) {
                 return true;
             }
         }
@@ -80,7 +75,7 @@ impl TransactionMatcher {
 
 #[derive(Debug, Deserialize)]
 pub struct MoneyRange {
-    low:  Money,
+    low: Money,
     high: Money,
 }
 
@@ -98,32 +93,40 @@ impl Collate for Processor {
     fn collate(&self, mut transactions: Vec<Transaction>) -> BResult<Vec<Transaction>> {
         use self::Processor::*;
         match *self {
-            Categorize { ref categories } => for transaction in &mut transactions {
-                let cat = &transaction.original_category;
-                for (key, values) in categories {
-                    if key == cat || (!values.is_empty() && values.contains(&cat.to_owned())) {
-                        transaction.category = key.clone();
+            Categorize { ref categories } => {
+                for transaction in &mut transactions {
+                    let cat = &transaction.original_category;
+                    for (key, values) in categories {
+                        if key == cat || (!values.is_empty() && values.contains(&cat.to_owned())) {
+                            transaction.category = key.clone();
+                        }
                     }
                 }
             },
-            AssignOwners { ref owners } => for transaction in &mut transactions {
-                for (owner, matcher) in owners {
-                    if matcher.matches(transaction) {
-                        transaction.person = owner.clone();
+            AssignOwners { ref owners } => {
+                for transaction in &mut transactions {
+                    for (owner, matcher) in owners {
+                        if matcher.matches(transaction) {
+                            transaction.person = owner.clone();
+                        }
                     }
                 }
             },
-            OverrideOwners { ref owner_override } => for transaction in &mut transactions {
-                if let Some(captures) = owner_override.captures(&transaction.notes) {
-                    if let Some(new_owner) = captures.get(1) {
-                        transaction.person = new_owner.as_str().to_owned();
+            OverrideOwners { ref owner_override } => {
+                for transaction in &mut transactions {
+                    if let Some(captures) = owner_override.captures(&transaction.notes) {
+                        if let Some(new_owner) = captures.get(1) {
+                            transaction.person = new_owner.as_str().to_owned();
+                        }
                     }
                 }
             },
-            AddTags { ref tags } => for transaction in &mut transactions {
-                for (tag, matcher) in tags {
-                    if matcher.matches(transaction) {
-                        transaction.tags.push(tag.to_owned());
+            AddTags { ref tags } => {
+                for transaction in &mut transactions {
+                    for (tag, matcher) in tags {
+                        if matcher.matches(transaction) {
+                            transaction.tags.push(tag.to_owned());
+                        }
                     }
                 }
             },
@@ -132,6 +135,9 @@ impl Collate for Processor {
             },
             Transfers { transfer_horizon } => {
                 transactions = TransferCollator::new(transfer_horizon).collate(transactions)?;
+            },
+            Refunds { refund_horizon } => {
+                transactions = RefundCollator::new(refund_horizon).collate(transactions)?;
             },
         }
         Ok(transactions)

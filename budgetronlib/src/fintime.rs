@@ -121,13 +121,15 @@ impl Date {
         self.date.month()
     }
 
+    pub fn day(&self) -> u32 {
+        self.date.day()
+    }
+
     pub fn uid(&self) -> String {
-        format!(
-            "{:04}{:02}{:02}",
-            self.date.year(),
-            self.date.month(),
-            self.date.day()
-        )
+        format!("{:04}{:02}{:02}",
+                self.date.year(),
+                self.date.month(),
+                self.date.day())
     }
 
     fn move_days(&mut self, days: i64) {
@@ -135,10 +137,8 @@ impl Date {
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(
-            i64::from(self.date.month()) - if forward { 0 } else { 1 },
-            i64::from(self.date.year()),
-        );
+        let days = days_in_month(i64::from(self.date.month()) - if forward { 0 } else { 1 },
+                                 i64::from(self.date.year()));
         self.move_days(days * if forward { 1 } else { -1 });
     }
 
@@ -187,9 +187,7 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date {
-            date: chrono::Utc.ymd(y, m as u32, d as u32),
-        }
+        Date { date: chrono::Utc.ymd(y, m as u32, d as u32) }
     }
 
     pub fn year(&self) -> i32 {

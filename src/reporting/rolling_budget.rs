@@ -108,6 +108,10 @@ impl Reporter for RollingBudget {
         }
         for transaction in transactions {
             if self.should_include(&transaction) {
+                if transaction.date.month() == 8 && transaction.date.year() == 2018 &&
+                   transaction.date.day() == 10 {
+                    println!("LORG::: {:?}", transaction);
+                }
                 if transaction.date.month() != month {
                     month = transaction.date.month();
                     for (name, amount) in &self.amounts {

@@ -75,7 +75,7 @@ impl Transaction {
                 TransactionType::Debit => "D",
                 TransactionType::Transfer => "T",
             },
-            &self.description.get(0..3).unwrap_or("unk"),
+            &self.description,
         )
     }
 }
