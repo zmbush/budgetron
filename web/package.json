@@ -40,7 +40,7 @@
     "prop-types": "^15.5.8",
     "re-base": "^2.7.0",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0",
+    "react-dom": "^16.8.6",
     "react-router-dom": "^4.0.0",
     "react-tap-event-plugin": "^2.0.1",
     "sass-loader": "^6.0.3",
