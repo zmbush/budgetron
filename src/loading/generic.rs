@@ -39,6 +39,7 @@ impl TransactionType {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Transaction {
+    pub uid: Option<String>,
     pub date: Date,
     pub description: String,
     pub amount: Money,

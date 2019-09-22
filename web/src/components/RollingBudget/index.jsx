@@ -17,7 +17,7 @@ type Props = {
 };
 
 type State = {
-  show: { [person: string]: bool },
+  show: string,
 };
 
 export default class RollingBudget extends React.Component<Props, State> {
@@ -25,14 +25,16 @@ export default class RollingBudget extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      show: {},
+      show: '',
     };
   }
 
   toggleTable(person: string) {
-    const { show } = this.state;
-    show[person] = !show[person];
-    this.setState({ show });
+    if (this.state.show === person) {
+      this.setState({ show: '' });
+    } else {
+      this.setState({ show: person });
+    }
   }
 
   proportions() {
@@ -52,7 +54,7 @@ export default class RollingBudget extends React.Component<Props, State> {
           <button onClick={() => this.toggleTable(person)}>
             {person}
           </button>: <Money amount={budget} />
-          { (this.state.show[person]) ? <Transactions
+          { (this.state.show === person) ? <Transactions
             transaction_ids={this.props.data.transactions}
             transactions={this.props.transactions}
             filter={([, t]) => t.person === person || t.person === this.props.report.config.split}
@@ -76,6 +78,15 @@ export default class RollingBudget extends React.Component<Props, State> {
 
   render() {
     const { timeseries } = this.props.data;
+    let lineNames = [...this.props.report.config.amounts.keys()];
+    if (this.state.show !== '') {
+      lineNames = [...this.props.report.config.amounts.keys()].map((k) => {
+        if (k === this.state.show) {
+          return k;
+        }
+        return null;
+      });
+    }
     return (
       <div className={style.main}>
         <div className={style.data}>
@@ -84,7 +95,7 @@ export default class RollingBudget extends React.Component<Props, State> {
         <TimeseriesChart
           className={style.graph}
           timeseries={timeseries}
-          lineNames={[...this.props.report.config.amounts.keys()]}
+          lineNames={lineNames}
         />
       </div>
     );

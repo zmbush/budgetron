@@ -31,38 +31,39 @@ impl Into<TransactionType> for AlliantTransactionType {
 
 #[derive(Debug, Deserialize)]
 pub struct AlliantExport {
-    id:               String,
-    account_id:       i64,
-    reference_id:     i64,
+    id: String,
+    account_id: i64,
+    reference_id: i64,
     transaction_type: AlliantTransactionType,
-    amount:           Money,
-    posted_at:        Date,
-    created_at:       Date,
-    nickname:         String,
-    original_name:    String,
-    merchant_id:      String,
-    updated_at:       Date,
-    check_number:     Option<i32>,
-    account_name:     String,
-    tags:             String,
+    amount: Money,
+    posted_at: Date,
+    created_at: Date,
+    nickname: String,
+    original_name: String,
+    merchant_id: String,
+    updated_at: Date,
+    check_number: Option<i32>,
+    account_name: String,
+    tags: String,
 }
 
 impl Genericize for AlliantExport {
     fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
-            date: self.posted_at,
-            person: "".to_owned(),
-            description: self.nickname,
-            original_description: self.original_name,
-            amount: self.amount,
-            transaction_type: self.transaction_type.into(),
-            category: self.tags.clone(),
-            original_category: self.tags,
-            account_name: self.account_name,
-            labels: "".to_owned(),
-            notes: "".to_owned(),
-            transfer_destination_account: None,
-            tags: vec![],
-        })
+               uid: Some(self.id),
+               date: self.posted_at,
+               person: "".to_owned(),
+               description: self.nickname,
+               original_description: self.original_name,
+               amount: self.amount,
+               transaction_type: self.transaction_type.into(),
+               category: self.tags.clone(),
+               original_category: self.tags,
+               account_name: self.account_name,
+               labels: "".to_owned(),
+               notes: "".to_owned(),
+               transfer_destination_account: None,
+               tags: vec![],
+           })
     }
 }

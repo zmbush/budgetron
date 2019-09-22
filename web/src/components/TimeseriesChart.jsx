@@ -5,6 +5,7 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
+  ReferenceLine,
   CartesianGrid,
   Tooltip,
   Legend,
@@ -46,6 +47,8 @@ export default function TimeseriesChart<T>(props: Props<T>) {
     return <div>No Data</div>;
   }
 
+
+
   return (
     <ResponsiveContainer className={className} width={width} height={height}>
       <LineChart data={data}>
@@ -72,6 +75,7 @@ export default function TimeseriesChart<T>(props: Props<T>) {
             dot={data.length > 200 ? false : undefined}
           />
         )) }
+        <ReferenceLine y={0} stroke="red" />
       </LineChart>
     </ResponsiveContainer>
   );

@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::str::FromStr;
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use serde::ser::{Serialize, Serializer};
-use std::fmt;
 use serde_json;
-use std::ops;
+use std::fmt;
 use std::iter;
+use std::ops;
+use std::str::FromStr;
 
 #[derive(Debug, Copy, PartialEq, Clone, Eq, PartialOrd, Ord, Default)]
 pub struct Money(i64);
@@ -92,6 +92,13 @@ impl ops::Mul<f64> for Money {
     type Output = Money;
     fn mul(self, other: f64) -> Money {
         Money::from_f64(self.to_f64() * other)
+    }
+}
+
+impl ops::Mul<i32> for Money {
+    type Output = Money;
+    fn mul(self, other: i32) -> Money {
+        self * f64::from(other)
     }
 }
 

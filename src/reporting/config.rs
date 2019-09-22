@@ -21,30 +21,28 @@ pub struct ConfiguredReports {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Report {
     name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    only_type: Option<TransactionType>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    skip_tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    only_tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    only_owners: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
+    #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")] only_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")] only_owners: Option<Vec<String>>,
     config: ReportType,
-    #[serde(default)]
-    ui_config: UIConfig,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")] old_configs: Vec<HistoricalConfig>,
+    #[serde(default)] ui_config: UIConfig,
 
-    #[serde(skip_serializing_if = "is_false", default)]
-    by_week: bool,
-    #[serde(skip_serializing_if = "is_false", default)]
-    by_month: bool,
-    #[serde(skip_serializing_if = "is_false", default)]
-    by_quarter: bool,
-    #[serde(skip_serializing_if = "is_false", default)]
-    by_year: bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_week: bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_month: bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_quarter: bool,
+    #[serde(skip_serializing_if = "is_false", default)] by_year: bool,
 }
 
 fn is_false(value: &bool) -> bool {
     !value
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HistoricalConfig {
+    end_date: Date,
+    config: ReportType,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -54,16 +52,13 @@ pub enum ReportType {
         start_date: Date,
         split: String,
         amounts: HashMap<String, Money>,
-        #[serde(default)]
-        options: ReportOptions,
+        #[serde(default)] options: ReportOptions,
     },
     Cashflow {
-        #[serde(default)]
-        options: ReportOptions,
+        #[serde(default)] options: ReportOptions,
     },
     Categories {
-        #[serde(default)]
-        options: ReportOptions,
+        #[serde(default)] options: ReportOptions,
     },
 }
 
@@ -74,10 +69,8 @@ pub struct ReportOptions {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UIConfig {
-    #[serde(default = "default_true")]
-    show_diff: bool,
-    #[serde(default)]
-    expenses_only: bool,
+    #[serde(default = "default_true")] show_diff: bool,
+    #[serde(default)] expenses_only: bool,
 }
 
 impl Default for UIConfig {
@@ -93,11 +86,11 @@ fn default_true() -> bool {
     true
 }
 
-
 impl Report {
     fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         let mut retval = serde_json::map::Map::new();
 
@@ -124,8 +117,9 @@ impl Report {
     }
 
     fn filter_report_only_owners<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         if let Some(ref only_owners) = self.only_owners {
             self.inner_run_report(&reporter.only_owners(only_owners.clone()), transactions)
@@ -135,8 +129,9 @@ impl Report {
     }
 
     fn filter_report_only_type<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         if let Some(only_type) = self.only_type {
             self.filter_report_only_owners(&reporter.only_type(only_type), transactions)
@@ -146,8 +141,9 @@ impl Report {
     }
 
     fn filter_report_only_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         if let Some(ref only_tags) = self.only_tags {
             self.filter_report_only_type(&reporter.only_tags(only_tags.clone()), transactions)
@@ -157,8 +153,9 @@ impl Report {
     }
 
     fn filter_report_skip_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         if let Some(ref skip_tags) = self.skip_tags {
             self.filter_report_only_tags(&reporter.excluding_tags(skip_tags.clone()), transactions)
@@ -168,8 +165,9 @@ impl Report {
     }
 
     fn run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-              R: Reporter
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
     {
         self.filter_report_skip_tags(reporter, transactions)
     }
@@ -177,7 +175,8 @@ impl Report {
 
 impl Reporter for ConfiguredReports {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
         let mut retval = Vec::new();
         for report_config in &self.report {
@@ -193,27 +192,30 @@ impl Reporter for ConfiguredReports {
                     ref split,
                     ref amounts,
                     ref options,
-                } => {
-                    report_config.run_report(&RollingBudget::new_param(start_date,
-                                                                       split.clone(),
-                                                                       amounts.clone(),
-                                                                       (*options).clone()),
-                                             transactions.clone())
-                },
-                ReportType::Cashflow { ref options } => {
-                    report_config.run_report(&Cashflow::with_options((*options).clone()),
-                                             transactions.clone())
-                },
-                ReportType::Categories { ref options } => {
-                    report_config.run_report(&Categories::with_options((*options).clone()),
-                                             transactions.clone())
-                },
+                } => report_config.run_report(
+                    &RollingBudget::new_param(
+                        start_date,
+                        split.clone(),
+                        amounts.clone(),
+                        (*options).clone(),
+                    ),
+                    transactions.clone(),
+                ),
+                ReportType::Cashflow { ref options } => report_config.run_report(
+                    &Cashflow::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
+                ReportType::Categories { ref options } => report_config.run_report(
+                    &Categories::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
             };
             let mut report_data = serde_json::map::Map::new();
             report_data.insert("data".to_string(), value);
-            report_data
-                .insert("report".to_string(),
-                        serde_json::to_value(report_config).expect("Could not write config"));
+            report_data.insert(
+                "report".to_string(),
+                serde_json::to_value(report_config).expect("Could not write config"),
+            );
             report_data.insert("key".to_string(), Value::String(report_key));
             retval.push(Value::Object(report_data));
         }

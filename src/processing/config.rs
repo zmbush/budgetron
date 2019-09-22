@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use processing::Collate;
-use std::collections::HashMap;
 use budgetronlib::error::BResult;
 use loading::{Money, Transaction};
 use processing::regex::Regex;
-use processing::TransferCollator;
+use processing::Collate;
 use processing::RefundCollator;
+use processing::TransferCollator;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredProcessors {
@@ -22,13 +22,30 @@ pub struct ConfiguredProcessors {
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Processor {
-    Categorize { categories: HashMap<String, Vec<String>>, },
-    AssignOwners { owners: HashMap<String, TransactionMatcher>, },
-    OverrideOwners { owner_override: Regex },
-    AddTags { tags: HashMap<String, TransactionMatcher>, },
-    HideAccount { hide_accounts: Vec<String> },
-    Transfers { transfer_horizon: usize },
-    Refunds { refund_horizon: usize },
+    Categorize {
+        categories: HashMap<String, Vec<String>>,
+    },
+    AssignOwners {
+        owners: HashMap<String, TransactionMatcher>,
+    },
+    OverrideOwners {
+        owner_override: Regex,
+    },
+    AddTags {
+        tags: HashMap<String, TransactionMatcher>,
+    },
+    HideAccount {
+        hide_accounts: Vec<String>,
+    },
+    HideDescription {
+        hide_description: Vec<Regex>,
+    },
+    Transfers {
+        transfer_horizon: usize,
+    },
+    Refunds {
+        refund_horizon: usize,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -44,8 +61,9 @@ impl TransactionMatcher {
     fn matches(&self, t: &Transaction) -> bool {
         if let Some(ref description) = self.description {
             if description
-                   .iter()
-                   .any(|v| v.is_match(&t.original_description)) {
+                .iter()
+                .any(|v| v.is_match(&t.original_description))
+            {
                 return true;
             }
         }
@@ -79,7 +97,6 @@ pub struct MoneyRange {
     high: Money,
 }
 
-
 impl Collate for ConfiguredProcessors {
     fn collate(&self, mut transactions: Vec<Transaction>) -> BResult<Vec<Transaction>> {
         for p in &self.processor {
@@ -102,7 +119,7 @@ impl Collate for Processor {
                         }
                     }
                 }
-            },
+            }
             AssignOwners { ref owners } => {
                 for transaction in &mut transactions {
                     for (owner, matcher) in owners {
@@ -111,7 +128,7 @@ impl Collate for Processor {
                         }
                     }
                 }
-            },
+            }
             OverrideOwners { ref owner_override } => {
                 for transaction in &mut transactions {
                     if let Some(captures) = owner_override.captures(&transaction.notes) {
@@ -120,7 +137,7 @@ impl Collate for Processor {
                         }
                     }
                 }
-            },
+            }
             AddTags { ref tags } => {
                 for transaction in &mut transactions {
                     for (tag, matcher) in tags {
@@ -129,16 +146,27 @@ impl Collate for Processor {
                         }
                     }
                 }
-            },
+            }
             HideAccount { ref hide_accounts } => {
                 transactions.retain(|t| !hide_accounts.contains(&t.account_name))
-            },
+            }
+            HideDescription {
+                ref hide_description,
+            } => transactions.retain(|t| {
+                for d in hide_description {
+                    if d.is_match(&t.description) {
+                        println!("Deleting transaction because it matches regex: {:?}", t);
+                        return false;
+                    }
+                }
+                true
+            }),
             Transfers { transfer_horizon } => {
                 transactions = TransferCollator::new(transfer_horizon).collate(transactions)?;
-            },
+            }
             Refunds { refund_horizon } => {
                 transactions = RefundCollator::new(refund_horizon).collate(transactions)?;
-            },
+            }
         }
         Ok(transactions)
     }

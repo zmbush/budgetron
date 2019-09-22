@@ -8,12 +8,12 @@
 
 use budgetronlib::fintime::Date;
 use loading::{Money, Transaction, TransactionType};
+use reporting::config::ReportOptions;
+use reporting::timeseries::Timeseries;
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::HashMap;
-use reporting::timeseries::Timeseries;
-use reporting::config::ReportOptions;
 
 #[derive(Debug, Deserialize)]
 pub struct RollingBudgetConfig {
@@ -29,11 +29,12 @@ pub struct RollingBudget {
 }
 
 impl RollingBudget {
-    pub fn new_param(start_date: Date,
-                     split: String,
-                     amounts: HashMap<String, Money>,
-                     options: ReportOptions)
-                     -> RollingBudget {
+    pub fn new_param(
+        start_date: Date,
+        split: String,
+        amounts: HashMap<String, Money>,
+        options: ReportOptions,
+    ) -> RollingBudget {
         RollingBudget {
             start_date,
             split,
@@ -47,9 +48,16 @@ impl RollingBudget {
     }
 }
 
+#[derive(Debug, Serialize, Default)]
+pub struct ExpenseBreakdown {
+    split_transactions: Money,
+    personal_transactions: Money,
+}
+
 #[derive(Debug, Serialize)]
 pub struct RollingBudgetReport {
     budgets: HashMap<String, Money>,
+    breakdown: HashMap<String, ExpenseBreakdown>,
     transactions: Vec<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -62,8 +70,8 @@ impl RollingBudget {
     }
 
     fn should_include(&self, transaction: &Transaction) -> bool {
-        transaction.date >= self.start_date &&
-        TransactionType::Transfer != transaction.transaction_type
+        transaction.date >= self.start_date
+            && TransactionType::Transfer != transaction.transaction_type
     }
 
     fn proportions(&self) -> HashMap<&str, f64> {
@@ -90,10 +98,12 @@ impl RollingBudget {
 
 impl Reporter for RollingBudget {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let mut report = RollingBudgetReport {
             budgets: self.amounts.clone(),
+            breakdown: HashMap::new(),
             transactions: Vec::new(),
             timeseries: if self.options.include_graph {
                 Some(Timeseries::new())
@@ -108,28 +118,48 @@ impl Reporter for RollingBudget {
         }
         for transaction in transactions {
             if self.should_include(&transaction) {
-                if transaction.date.month() == 8 && transaction.date.year() == 2018 &&
-                   transaction.date.day() == 10 {
-                    println!("LORG::: {:?}", transaction);
-                }
                 if transaction.date.month() != month {
+                    let mut count = transaction.date.month() as i32 - month as i32;
+                    if count < 0 {
+                        count += 12;
+                    }
+                    println!("Count: '{}'", count);
                     month = transaction.date.month();
                     for (name, amount) in &self.amounts {
                         *report
-                             .budgets
-                             .entry(name.to_string())
-                             .or_insert_with(Money::zero) += *amount;
+                            .budgets
+                            .entry(name.to_string())
+                            .or_insert_with(Money::zero) += (*amount) * count;
                     }
                 }
+                let split = self.should_split(&transaction);
                 for (name, amount) in self.split_transaction(&transaction) {
                     let entry = report
                         .budgets
                         .entry(name.to_string())
                         .or_insert_with(Money::zero);
+                    let breakdown_entry = report
+                        .breakdown
+                        .entry(name.to_string())
+                        .or_insert_with(Default::default);
                     match transaction.transaction_type {
-                        TransactionType::Debit => *entry -= amount,
-                        TransactionType::Credit => *entry += amount,
-                        _ => {},
+                        TransactionType::Debit => {
+                            *entry -= amount;
+                            if split {
+                                breakdown_entry.split_transactions -= amount;
+                            } else {
+                                breakdown_entry.personal_transactions -= amount;
+                            }
+                        }
+                        TransactionType::Credit => {
+                            *entry += amount;
+                            if split {
+                                breakdown_entry.split_transactions += amount;
+                            } else {
+                                breakdown_entry.personal_transactions += amount;
+                            }
+                        }
+                        _ => {}
                     }
                 }
                 report.transactions.push(transaction.uid());
