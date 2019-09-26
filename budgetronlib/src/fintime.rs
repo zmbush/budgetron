@@ -8,8 +8,8 @@
 
 use self::Timeframe::*;
 use chrono;
-use chrono::Datelike;
 use chrono::offset::TimeZone;
+use chrono::Datelike;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::ops;
@@ -126,10 +126,12 @@ impl Date {
     }
 
     pub fn uid(&self) -> String {
-        format!("{:04}{:02}{:02}",
-                self.date.year(),
-                self.date.month(),
-                self.date.day())
+        format!(
+            "{:04}{:02}{:02}",
+            self.date.year(),
+            self.date.month(),
+            self.date.day()
+        )
     }
 
     fn move_days(&mut self, days: i64) {
@@ -137,8 +139,10 @@ impl Date {
     }
 
     fn move_one_month(&mut self, forward: bool) {
-        let days = days_in_month(i64::from(self.date.month()) - if forward { 0 } else { 1 },
-                                 i64::from(self.date.year()));
+        let days = days_in_month(
+            i64::from(self.date.month()) - if forward { 0 } else { 1 },
+            i64::from(self.date.year()),
+        );
         self.move_days(days * if forward { 1 } else { -1 });
     }
 
@@ -165,7 +169,6 @@ impl Date {
         *self -= Days(days);
     }
 
-
     pub fn align_to_quarter(&mut self) {
         self.align_to_month();
         let months = i64::from(self.date.month0()) % 3;
@@ -187,7 +190,9 @@ impl Date {
     }
 
     pub fn ymd(y: i32, m: i32, d: i32) -> Date {
-        Date { date: chrono::Utc.ymd(y, m as u32, d as u32) }
+        Date {
+            date: chrono::Utc.ymd(y, m as u32, d as u32),
+        }
     }
 
     pub fn year(&self) -> i32 {
@@ -220,7 +225,7 @@ macro_rules! forward_ref_binop {
                 ops::$imp::$method(*self, *other)
             }
         }
-    }
+    };
 }
 
 impl ops::Sub<Timeframe> for Date {
@@ -308,11 +313,11 @@ impl<'de> de::Visitor<'de> for DateVisitor {
                 match $d.next() {
                     Some(s) => match s.parse() {
                         Ok(i) => i,
-                        Err(_) => return error
+                        Err(_) => return error,
                     },
-                    None => return error
+                    None => return error,
                 }
-            }
+            };
         }
 
         let val = if value.contains(' ') {

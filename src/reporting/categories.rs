@@ -7,12 +7,12 @@
 // except according to those terms.
 
 use loading::{Money, Transaction, TransactionType};
+use reporting::config::ReportOptions;
+use reporting::timeseries::Timeseries;
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::HashMap;
-use reporting::config::ReportOptions;
-use reporting::timeseries::Timeseries;
 
 pub struct Categories {
     options: ReportOptions,
@@ -47,7 +47,8 @@ impl CategoriesReport {
 
 impl Reporter for Categories {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let mut report = CategoriesReport {
             timeseries: if self.options.include_graph {

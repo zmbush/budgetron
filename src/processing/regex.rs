@@ -22,18 +22,23 @@ impl<'de> Visitor<'de> for RegexVisitor {
     }
 
     fn visit_str<E>(self, value: &str) -> Result<Regex, E>
-        where E: de::Error
+    where
+        E: de::Error,
     {
         match regex::Regex::new(value) {
             Ok(re) => Ok(Regex(re)),
-            Err(e) => Err(E::custom(format!("Unable to parse `{}` as regex {}", value, e))),
+            Err(e) => Err(E::custom(format!(
+                "Unable to parse `{}` as regex {}",
+                value, e
+            ))),
         }
     }
 }
 
 impl<'de> Deserialize<'de> for Regex {
     fn deserialize<D>(deserializer: D) -> Result<Regex, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         deserializer.deserialize_str(RegexVisitor)
     }

@@ -19,7 +19,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+pub mod error;
 pub mod loading;
 pub mod processing;
 pub mod reporting;
-pub mod error;

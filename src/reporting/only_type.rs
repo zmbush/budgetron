@@ -6,20 +6,22 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reporting::Reporter;
-use std::borrow::Cow;
 use loading::{Transaction, TransactionType};
+use reporting::Reporter;
 use serde_json::Value;
+use std::borrow::Cow;
 
 pub struct OnlyType<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     inner: &'a T,
     t: TransactionType,
 }
 
 impl<'a, T> OnlyType<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     pub fn new(inner: &'a T, t: TransactionType) -> Self {
         OnlyType { inner, t }
@@ -27,10 +29,12 @@ impl<'a, T> OnlyType<'a, T>
 }
 
 impl<'a, T> Reporter for OnlyType<'a, T>
-    where T: Reporter
+where
+    T: Reporter,
 {
     fn report<'b, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'b, Transaction>>
+    where
+        I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let (transactions, _): (Vec<_>, Vec<_>) = transactions
             .into_iter()

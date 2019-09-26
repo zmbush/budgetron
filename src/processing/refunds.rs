@@ -9,8 +9,8 @@
 use budgetronlib::error::BResult;
 use loading::Transaction;
 use processing::Collate;
-use std::collections::HashSet;
 use std::cmp::min;
+use std::collections::HashSet;
 use std::i64;
 
 pub struct RefundCollator {
@@ -31,8 +31,10 @@ impl Collate for RefundCollator {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
                     .filter_map(|j| {
                         let tn = &transactions[j];
-                        if tn.amount == t.amount && !to_delete.contains(&i) &&
-                           !to_delete.contains(&j) {
+                        if tn.amount == t.amount
+                            && !to_delete.contains(&i)
+                            && !to_delete.contains(&j)
+                        {
                             Some(j)
                         } else {
                             None
@@ -58,8 +60,9 @@ impl Collate for RefundCollator {
 
                     for credit_ix in credits {
                         let credit = &transactions[*credit_ix];
-                        if (debit.date - credit.date).abs() < mindelta &&
-                           debit.account_name == credit.account_name {
+                        if (debit.date - credit.date).abs() < mindelta
+                            && debit.account_name == credit.account_name
+                        {
                             found_transfer = (*debit_ix, *credit_ix);
                             mindelta = (debit.date - credit.date).abs();
                         }

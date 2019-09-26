@@ -7,8 +7,8 @@
 // except according to those terms.
 
 use budgetronlib::error::BResult;
-use loading::money::Money;
 use budgetronlib::fintime::Date;
+use loading::money::Money;
 
 #[derive(Debug, Serialize, Copy, Deserialize, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub enum TransactionType {

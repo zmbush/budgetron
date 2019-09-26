@@ -34,16 +34,16 @@ where
 }
 
 struct StdinSource<'a> {
-    buf:   Vec<u8>,
-    loc:   usize,
+    buf: Vec<u8>,
+    loc: usize,
     stdin: StdinLock<'a>,
 }
 
 impl<'a> StdinSource<'a> {
     fn new(stdin: &'a Stdin) -> StdinSource<'a> {
         StdinSource {
-            buf:   Vec::new(),
-            loc:   0,
+            buf: Vec::new(),
+            loc: 0,
             stdin: stdin.lock(),
         }
     }
@@ -62,7 +62,7 @@ impl<'a> Seek for Source<'a> {
                 io::SeekFrom::Start(loc) => {
                     source.loc = loc as usize;
                     Ok(source.loc as u64)
-                },
+                }
                 io::SeekFrom::Current(diff) => {
                     if diff >= 0 {
                         source.loc += diff as usize;
@@ -77,7 +77,7 @@ impl<'a> Seek for Source<'a> {
                     } else {
                         Ok(source.loc as u64)
                     }
-                },
+                }
                 io::SeekFrom::End(_) => Err(io::Error::new(
                     io::ErrorKind::InvalidInput,
                     "Stdin has no end",
@@ -91,24 +91,26 @@ impl<'a> Read for Source<'a> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         match *self {
             Source::File(ref mut f) => f.read(buf),
-            Source::Stdin(ref mut source) => if source.loc >= source.buf.len() {
-                let ret = source.stdin.read(buf);
-                if let Ok(size) = ret {
-                    source.buf.extend_from_slice(&buf[..size]);
-                    source.loc += size;
-                    Ok(size)
+            Source::Stdin(ref mut source) => {
+                if source.loc >= source.buf.len() {
+                    let ret = source.stdin.read(buf);
+                    if let Ok(size) = ret {
+                        source.buf.extend_from_slice(&buf[..size]);
+                        source.loc += size;
+                        Ok(size)
+                    } else {
+                        ret
+                    }
                 } else {
-                    ret
+                    let len = buf.len();
+                    let start = source.loc;
+                    let end = min(start + len, source.buf.len());
+                    let readlen = end - start;
+                    buf[..readlen].copy_from_slice(&source.buf[start..end]);
+                    source.loc = end;
+                    Ok(readlen)
                 }
-            } else {
-                let len = buf.len();
-                let start = source.loc;
-                let end = min(start + len, source.buf.len());
-                let readlen = end - start;
-                buf[..readlen].copy_from_slice(&source.buf[start..end]);
-                source.loc = end;
-                Ok(readlen)
-            },
+            }
         }
     }
 }

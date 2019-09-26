@@ -12,14 +12,16 @@ use serde_json::Value;
 use std::borrow::Cow;
 
 pub struct OnlyOwners<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     inner: &'a T,
     owners: Vec<String>,
 }
 
 impl<'a, T> OnlyOwners<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     pub fn new(inner: &'a T, owners: Vec<String>) -> Self {
         OnlyOwners { inner, owners }
@@ -27,15 +29,16 @@ impl<'a, T> OnlyOwners<'a, T>
 }
 
 impl<'a, T> Reporter for OnlyOwners<'a, T>
-    where T: Reporter
+where
+    T: Reporter,
 {
     fn report<'b, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'b, Transaction>>
+    where
+        I: Iterator<Item = Cow<'b, Transaction>>,
     {
-        let (transactions, _): (Vec<_>, Vec<_>) =
-            transactions
-                .into_iter()
-                .partition(|t| self.owners.iter().any(|owner| t.person == *owner));
+        let (transactions, _): (Vec<_>, Vec<_>) = transactions
+            .into_iter()
+            .partition(|t| self.owners.iter().any(|owner| t.person == *owner));
         self.inner.report(transactions.into_iter())
     }
 

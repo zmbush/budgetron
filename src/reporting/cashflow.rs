@@ -7,12 +7,12 @@
 // except according to those terms.
 
 use loading::{Money, Transaction, TransactionType};
+use reporting::config::ReportOptions;
+use reporting::timeseries::Timeseries;
 use reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::fmt;
-use reporting::config::ReportOptions;
-use reporting::timeseries::Timeseries;
 
 pub struct Cashflow {
     options: ReportOptions,
@@ -51,7 +51,8 @@ impl CashflowReport {
 
 impl Reporter for Cashflow {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let report = CashflowReport {
             timeseries: if self.options.include_graph {
@@ -67,12 +68,12 @@ impl Reporter for Cashflow {
                 TransactionType::Credit => {
                     report.credit += t.amount;
                     report.net += t.amount;
-                },
+                }
                 TransactionType::Debit => {
                     report.debit += t.amount;
                     report.net -= t.amount;
-                },
-                _ => {},
+                }
+                _ => {}
             }
             let datum = report.datum();
             if let Some(ref mut ts) = report.timeseries {
@@ -91,10 +92,12 @@ impl Reporter for Cashflow {
 
 impl fmt::Display for CashflowReport {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f,
-                 "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
-                 self.credit,
-                 self.debit,
-                 self.credit - self.debit)
+        writeln!(
+            f,
+            "In: ${:0.2}  Out: ${:0.2}  Delta: ${:0.2}",
+            self.credit,
+            self.debit,
+            self.credit - self.debit
+        )
     }
 }

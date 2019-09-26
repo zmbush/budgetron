@@ -16,16 +16,16 @@ pub struct NetWorth;
 
 impl Reporter for NetWorth {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>>
+    where
+        I: Iterator<Item = Cow<'a, Transaction>>,
     {
         let mut worth = BTreeMap::new();
         for transaction in transactions {
             *worth
-                 .entry(transaction.account_name.clone())
-                 .or_insert_with(Money::zero) += match transaction.transaction_type {
+                .entry(transaction.account_name.clone())
+                .or_insert_with(Money::zero) += match transaction.transaction_type {
                 TransactionType::Credit => transaction.amount,
-                TransactionType::Debit |
-                TransactionType::Transfer => -transaction.amount,
+                TransactionType::Debit | TransactionType::Transfer => -transaction.amount,
             };
             if let TransactionType::Transfer = transaction.transaction_type {
                 *worth

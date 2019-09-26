@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+pub mod alliant;
 mod generic;
 pub mod logix;
 pub mod mint;
-pub mod alliant;
-mod util;
 mod money;
+mod util;
 
 pub use self::generic::{Transaction, TransactionType};
-pub use self::util::load_from_files;
 pub use self::money::Money;
+pub use self::util::load_from_files;

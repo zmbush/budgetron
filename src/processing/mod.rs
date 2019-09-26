@@ -10,9 +10,9 @@ use budgetronlib::error::BResult;
 use loading::Transaction;
 
 pub mod config;
+mod refunds;
 mod regex;
 mod transfers;
-mod refunds;
 
 pub enum Collator {
     Transfers(transfers::TransferCollator),
@@ -20,9 +20,9 @@ pub enum Collator {
     Config(config::ConfiguredProcessors),
 }
 
-pub use processing::transfers::TransferCollator;
 pub use processing::config::ConfiguredProcessors;
 pub use processing::refunds::RefundCollator;
+pub use processing::transfers::TransferCollator;
 
 pub trait Collate {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;
@@ -38,9 +38,10 @@ impl Collate for Collator {
     }
 }
 
-pub fn collate_all(mut transactions: Vec<Transaction>,
-                   collators: &[Collator])
-                   -> BResult<Vec<Transaction>> {
+pub fn collate_all(
+    mut transactions: Vec<Transaction>,
+    collators: &[Collator],
+) -> BResult<Vec<Transaction>> {
     for collator in collators {
         transactions = collator.collate(transactions)?
     }

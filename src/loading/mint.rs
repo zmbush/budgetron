@@ -46,20 +46,20 @@ pub struct MintExport {
 impl Genericize for MintExport {
     fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
-               uid: None,
-               date: self.date,
-               person: "".to_owned(),
-               description: self.description,
-               original_description: self.original_description,
-               amount: self.amount,
-               transaction_type: self.transaction_type.into(),
-               category: self.category.clone(),
-               original_category: self.category,
-               account_name: self.account_name,
-               labels: self.labels,
-               notes: self.notes,
-               transfer_destination_account: None,
-               tags: vec![],
-           })
+            uid: None,
+            date: self.date,
+            person: "".to_owned(),
+            description: self.description,
+            original_description: self.original_description,
+            amount: self.amount,
+            transaction_type: self.transaction_type.into(),
+            category: self.category.clone(),
+            original_category: self.category,
+            account_name: self.account_name,
+            labels: self.labels,
+            notes: self.notes,
+            transfer_destination_account: None,
+            tags: vec![],
+        })
     }
 }

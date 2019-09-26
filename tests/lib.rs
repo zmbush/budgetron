@@ -9,9 +9,9 @@
 extern crate budgetron;
 extern crate budgetronlib;
 
-use budgetronlib::config;
 use budgetron::processing::ConfiguredProcessors;
 use budgetron::reporting::ConfiguredReports;
+use budgetronlib::config;
 
 #[test]
 fn test_loading_budgetronrc_example() {

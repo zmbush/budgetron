@@ -26,24 +26,24 @@ pub struct LogixExport {
 impl Genericize for LogixExport {
     fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
-               uid: None,
-               date: self.date,
-               person: "".to_owned(),
-               description: self.description.clone(),
-               original_description: self.description,
-               amount: self.amount.abs(),
-               transaction_type: if self.amount.is_negative() {
-                   TransactionType::Debit
-               } else {
-                   TransactionType::Credit
-               },
-               category: self.category.clone(),
-               original_category: self.category,
-               account_name: self.account,
-               labels: self.memo,
-               notes: self.notes,
-               transfer_destination_account: None,
-               tags: vec![],
-           })
+            uid: None,
+            date: self.date,
+            person: "".to_owned(),
+            description: self.description.clone(),
+            original_description: self.description,
+            amount: self.amount.abs(),
+            transaction_type: if self.amount.is_negative() {
+                TransactionType::Debit
+            } else {
+                TransactionType::Credit
+            },
+            category: self.category.clone(),
+            original_category: self.category,
+            account_name: self.account,
+            labels: self.memo,
+            notes: self.notes,
+            transfer_destination_account: None,
+            tags: vec![],
+        })
     }
 }

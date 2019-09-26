@@ -8,8 +8,8 @@
 
 use loading::Transaction;
 use reporting::Reporter;
-use serde_json::Value;
 use serde_json::map::Map;
+use serde_json::Value;
 use std::borrow::Cow;
 
 macro_rules! tuple_impls {

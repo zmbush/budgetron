@@ -50,20 +50,20 @@ pub struct AlliantExport {
 impl Genericize for AlliantExport {
     fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
-               uid: Some(self.id),
-               date: self.posted_at,
-               person: "".to_owned(),
-               description: self.nickname,
-               original_description: self.original_name,
-               amount: self.amount,
-               transaction_type: self.transaction_type.into(),
-               category: self.tags.clone(),
-               original_category: self.tags,
-               account_name: self.account_name,
-               labels: "".to_owned(),
-               notes: "".to_owned(),
-               transfer_destination_account: None,
-               tags: vec![],
-           })
+            uid: Some(self.id),
+            date: self.posted_at,
+            person: "".to_owned(),
+            description: self.nickname,
+            original_description: self.original_name,
+            amount: self.amount,
+            transaction_type: self.transaction_type.into(),
+            category: self.tags.clone(),
+            original_category: self.tags,
+            account_name: self.account_name,
+            labels: "".to_owned(),
+            notes: "".to_owned(),
+            transfer_destination_account: None,
+            tags: vec![],
+        })
     }
 }

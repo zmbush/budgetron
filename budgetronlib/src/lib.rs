@@ -15,6 +15,6 @@ extern crate serde;
 extern crate serde_derive;
 extern crate toml;
 
-pub mod fintime;
 pub mod config;
 pub mod error;
+pub mod fintime;

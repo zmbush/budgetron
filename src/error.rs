@@ -17,7 +17,6 @@ pub enum Error {
 
 pub type Result<T> = ::std::result::Result<T, Error>;
 
-
 impl From<io::Error> for Error {
     fn from(e: io::Error) -> Error {
         Error::IO(e)

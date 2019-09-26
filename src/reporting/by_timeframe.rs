@@ -15,14 +15,16 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 pub struct ByTimeframe<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     inner: &'a T,
     timeframe: Timeframe,
 }
 
 impl<'a, T> ByTimeframe<'a, T>
-    where T: 'a + Reporter
+where
+    T: 'a + Reporter,
 {
     pub fn new(inner: &'a T, timeframe: Timeframe) -> Self {
         ByTimeframe { inner, timeframe }
@@ -36,7 +38,8 @@ pub struct ByTimeframeReport<T> {
 }
 
 impl<T> ByTimeframeReport<T>
-    where T: fmt::Display
+where
+    T: fmt::Display,
 {
     pub fn print(&self) {
         println!("{}", self)
@@ -44,14 +47,17 @@ impl<T> ByTimeframeReport<T>
 }
 
 impl<T> fmt::Display for ByTimeframeReport<T>
-    where T: fmt::Display
+where
+    T: fmt::Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (key, value) in &self.by_timeframe {
-            writeln!(f,
-                     "For the transactions in {}-{}",
-                     key,
-                     key + self.timeframe - Timeframe::Days(1))?;
+            writeln!(
+                f,
+                "For the transactions in {}-{}",
+                key,
+                key + self.timeframe - Timeframe::Days(1)
+            )?;
             writeln!(f, "{}", value)?;
         }
         Ok(())
@@ -59,10 +65,12 @@ impl<T> fmt::Display for ByTimeframeReport<T>
 }
 
 impl<'a, T> Reporter for ByTimeframe<'a, T>
-    where T: Reporter
+where
+    T: Reporter,
 {
     fn report<'b, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'b, Transaction>>
+    where
+        I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let mut transactions: Vec<_> = transactions.collect();
         let mut date = transactions
@@ -71,7 +79,7 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
             .unwrap_or_else(|| Date::ymd(2000, 1, 1));
 
         match self.timeframe {
-            Timeframe::Days(_) => {},
+            Timeframe::Days(_) => {}
             Timeframe::Weeks(_) => date.align_to_week(),
             Timeframe::Months(_) => date.align_to_month(),
             Timeframe::Quarters(_) => date.align_to_quarter(),
@@ -80,10 +88,9 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
 
         let mut by_timeframe = BTreeMap::new();
         while !transactions.is_empty() {
-            let (current, remaining): (Vec<_>, Vec<_>) =
-                transactions
-                    .into_iter()
-                    .partition(|t| t.date >= date && t.date < date + self.timeframe);
+            let (current, remaining): (Vec<_>, Vec<_>) = transactions
+                .into_iter()
+                .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
             by_timeframe.insert(date, self.inner.report(current.into_iter()));
             date += self.timeframe;
@@ -93,11 +100,13 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
     }
 
     fn key(&self) -> Option<String> {
-        Some(self.timeframe
-                 .ly()
-                 .to_lowercase()
-                 .split_whitespace()
-                 .collect::<Vec<_>>()
-                 .join("_"))
+        Some(
+            self.timeframe
+                .ly()
+                .to_lowercase()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join("_"),
+        )
     }
 }
