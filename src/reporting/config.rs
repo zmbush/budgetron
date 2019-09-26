@@ -6,9 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::{Money, Transaction, TransactionType};
+use crate::reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget};
 use budgetronlib::fintime::Date;
-use loading::{Money, Transaction, TransactionType};
-use reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget};
+use serde_derive::{Deserialize, Serialize};
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -238,6 +239,7 @@ impl Reporter for ConfiguredReports {
                     transactions.clone(),
                 ),
             };
+
             let mut report_data = serde_json::map::Map::new();
             report_data.insert("data".to_string(), value);
             report_data.insert(

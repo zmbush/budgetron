@@ -6,10 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::generic::{Genericize, Transaction, TransactionType};
+use crate::loading::money::Money;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use loading::generic::{Genericize, Transaction, TransactionType};
-use loading::money::Money;
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -7,6 +7,7 @@
 // except according to those terms.
 
 use budgetronlib::fintime::Date;
+use serde_derive::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct Timeseries<V>(Vec<TimeseriesDatum<V>>);

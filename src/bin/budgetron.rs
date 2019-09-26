@@ -6,18 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(unused, unused_extern_crates)]
-
-extern crate budgetron;
-extern crate budgetronlib;
-extern crate clap;
-extern crate env_logger;
-extern crate serde;
-extern crate serde_json;
-
-extern crate iron;
-extern crate mount;
-extern crate staticfile;
+#![deny(unused)]
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};

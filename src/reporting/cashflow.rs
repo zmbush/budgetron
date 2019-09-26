@@ -6,10 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::{Money, Transaction, TransactionType};
-use reporting::config::ReportOptions;
-use reporting::timeseries::Timeseries;
-use reporting::Reporter;
+use crate::loading::{Money, Transaction, TransactionType};
+use crate::reporting::config::ReportOptions;
+use crate::reporting::timeseries::Timeseries;
+use crate::reporting::Reporter;
+use serde_derive::Serialize;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::fmt;

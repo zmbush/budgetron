@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::Transaction;
+use crate::loading::TransactionType;
+use crate::reporting::Reporter;
 use data_store;
-use loading::Transaction;
-use loading::TransactionType;
-use reporting::Reporter;
 use serde_json::Value;
 use std::borrow::Cow;
 
