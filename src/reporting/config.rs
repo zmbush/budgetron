@@ -6,12 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::HashMap;
 use budgetronlib::fintime::Date;
-use reporting::{Cashflow, Categories, Reporter, RollingBudget};
-use std::borrow::Cow;
-use serde_json::{self, Value};
 use loading::{Money, Transaction, TransactionType};
+use reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget};
+use serde_json::{self, Value};
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {
@@ -21,18 +21,28 @@ pub struct ConfiguredReports {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Report {
     name: String,
-    #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
-    #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")] only_tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")] only_owners: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_type: Option<TransactionType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    skip_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_owners: Option<Vec<String>>,
     config: ReportType,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")] old_configs: Vec<HistoricalConfig>,
-    #[serde(default)] ui_config: UIConfig,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    old_configs: Vec<HistoricalConfig>,
+    #[serde(default)]
+    ui_config: UIConfig,
 
-    #[serde(skip_serializing_if = "is_false", default)] by_week: bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_month: bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_quarter: bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_year: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_week: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_month: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_quarter: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_year: bool,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -52,13 +62,22 @@ pub enum ReportType {
         start_date: Date,
         split: String,
         amounts: HashMap<String, Money>,
-        #[serde(default)] options: ReportOptions,
+        #[serde(default)]
+        options: ReportOptions,
     },
     Cashflow {
-        #[serde(default)] options: ReportOptions,
+        #[serde(default)]
+        options: ReportOptions,
     },
     Categories {
-        #[serde(default)] options: ReportOptions,
+        #[serde(default)]
+        options: ReportOptions,
+    },
+    IncomeExpenseRatio {
+        #[serde(default)]
+        income_tags: Vec<String>,
+        #[serde(default)]
+        expense_tags: Vec<String>,
     },
 }
 
@@ -69,8 +88,10 @@ pub struct ReportOptions {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UIConfig {
-    #[serde(default = "default_true")] show_diff: bool,
-    #[serde(default)] expenses_only: bool,
+    #[serde(default = "default_true")]
+    show_diff: bool,
+    #[serde(default)]
+    expenses_only: bool,
 }
 
 impl Default for UIConfig {
@@ -207,6 +228,13 @@ impl Reporter for ConfiguredReports {
                 ),
                 ReportType::Categories { ref options } => report_config.run_report(
                     &Categories::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
+                ReportType::IncomeExpenseRatio {
+                    ref income_tags,
+                    ref expense_tags,
+                } => report_config.run_report(
+                    &IncomeExpenseRatio::new(income_tags, expense_tags),
                     transactions.clone(),
                 ),
             };

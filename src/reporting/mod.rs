@@ -17,7 +17,8 @@ use std::fmt;
 
 pub trait Reporter: Sized {
     fn report<'a, I>(&self, transactions: I) -> Value
-        where I: Iterator<Item = Cow<'a, Transaction>> + Clone;
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 
     fn key(&self) -> Option<String>;
 
@@ -71,12 +72,13 @@ mod categories;
 mod config;
 mod database;
 mod excluding_tags;
+mod income_expense_ratio;
 mod list;
 mod multi;
 mod net_worth;
+mod only_owners;
 mod only_tags;
 mod only_type;
-mod only_owners;
 mod rolling_budget;
 mod timeseries;
 
@@ -87,6 +89,7 @@ pub use reporting::categories::Categories;
 pub use reporting::config::ConfiguredReports;
 pub use reporting::database::Database;
 pub use reporting::excluding_tags::ExcludingTags;
+pub use reporting::income_expense_ratio::IncomeExpenseRatio;
 pub use reporting::list::List;
 pub use reporting::net_worth::NetWorth;
 pub use reporting::only_owners::OnlyOwners;
