@@ -141,7 +141,8 @@ export default class ByTimeframe extends React.Component<Props, State> {
           <b>1 Year Median:</b> <Money amount={this.stats(1, 'year').median} /><br />
           { timeframes.map(([date, content]) => (
             <div key={date}>
-              <b>{ this.printDate(date) }</b> <Component
+              <h1>{ this.printDate(date) }</h1>
+              <Component
                 data={content}
                 transactions={transactions}
                 report={report}

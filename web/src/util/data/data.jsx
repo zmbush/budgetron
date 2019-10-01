@@ -129,6 +129,36 @@ export class CashflowData {
   }
 }
 
+export class IncomeExpenseRatioDatum {
+  byTag: Map<String, String>
+  other: String
+
+  constructor(data: {}) {
+    if (typeof data.other === 'string') this.other = data.other;
+    if (typeof data.other === 'number') this.other = data.other.toString();
+    this.byTag = new Map();
+    if (typeof data.by_tag  === 'object') {
+      Object.entries(data.by_tag).forEach(([k, v]) => {
+        if (typeof k === 'string' && typeof v === 'string') {
+          this.byTag.set(k, v);
+        }
+      });
+    }
+  }
+}
+
+export class IncomeExpenseRatioData {
+  credit: IncomeExpenseRatioDatum
+  debit: IncomeExpenseRatioDatum
+
+  constructor(data: {}) {
+    console.log(data, typeof data.credit, typeof data.debit ==='object');
+    if (typeof data.credit === 'object') this.credit = new IncomeExpenseRatioDatum(data.credit);
+    if (typeof data.debit === 'object') this.debit = new IncomeExpenseRatioDatum(data.debit);
+    console.log(this);
+  }
+}
+
 export class CategoriesCategory {
   amount: string
   transactions: Array<string>
@@ -180,7 +210,7 @@ export class CategoriesData {
   }
 }
 
-export type ReportData = RollingBudgetData | CashflowData | CategoriesData;
+export type ReportData = RollingBudgetData | CashflowData | CategoriesData | IncomeExpenseRatioData;
 
 export class TimedReportData {
   byWeek: ?Map<Date, ReportData>
@@ -282,7 +312,7 @@ export class ReportInfo {
     if (report.config && typeof report.config === 'object') {
       if (report.config.type === 'RollingBudget') {
         this.config = new RollingBudgetConfig(report.config);
-      } else if (report.config.type === 'Cashflow' || report.config.type === 'Categories') {
+      } else {
         this.config = {
           type: report.config.type,
         };
@@ -301,6 +331,8 @@ export class ReportInfo {
         return new CashflowData(data);
       case 'Categories':
         return new CategoriesData(data);
+      case 'IncomeExpenseRatio':
+        return new IncomeExpenseRatioData(data);
       default:
         return null;
     }

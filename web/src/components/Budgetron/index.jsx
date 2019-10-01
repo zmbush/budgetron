@@ -5,6 +5,7 @@ import Categories from 'components/Categories';
 import React from 'react';
 import RollingBudget from 'components/RollingBudget';
 import ByTimeframe from 'components/ByTimeframe';
+import IncomeExpenseRatio from 'components/IncomeExpenseRatio';
 import type { ComponentType } from 'react';
 import { Report, TimedReportData, type Transaction } from 'util/data';
 import Chip from 'material-ui/Chip';
@@ -25,6 +26,9 @@ const componentConfig = (type) => {
     config.count = 4;
   } else if (type === 'Categories') {
     config.Component = Categories;
+  } else if (type === 'IncomeExpenseRatio') {
+    config.Component = IncomeExpenseRatio;
+    config.count = 100;
   }
 
   return config;

@@ -79,6 +79,8 @@ pub enum ReportType {
         income_tags: Vec<String>,
         #[serde(default)]
         expense_tags: Vec<String>,
+        #[serde(default)]
+        options: ReportOptions,
     },
 }
 
@@ -234,6 +236,7 @@ impl Reporter for ConfiguredReports {
                 ReportType::IncomeExpenseRatio {
                     ref income_tags,
                     ref expense_tags,
+                    ..
                 } => report_config.run_report(
                     &IncomeExpenseRatio::new(income_tags, expense_tags),
                     transactions.clone(),
