@@ -1,16 +1,28 @@
 // @flow
 
-import React from 'react';
-import { Transaction } from 'util/data';
-import style from './style.scss';
+import React from "react";
+import { Transaction } from "util/data";
+import style from "./style.scss";
 
-const COLUMNS = ['date', 'amount', 'person', 'description', 'originalDescription',
-  'transactionType', 'category', 'originalCategory', 'accountName', 'labels', 'notes', 'tags'];
+const COLUMNS = [
+  "date",
+  "amount",
+  "person",
+  "description",
+  "originalDescription",
+  "transactionType",
+  "category",
+  "originalCategory",
+  "accountName",
+  "labels",
+  "notes",
+  "tags"
+];
 
 type DetailsTableProps = {
-  show?: bool,
+  show?: boolean,
   colSpan?: number,
-  transaction: Transaction,
+  transaction: Transaction
 };
 
 const DetailsTable = (props: DetailsTableProps) => {
@@ -26,13 +38,13 @@ const DetailsTable = (props: DetailsTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {COLUMNS.map((c) => {
+            {COLUMNS.map(c => {
               const data = props.transaction.render(c);
               if (!data) return null;
               return (
                 <tr key={c} className={style.normal_row}>
-                  <td>{ Transaction.name(c) }</td>
-                  <td>{ data }</td>
+                  <td>{Transaction.transactionName(c)}</td>
+                  <td>{data}</td>
                 </tr>
               );
             })}
@@ -45,7 +57,7 @@ const DetailsTable = (props: DetailsTableProps) => {
 
 DetailsTable.defaultProps = {
   show: false,
-  colSpan: 1,
+  colSpan: 1
 };
 
 type Props = {
@@ -53,26 +65,26 @@ type Props = {
   transaction_ids: Array<string>,
   transactions: Map<string, Transaction>,
 
-  filter: (entry: [string, Transaction]) => bool,
-  transform: (t: Transaction) => Transaction,
+  filter: (entry: [string, Transaction]) => boolean,
+  transform: (t: Transaction) => Transaction
 };
 
 type State = {
-  show: { [uid: string]: bool },
+  show: { [uid: string]: boolean }
 };
 
 export default class Transactions extends React.Component<Props, State> {
   static defaultProps = {
-    columns: ['date', 'amount', 'person', 'description'],
+    columns: ["date", "amount", "person", "description"],
     filter: () => true,
-    transform: t => t,
+    transform: t => t
   };
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      show: {},
+      show: {}
     };
   }
 
@@ -92,35 +104,37 @@ export default class Transactions extends React.Component<Props, State> {
     const money = tid.slice(8, 18);
 
     let type = tid.slice(18, 19);
-    if (type === 'D') {
-      type = 'Debit';
-    } else if (type === 'C') {
-      type = 'Credit';
-    } else if (type === 'T') {
-      type = 'Trasnfer';
+    if (type === "D") {
+      type = "Debit";
+    } else if (type === "C") {
+      type = "Credit";
+    } else if (type === "T") {
+      type = "Trasnfer";
     }
     return new Transaction(
-      'Unknown',
+      "Unknown",
       `${money.slice(0, 6)}.${money.slice(6, 10)}`,
-      'unknown',
+      "unknown",
       new Date(`${month}/${day}/${year}`),
-      'Unknown',
-      '',
-      '',
-      '',
-      'UNKNOWN',
-      'unknown',
-      ['details not exported'],
-      type,
+      "Unknown",
+      "",
+      "",
+      "",
+      "UNKNOWN",
+      "unknown",
+      ["details not exported"],
+      type
     );
   }
 
   renderHeaders() {
-    return this.props.columns.map(id => <th key={id}>{ Transaction.name(id) }</th>);
+    return this.props.columns.map(id => (
+      <th key={id}>{Transaction.transactionName(id)}</th>
+    ));
   }
 
   renderRowCells(t: Transaction) {
-    return this.props.columns.map(id => <td key={id}>{ t.render(id) }</td>);
+    return this.props.columns.map(id => <td key={id}>{t.render(id)}</td>);
   }
 
   render() {
@@ -133,7 +147,7 @@ export default class Transactions extends React.Component<Props, State> {
     return (
       <table className={style.table}>
         <thead>
-          <tr>{ this.renderHeaders() }</tr>
+          <tr>{this.renderHeaders()}</tr>
         </thead>
         <tbody>
           {transactions.map(([tid, transaction]) => [
@@ -142,14 +156,14 @@ export default class Transactions extends React.Component<Props, State> {
               onClick={() => this.toggleDetails(tid)}
               className={style.normal_row}
             >
-              { this.renderRowCells(transaction) }
+              {this.renderRowCells(transaction)}
             </tr>,
             <DetailsTable
               colSpan={this.props.columns.length}
               key={`${tid} details`}
               show={this.state.show[tid]}
               transaction={transaction}
-            />,
+            />
           ])}
         </tbody>
       </table>

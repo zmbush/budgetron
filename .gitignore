@@ -1,5 +1,5 @@
 target
-data
+/data
 output
 .~lock*
 *.csv
@@ -14,3 +14,4 @@ budgetronrc.old.toml
 .trigger
 node_modules/
 web/static
+yarn-error.log
