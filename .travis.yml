@@ -1,25 +1,23 @@
 language: rust
 rust:
   - stable
-  - 1.21.0
 cache: cargo
 services:
   - postgresql
 install:
-  - rustup install nightly
-  - cargo +nightly install --force rustfmt-nightly
-  - cargo +nightly install --force clippy
+  - rustup component add clippy
+  - rustup component add rustfmt
   - nvm install 6
   - npm install -g yarn
   - cargo install --force diesel_cli
-  - (cd web && yarn)
+  - yarn
 before_script:
   - psql -c 'create database budgetron;' -U postgres
   - cp .env.travis .env
   - diesel migration run
   - cargo build
 script:
-  - (cd web && yarn run webpack)
-  - cargo +nightly clippy --all -- -D clippy
-  - cargo +nightly fmt --all -- --write-mode=diff
+  - yarn run webpack
+  - cargo clippy --all -- -D clippy
+  - cargo fmt --all -- --write-mode=diff
   - cargo test
