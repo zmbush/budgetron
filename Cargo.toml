@@ -11,22 +11,22 @@ doc = false
 [dependencies]
 # Both
 budgetronlib = { path = "budgetronlib" }
-serde = "*"
-serde_json = "*"
+serde = "1.0.15"
+serde_json = "1.0.4"
 
 # Library
 csv = "1.0.0-beta.5"
 data_store = { path = "data_store" }
-log = "*"
-regex = "*"
-serde_derive = "*"
+log = "0.3.8"
+regex = "0.2.2"
+serde_derive = "1.0.15"
 
 # Binary
-clap = "*"
-env_logger = "*"
-iron = "*"
-mount = "*"
-staticfile = "*"
-toml = "*"
+clap = "2.26.2"
+env_logger = "0.4.3"
+iron = "0.5.1"
+mount = "0.3.0"
+staticfile = "0.4.0"
+toml = "0.4.5"
 
 [workspace]
