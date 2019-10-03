@@ -1,8 +1,8 @@
 // @flow
 
-import React from "react";
+import * as React from "react";
 import { Transaction } from "util/data";
-import style from "./style.scss";
+import * as style from "./style.scss";
 
 const COLUMNS = [
   "date",
@@ -20,9 +20,9 @@ const COLUMNS = [
 ];
 
 type DetailsTableProps = {
-  show?: boolean,
-  colSpan?: number,
-  transaction: Transaction
+  show?: boolean;
+  colSpan?: number;
+  transaction: Transaction;
 };
 
 const DetailsTable = (props: DetailsTableProps) => {
@@ -61,23 +61,23 @@ DetailsTable.defaultProps = {
 };
 
 type Props = {
-  columns: Array<string>,
-  transaction_ids: Array<string>,
-  transactions: Map<string, Transaction>,
+  columns: Array<string>;
+  transaction_ids: Array<string>;
+  transactions: Map<string, Transaction>;
 
-  filter: (entry: [string, Transaction]) => boolean,
-  transform: (t: Transaction) => Transaction
+  filter: (entry: [string, Transaction]) => boolean;
+  transform: (t: Transaction) => Transaction;
 };
 
 type State = {
-  show: { [uid: string]: boolean }
+  show: { [uid: string]: boolean };
 };
 
 export default class Transactions extends React.Component<Props, State> {
   static defaultProps = {
     columns: ["date", "amount", "person", "description"],
     filter: () => true,
-    transform: t => t
+    transform: (t: Transaction) => t
   };
 
   constructor(props: Props) {
@@ -140,9 +140,12 @@ export default class Transactions extends React.Component<Props, State> {
   render() {
     const transactions = this.props.transaction_ids
       .sort()
-      .map(tid => [tid, this.fetchTransactionDetails(tid)])
+      .map((tid): [string, Transaction] => [
+        tid,
+        this.fetchTransactionDetails(tid)
+      ])
       .filter(this.props.filter)
-      .map(([tid, t]) => [tid, this.props.transform(t)])
+      .map(([tid, t]): [string, Transaction] => [tid, this.props.transform(t)])
       .reverse();
     return (
       <table className={style.table}>

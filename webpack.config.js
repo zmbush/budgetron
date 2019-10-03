@@ -7,7 +7,7 @@ const webpack = require("webpack");
 
 module.exports = {
   mode: "development",
-  entry: ["babel-polyfill", "./web/src/entry.jsx"],
+  entry: ["babel-polyfill", "./web/src/entry.tsx"],
   output: {
     path: path.resolve("./web/static"),
     filename: "assets/js/[name]-[chunkhash].js",

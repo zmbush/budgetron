@@ -6,7 +6,4 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-declare module "*.scss" {
-  const content: { [className: string]: string };
-  export default content;
-}
+declare module "*.scss";

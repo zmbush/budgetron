@@ -17,7 +17,7 @@ export class Timeseries<TSData> {
 }
 
 export class RollingBudgetConfig {
-  type = "RollingBudget";
+  type: "RollingBudget" = "RollingBudget";
   split: string;
   startDate: Date;
   amounts: Map<string, string>;
@@ -136,8 +136,8 @@ export class CashflowData {
 }
 
 export class IncomeExpenseRatioDatum {
-  byTag: Map<String, String>;
-  other: String;
+  byTag: Map<string, string>;
+  other: string;
 
   constructor(data: { [part: string]: any }) {
     if (typeof data.other === "string") this.other = data.other;
@@ -308,7 +308,7 @@ export class ReportInfo {
   config:
     | RollingBudgetConfig
     | {
-        type: "Cashflow" | "Categories";
+        type: "Cashflow" | "Categories" | "IncomeExpenseRatio";
       };
   uiConfig: UIConfig;
   skipTags?: Array<string>;
