@@ -22,7 +22,7 @@ regex = "0.2.2"
 serde_derive = "1.0.101"
 
 # Binary
-clap = "2.26.2"
+clap = "2.33.0"
 env_logger = "0.4.3"
 iron = "0.5.1"
 mount = "0.3.0"
