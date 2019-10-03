@@ -79,9 +79,10 @@ module.exports = {
           },
           {
             loader: "css-loader",
-            query: {
-              modules: true,
-              localIdentName: "[path][name]_[local]--[hash:base64:5]"
+            options: {
+              modules: {
+                localIdentRegExp: "[path][name]_[local]--[hash:base64:5]"
+              }
             }
           },
           {
