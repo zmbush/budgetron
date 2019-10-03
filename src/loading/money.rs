@@ -183,6 +183,13 @@ impl<'de> Visitor<'de> for MoneyVisitor {
     {
         Ok(Money::from_i64(value))
     }
+    
+    fn visit_i128<E>(self, value: i128) -> Result<Money, E>
+    where
+        E: de::Error,
+    {
+        Ok(Money::from_i64(value.try_into()?))
+    }
 
     fn visit_f32<E>(self, value: f32) -> Result<Money, E>
     where
