@@ -25,7 +25,7 @@ serde_derive = "1.0.101"
 clap = "2.26.2"
 env_logger = "0.4.3"
 iron = "0.5.1"
-mount = "0.3.0"
+mount = "0.4.0"
 staticfile = "0.4.0"
 toml = "0.4.5"
 
