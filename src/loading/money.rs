@@ -118,7 +118,7 @@ impl<'a> ops::Div<Money> for &'a Money {
 }
 
 impl Money {
-    pub fn to_f64(&self) -> f64 {
+    pub fn to_f64(self) -> f64 {
         (self.0 as f64) / 10_000.0
     }
 
@@ -130,11 +130,11 @@ impl Money {
         Money(v * 10_000)
     }
 
-    pub fn abs(&self) -> Money {
+    pub fn abs(self) -> Money {
         Money(self.0.abs())
     }
 
-    pub fn is_negative(&self) -> bool {
+    pub fn is_negative(self) -> bool {
         self.0 < 0
     }
 
@@ -142,7 +142,7 @@ impl Money {
         Money(0)
     }
 
-    pub fn uid(&self) -> String {
+    pub fn uid(self) -> String {
         format!("{:010}", self.0)
     }
 }

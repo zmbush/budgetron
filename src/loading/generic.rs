@@ -25,16 +25,16 @@ impl Default for TransactionType {
 }
 
 impl TransactionType {
-    pub fn is_credit(&self) -> bool {
-        TransactionType::Credit == *self
+    pub fn is_credit(self) -> bool {
+        TransactionType::Credit == self
     }
 
-    pub fn is_debit(&self) -> bool {
-        TransactionType::Debit == *self
+    pub fn is_debit(self) -> bool {
+        TransactionType::Debit == self
     }
 
-    pub fn is_transfer(&self) -> bool {
-        TransactionType::Transfer == *self
+    pub fn is_transfer(self) -> bool {
+        TransactionType::Transfer == self
     }
 }
 

@@ -29,16 +29,9 @@ impl Collate for RefundCollator {
         for (i, t) in transactions.iter().enumerate() {
             loop {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
-                    .filter_map(|j| {
+                    .filter(|&j| {
                         let tn = &transactions[j];
-                        if tn.amount == t.amount
-                            && !to_delete.contains(&i)
-                            && !to_delete.contains(&j)
-                        {
-                            Some(j)
-                        } else {
-                            None
-                        }
+                        tn.amount == t.amount && !to_delete.contains(&i) && !to_delete.contains(&j)
                     })
                     .collect();
 

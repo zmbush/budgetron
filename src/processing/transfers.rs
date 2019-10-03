@@ -30,18 +30,13 @@ impl Collate for TransferCollator {
         for (i, t) in transactions.iter().enumerate() {
             loop {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
-                    .filter_map(|j| {
+                    .filter(|&j| {
                         let tn = &transactions[j];
-                        if tn.amount == t.amount
+                        tn.amount == t.amount
                             && !to_delete.contains(&i)
                             && !to_delete.contains(&j)
                             && !to_update.contains_key(&i)
                             && !to_update.contains_key(&j)
-                        {
-                            Some(j)
-                        } else {
-                            None
-                        }
                     })
                     .collect();
 

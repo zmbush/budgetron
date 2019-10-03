@@ -36,9 +36,8 @@ where
     where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
-        let (_, transactions): (Vec<_>, Vec<_>) = transactions
-            .into_iter()
-            .partition(|t| self.tags.iter().any(|tag| t.tags.contains(tag)));
+        let (_, transactions): (Vec<_>, Vec<_>) =
+            transactions.partition(|t| self.tags.iter().any(|tag| t.tags.contains(tag)));
 
         self.inner.report(transactions.into_iter())
     }
