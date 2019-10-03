@@ -1,3 +1,8 @@
 #!/bin/bash
 
-rustup override set 1.21.0
+rustup override set 1.37.0
+rustup component add clippy
+rustup component add rust-src
+rustup component add rustfmt
+rustup component add rls
+rustup component add rust-analysis

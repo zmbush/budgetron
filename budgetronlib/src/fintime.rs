@@ -8,8 +8,8 @@
 
 use self::Timeframe::*;
 use chrono;
-use chrono::Datelike;
 use chrono::offset::TimeZone;
+use chrono::Datelike;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::ops;
@@ -121,6 +121,19 @@ impl Date {
         self.date.month()
     }
 
+    pub fn day(&self) -> u32 {
+        self.date.day()
+    }
+
+    pub fn uid(&self) -> String {
+        format!(
+            "{:04}{:02}{:02}",
+            self.date.year(),
+            self.date.month(),
+            self.date.day()
+        )
+    }
+
     fn move_days(&mut self, days: i64) {
         self.date = self.date + chrono::Duration::days(days);
     }
@@ -155,7 +168,6 @@ impl Date {
         let days = i64::from(self.date.day0());
         *self -= Days(days);
     }
-
 
     pub fn align_to_quarter(&mut self) {
         self.align_to_month();
@@ -213,7 +225,7 @@ macro_rules! forward_ref_binop {
                 ops::$imp::$method(*self, *other)
             }
         }
-    }
+    };
 }
 
 impl ops::Sub<Timeframe> for Date {
@@ -301,11 +313,11 @@ impl<'de> de::Visitor<'de> for DateVisitor {
                 match $d.next() {
                     Some(s) => match s.parse() {
                         Ok(i) => i,
-                        Err(_) => return error
+                        Err(_) => return error,
                     },
-                    None => return error
+                    None => return error,
                 }
-            }
+            };
         }
 
         let val = if value.contains(' ') {

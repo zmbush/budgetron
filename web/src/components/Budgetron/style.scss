@@ -1,0 +1,22 @@
+.reports {
+  padding: 20px;
+  display: flex;
+}
+
+.report {
+  margin: 0 auto;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.mainContent {
+  padding: 10px;
+}
+
+.chipBag {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+}

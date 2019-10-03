@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::str::FromStr;
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use serde::ser::{Serialize, Serializer};
-use std::fmt;
 use serde_json;
-use std::ops;
+use std::fmt;
 use std::iter;
+use std::ops;
+use std::str::FromStr;
 
 #[derive(Debug, Copy, PartialEq, Clone, Eq, PartialOrd, Ord, Default)]
 pub struct Money(i64);
@@ -88,6 +88,20 @@ impl ops::Mul<Money> for Money {
     }
 }
 
+impl ops::Mul<f64> for Money {
+    type Output = Money;
+    fn mul(self, other: f64) -> Money {
+        Money::from_f64(self.to_f64() * other)
+    }
+}
+
+impl ops::Mul<i32> for Money {
+    type Output = Money;
+    fn mul(self, other: i32) -> Money {
+        self * f64::from(other)
+    }
+}
+
 impl ops::Div<Money> for Money {
     type Output = Money;
     fn div(self, other: Money) -> Money {
@@ -125,6 +139,10 @@ impl Money {
 
     pub fn zero() -> Money {
         Money(0)
+    }
+
+    pub fn uid(&self) -> String {
+        format!("{:010}", self.0)
     }
 }
 
@@ -268,7 +286,7 @@ mod tests {
                     let money_str = format!(r#""{}""#, $s);
                     let parsed_money: Money = serde_json::from_str(&money_str).unwrap();
                     assert_eq!(parsed_money, Money::from_f64($o));
-                )+
+                 )+
             }
         }
     }
@@ -278,13 +296,13 @@ mod tests {
         "($100.0)" => -100.0,
         "$100.0" => 100.0,
         "-$100.0" => -100.0
-    );
+        );
 
     test_conversion!(
         parse_simpler_numbers,
         "$150.0" => 150.0,
         "-125.50" => -125.50
-    );
+        );
 }
 
 impl fmt::Display for Money {

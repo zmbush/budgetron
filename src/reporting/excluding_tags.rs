@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::Transaction;
-use reporting::Reporter;
+use crate::loading::Transaction;
+use crate::reporting::Reporter;
 use serde_json::Value;
 use std::borrow::Cow;
 
@@ -16,7 +16,7 @@ where
     T: 'a + Reporter,
 {
     inner: &'a T,
-    tags:  Vec<String>,
+    tags: Vec<String>,
 }
 
 impl<'a, T> ExcludingTags<'a, T>

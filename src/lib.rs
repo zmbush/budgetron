@@ -6,20 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(unused, unused_extern_crates)]
+#![deny(unused)]
 
-extern crate budgetronlib;
-extern crate csv;
-extern crate data_store;
-#[macro_use]
-extern crate log;
-extern crate regex;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-
+pub mod error;
 pub mod loading;
 pub mod processing;
 pub mod reporting;
-pub mod error;

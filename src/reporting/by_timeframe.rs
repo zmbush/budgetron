@@ -6,9 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::Transaction;
+use crate::reporting::Reporter;
 use budgetronlib::fintime::{Date, Timeframe};
-use loading::Transaction;
-use reporting::Reporter;
+use serde_derive::Serialize;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -18,7 +19,7 @@ pub struct ByTimeframe<'a, T>
 where
     T: 'a + Reporter,
 {
-    inner:     &'a T,
+    inner: &'a T,
     timeframe: Timeframe,
 }
 
@@ -33,7 +34,7 @@ where
 
 #[derive(Debug, Serialize)]
 pub struct ByTimeframeReport<T> {
-    timeframe:    Timeframe,
+    timeframe: Timeframe,
     by_timeframe: BTreeMap<Date, T>,
 }
 
@@ -79,7 +80,7 @@ where
             .unwrap_or_else(|| Date::ymd(2000, 1, 1));
 
         match self.timeframe {
-            Timeframe::Days(_) => {},
+            Timeframe::Days(_) => {}
             Timeframe::Weeks(_) => date.align_to_week(),
             Timeframe::Months(_) => date.align_to_month(),
             Timeframe::Quarters(_) => date.align_to_quarter(),

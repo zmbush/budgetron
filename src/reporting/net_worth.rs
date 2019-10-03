@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::{Money, Transaction, TransactionType};
-use reporting::Reporter;
+use crate::loading::{Money, Transaction, TransactionType};
+use crate::reporting::Reporter;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::collections::BTreeMap;

@@ -15,13 +15,12 @@ use std::io::Read;
 use std::path::PathBuf;
 use toml;
 
-
 #[derive(Deserialize)]
 pub struct EmailAccount {
     pub username: String,
     pub password: String,
-    pub server:   String,
-    pub port:     u16,
+    pub server: String,
+    pub port: u16,
 }
 
 #[derive(Deserialize)]
@@ -29,7 +28,7 @@ pub struct SecureConfig {}
 
 #[derive(Deserialize, Debug)]
 pub struct CategoryConfig {
-    pub categories:       HashMap<String, Vec<String>>,
+    pub categories: HashMap<String, Vec<String>>,
     pub ignored_accounts: Vec<String>,
 }
 

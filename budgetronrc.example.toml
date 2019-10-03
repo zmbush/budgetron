@@ -1,4 +1,10 @@
 [[processor]]
+hide_accounts = ["bad account"]
+
+[[processor]]
+transfer_horizon = 100
+
+[[processor]]
 [processor.categories]
 "Auto Payment" = []
 Automobile = ["Auto & Transport", "Gas & Fuel"]
@@ -15,6 +21,9 @@ account = ["Person1Account"]
 
 [processor.owners.Person3]
 description = ["OWNER 2"]
+
+[[processor]]
+owner_override = "Owner: (.*)"
 
 [[processor]]
 [processor.tags.essential]

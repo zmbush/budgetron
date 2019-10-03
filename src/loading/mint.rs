@@ -6,10 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::generic::{Genericize, Transaction, TransactionType};
+use crate::loading::money::Money;
 use budgetronlib::error::BResult;
 use budgetronlib::fintime::Date;
-use loading::generic::{Genericize, Transaction, TransactionType};
-use loading::money::Money;
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -31,11 +32,14 @@ impl Into<TransactionType> for MintTransactionType {
 pub struct MintExport {
     date: Date,
     description: String,
-    #[serde(rename = "Original Description")] original_description: String,
+    #[serde(rename = "Original Description")]
+    original_description: String,
     amount: Money,
-    #[serde(rename = "Transaction Type")] transaction_type: MintTransactionType,
+    #[serde(rename = "Transaction Type")]
+    transaction_type: MintTransactionType,
     category: String,
-    #[serde(rename = "Account Name")] account_name: String,
+    #[serde(rename = "Account Name")]
+    account_name: String,
     labels: String,
     notes: String,
 }
@@ -43,6 +47,7 @@ pub struct MintExport {
 impl Genericize for MintExport {
     fn genericize(self) -> BResult<Transaction> {
         Ok(Transaction {
+            uid: None,
             date: self.date,
             person: "".to_owned(),
             description: self.description,

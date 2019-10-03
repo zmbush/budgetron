@@ -1,5 +1,5 @@
 target
-data
+/data
 output
 .~lock*
 *.csv
@@ -10,4 +10,8 @@ output
 *.swm
 *.rs.bk
 budgetronrc.toml
+budgetronrc.old.toml
 .trigger
+node_modules/
+web/static
+yarn-error.log

@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::Transaction;
-use reporting::Reporter;
-use serde_json::Value;
+use crate::loading::Transaction;
+use crate::reporting::Reporter;
 use serde_json::map::Map;
+use serde_json::Value;
 use std::borrow::Cow;
 
 macro_rules! tuple_impls {

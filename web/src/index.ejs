@@ -12,20 +12,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/images/icons/favicon-96x96.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png">
-  <!-- update the version number as needed -->
-  <!-- <script defer src="/__/firebase/3.7.5/firebase-app.js"></script> -->
-  <!-- include only the Firebase features as you need -->
-  <!-- <script defer src="/__/firebase/3.7.5/firebase-auth.js"></script>
-    <script defer src="/__/firebase/3.7.5/firebase-database.js"></script> -->
-  <!-- initialize the SDK after all desired features are loaded -->
-  <!-- <script defer src="/__/firebase/init.js"></script> -->
-  <% for (var js in htmlWebpackPlugin.files.js) {
-      %>
+  <% for (var js in htmlWebpackPlugin.files.js) { %>
     <script defer src="/<%= htmlWebpackPlugin.files.js[js] %>"></script>
-    <% } %>
-      <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/1.0.1/firebaseui.css"
-      />
-      <meta name="viewport" content="width=device-width">
+  <% } %>
+  <meta name="viewport" content="width=device-width">
 </head>
 
 <body>

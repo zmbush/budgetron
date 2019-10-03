@@ -6,20 +6,23 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::Transaction;
 use budgetronlib::error::BResult;
-use loading::Transaction;
 
 pub mod config;
+mod refunds;
 mod regex;
 mod transfers;
 
 pub enum Collator {
     Transfers(transfers::TransferCollator),
+    Refund(refunds::RefundCollator),
     Config(config::ConfiguredProcessors),
 }
 
-pub use processing::transfers::TransferCollator;
-pub use processing::config::ConfiguredProcessors;
+pub use crate::processing::config::ConfiguredProcessors;
+pub use crate::processing::refunds::RefundCollator;
+pub use crate::processing::transfers::TransferCollator;
 
 pub trait Collate {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;
@@ -30,6 +33,7 @@ impl Collate for Collator {
         match *self {
             Collator::Transfers(ref tc) => tc.collate(transactions),
             Collator::Config(ref cfg) => cfg.collate(transactions),
+            Collator::Refund(ref rc) => rc.collate(transactions),
         }
     }
 }

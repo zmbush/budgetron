@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::{Transaction, TransactionType};
+use crate::processing::Collate;
 use budgetronlib::error::BResult;
-use loading::{Transaction, TransactionType};
-use processing::Collate;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
 use std::i64;
@@ -32,7 +32,8 @@ impl Collate for TransferCollator {
                 let candidates: Vec<_> = (i..min(transactions.len(), i + self.horizon))
                     .filter_map(|j| {
                         let tn = &transactions[j];
-                        if tn.amount == t.amount && !to_delete.contains(&i)
+                        if tn.amount == t.amount
+                            && !to_delete.contains(&i)
                             && !to_delete.contains(&j)
                             && !to_update.contains_key(&i)
                             && !to_update.contains_key(&j)
@@ -61,7 +62,9 @@ impl Collate for TransferCollator {
                         .filter(|&i| transactions[*i].transaction_type.is_credit());
                     for credit_ix in credits {
                         let credit = &transactions[*credit_ix];
-                        if (debit.date - credit.date).abs() < mindelta {
+                        if (debit.date - credit.date).abs() < mindelta
+                            && debit.account_name != credit.account_name
+                        {
                             found_transfer = (*debit_ix, *credit_ix);
                             mindelta = (debit.date - credit.date).abs();
                         }

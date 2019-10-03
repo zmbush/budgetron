@@ -6,22 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(unused, unused_extern_crates)]
-
-extern crate budgetron;
-extern crate budgetronlib;
-extern crate clap;
-extern crate env_logger;
-extern crate serde;
-extern crate serde_json;
-
-extern crate iron;
-extern crate mount;
-extern crate staticfile;
+#![deny(unused)]
 
 use budgetron::loading;
-use budgetron::processing::{collate_all, Collator, ConfiguredProcessors, TransferCollator};
-use budgetron::reporting::{ConfiguredReports, Database, Reporter};
+use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};
+use budgetron::reporting::{ConfiguredReports, Database, List, Reporter};
 use budgetronlib::config;
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -47,18 +36,18 @@ fn main() {
                 .multiple(true),
         )
         .arg(
-            Arg::with_name("transfers")
-                .short("t")
-                .long("transfers")
-                .value_name("HORIZON")
-                .help("The number of transactions to look through to find transfer.")
-                .default_value("100")
-                .takes_value(true),
-        )
-        .arg(
             Arg::with_name("serve")
                 .long("serve")
                 .help("Start server to view reports"),
+        )
+        .arg(
+            Arg::with_name("port")
+                .short("p")
+                .value_name("PORT")
+                .long("port")
+                .help("Port to host the server at")
+                .default_value("3000")
+                .takes_value(true),
         )
         .get_matches();
 
@@ -68,15 +57,10 @@ fn main() {
         Vec::new()
     };
 
-    let mut collations = Vec::new();
-    if let Some(Ok(horizon)) = matches.value_of("transfers").map(|t| t.parse()) {
-        collations.push(Collator::Transfers(TransferCollator::new(horizon)));
-    }
     let processors: ConfiguredProcessors =
         config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
-    collations.push(Collator::Config(processors));
-
-    let transactions = collate_all(transactions, &collations).expect("Unable to collate");
+    let transactions =
+        collate_all(transactions, &[Collator::Config(processors)]).expect("Unable to collate");
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
@@ -84,13 +68,26 @@ fn main() {
 
     let reports: ConfiguredReports =
         config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
-    let report = (Database, reports).report(cow_transactions.into_iter());
+    let report = reports.report(cow_transactions.into_iter());
+
+    let cow_transactions = transactions
+        .iter()
+        .map(|t| Cow::Borrowed(t))
+        .collect::<Vec<_>>();
+    let transaction_list = (List, Database).report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
         let mut mount = Mount::new();
         mount.mount("/", staticfile::Static::new(Path::new("web/static")));
         mount.mount("__/data.json", JsonHandler { data: report });
-        Iron::new(mount).http("0.0.0.0:3000").unwrap();
+        mount.mount(
+            "__/transactions.json",
+            JsonHandler {
+                data: transaction_list,
+            },
+        );
+        let port = matches.value_of("port").unwrap();
+        Iron::new(mount).http(format!("0.0.0.0:{}", port)).unwrap();
     }
 }
 
@@ -102,7 +99,7 @@ impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHan
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
         Ok(Response::with((
             iron::status::Ok,
-            serde_json::to_string_pretty(&self.data).unwrap(),
+            serde_json::to_string(&self.data).unwrap(),
         )))
     }
 }

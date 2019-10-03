@@ -6,8 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::{Transaction, TransactionType};
-use reporting::Reporter;
+use crate::loading::{Transaction, TransactionType};
+use crate::reporting::Reporter;
+use serde_derive::Serialize;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::fmt;
@@ -16,7 +17,7 @@ pub struct ByAccount<'a, T>
 where
     T: 'a + Reporter,
 {
-    inner:   &'a T,
+    inner: &'a T,
     account: String,
 }
 
@@ -31,7 +32,7 @@ where
 
 #[derive(Debug, Serialize)]
 pub struct ByAccountReport<T> {
-    account:    String,
+    account: String,
     by_account: T,
 }
 
@@ -64,26 +65,29 @@ where
     {
         let (transactions, _): (Vec<_>, Vec<_>) = transactions
             .into_iter()
-            .map(|t| if let TransactionType::Transfer = t.transaction_type {
-                if t.account_name == self.account {
-                    let mut t = t.into_owned();
-                    t.transaction_type = TransactionType::Debit;
-                    t.transfer_destination_account = None;
-                    Cow::Owned(t)
-                } else if *t.transfer_destination_account
-                    .as_ref()
-                    .expect("all transfers should have destinations")
-                    == self.account
-                {
-                    let mut t = t.into_owned();
-                    t.transaction_type = TransactionType::Credit;
-                    t.account_name = t.transfer_destination_account.take().unwrap();
-                    Cow::Owned(t)
+            .map(|t| {
+                if let TransactionType::Transfer = t.transaction_type {
+                    if t.account_name == self.account {
+                        let mut t = t.into_owned();
+                        t.transaction_type = TransactionType::Debit;
+                        t.transfer_destination_account = None;
+                        Cow::Owned(t)
+                    } else if *t
+                        .transfer_destination_account
+                        .as_ref()
+                        .expect("all transfers should have destinations")
+                        == self.account
+                    {
+                        let mut t = t.into_owned();
+                        t.transaction_type = TransactionType::Credit;
+                        t.account_name = t.transfer_destination_account.take().unwrap();
+                        Cow::Owned(t)
+                    } else {
+                        t
+                    }
                 } else {
                     t
                 }
-            } else {
-                t
             })
             .partition(|t| t.account_name == self.account);
 
@@ -93,12 +97,14 @@ where
             retval.insert(v.to_owned(), self.inner.report(transactions.into_iter()));
         } else {
             match self.inner.report(transactions.into_iter()) {
-                Value::Object(o) => for (k, v) in o {
-                    retval.insert(k, v);
-                },
+                Value::Object(o) => {
+                    for (k, v) in o {
+                        retval.insert(k, v);
+                    }
+                }
                 other => {
                     retval.insert("by_account".to_owned(), other);
-                },
+                }
             }
         }
         Value::Object(retval)

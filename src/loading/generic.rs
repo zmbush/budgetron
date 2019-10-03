@@ -6,9 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::money::Money;
 use budgetronlib::error::BResult;
-use loading::money::Money;
 use budgetronlib::fintime::Date;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Copy, Deserialize, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub enum TransactionType {
@@ -39,6 +40,7 @@ impl TransactionType {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Transaction {
+    pub uid: Option<String>,
     pub date: Date,
     pub description: String,
     pub amount: Money,
@@ -61,5 +63,21 @@ pub trait Genericize {
 impl Genericize for Transaction {
     fn genericize(self) -> BResult<Transaction> {
         Ok(self)
+    }
+}
+
+impl Transaction {
+    pub fn uid(&self) -> String {
+        format!(
+            "{}{}{}{}",
+            self.date.uid(),
+            self.amount.uid(),
+            match self.transaction_type {
+                TransactionType::Credit => "C",
+                TransactionType::Debit => "D",
+                TransactionType::Transfer => "T",
+            },
+            &self.description,
+        )
     }
 }

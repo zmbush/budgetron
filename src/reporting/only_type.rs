@@ -6,17 +6,17 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reporting::Reporter;
-use std::borrow::Cow;
-use loading::{Transaction, TransactionType};
+use crate::loading::{Transaction, TransactionType};
+use crate::reporting::Reporter;
 use serde_json::Value;
+use std::borrow::Cow;
 
 pub struct OnlyType<'a, T>
 where
     T: 'a + Reporter,
 {
     inner: &'a T,
-    t:     TransactionType,
+    t: TransactionType,
 }
 
 impl<'a, T> OnlyType<'a, T>

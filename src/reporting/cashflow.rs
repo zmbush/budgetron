@@ -6,18 +6,48 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::{Money, Transaction, TransactionType};
-use reporting::Reporter;
+use crate::loading::{Money, Transaction, TransactionType};
+use crate::reporting::config::ReportOptions;
+use crate::reporting::timeseries::Timeseries;
+use crate::reporting::Reporter;
+use serde_derive::Serialize;
 use serde_json::{self, Value};
 use std::borrow::Cow;
 use std::fmt;
 
-pub struct Cashflow;
+pub struct Cashflow {
+    options: ReportOptions,
+}
 
 #[derive(Default, Serialize)]
 pub struct CashflowReport {
-    pub credit: Money,
-    pub debit:  Money,
+    credit: Money,
+    debit: Money,
+    net: Money,
+    timeseries: Option<Timeseries<CashflowDatum>>,
+}
+
+#[derive(Default, Serialize)]
+pub struct CashflowDatum {
+    credit: Money,
+    debit: Money,
+    net: Money,
+}
+
+impl Cashflow {
+    pub fn with_options(options: ReportOptions) -> Cashflow {
+        Cashflow { options }
+    }
+}
+
+impl CashflowReport {
+    fn datum(&self) -> CashflowDatum {
+        CashflowDatum {
+            credit: self.credit,
+            debit: self.debit,
+            net: self.net,
+        }
+    }
 }
 
 impl Reporter for Cashflow {
@@ -25,13 +55,32 @@ impl Reporter for Cashflow {
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {
-        let cashflow: CashflowReport = transactions.fold(Default::default(), |mut acc, ref t| {
+        let report = CashflowReport {
+            timeseries: if self.options.include_graph {
+                Some(Timeseries::new())
+            } else {
+                None
+            },
+            ..Default::default()
+        };
+
+        let cashflow: CashflowReport = transactions.fold(report, |mut report, ref t| {
             match t.transaction_type {
-                TransactionType::Credit => acc.credit += t.amount,
-                TransactionType::Debit => acc.debit += t.amount,
-                _ => {},
+                TransactionType::Credit => {
+                    report.credit += t.amount;
+                    report.net += t.amount;
+                }
+                TransactionType::Debit => {
+                    report.debit += t.amount;
+                    report.net -= t.amount;
+                }
+                _ => {}
             }
-            acc
+            let datum = report.datum();
+            if let Some(ref mut ts) = report.timeseries {
+                ts.add(t.date, datum);
+            }
+            report
         });
 
         serde_json::to_value(&cashflow).expect("could not calculate cashflow report")

@@ -6,12 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::HashMap;
+use crate::loading::{Money, Transaction, TransactionType};
+use crate::reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget};
 use budgetronlib::fintime::Date;
-use reporting::{Cashflow, Categories, Reporter, RollingBudget};
-use std::borrow::Cow;
+use serde_derive::{Deserialize, Serialize};
 use serde_json::{self, Value};
-use loading::{Money, Transaction, TransactionType};
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {
@@ -21,14 +22,28 @@ pub struct ConfiguredReports {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Report {
     name: String,
-    #[serde(skip_serializing_if = "Option::is_none")] only_type: Option<TransactionType>,
-    #[serde(skip_serializing_if = "Option::is_none")] skip_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_type: Option<TransactionType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    skip_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    only_owners: Option<Vec<String>>,
     config: ReportType,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    old_configs: Vec<HistoricalConfig>,
+    #[serde(default)]
+    ui_config: UIConfig,
 
-    #[serde(skip_serializing_if = "is_false", default)] by_week:    bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_month:   bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_quarter: bool,
-    #[serde(skip_serializing_if = "is_false", default)] by_year:    bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_week: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_month: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_quarter: bool,
+    #[serde(skip_serializing_if = "is_false", default)]
+    by_year: bool,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -36,20 +51,67 @@ fn is_false(value: &bool) -> bool {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct HistoricalConfig {
+    end_date: Date,
+    config: ReportType,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "type")]
 pub enum ReportType {
     RollingBudget {
         start_date: Date,
-        split:      String,
-        amounts:    HashMap<String, Money>,
+        split: String,
+        amounts: HashMap<String, Money>,
+        #[serde(default)]
+        options: ReportOptions,
     },
-    Cashflow,
-    Categories,
+    Cashflow {
+        #[serde(default)]
+        options: ReportOptions,
+    },
+    Categories {
+        #[serde(default)]
+        options: ReportOptions,
+    },
+    IncomeExpenseRatio {
+        #[serde(default)]
+        income_tags: Vec<String>,
+        #[serde(default)]
+        expense_tags: Vec<String>,
+        #[serde(default)]
+        options: ReportOptions,
+    },
 }
 
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+pub struct ReportOptions {
+    pub include_graph: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UIConfig {
+    #[serde(default = "default_true")]
+    show_diff: bool,
+    #[serde(default)]
+    expenses_only: bool,
+}
+
+impl Default for UIConfig {
+    fn default() -> Self {
+        UIConfig {
+            show_diff: true,
+            expenses_only: false,
+        }
+    }
+}
+
+fn default_true() -> bool {
+    true
+}
 
 impl Report {
-    fn inner_run_report<'a, I, R>(&self, reporter: R, transactions: I) -> Value
+    fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
@@ -78,22 +140,60 @@ impl Report {
         }
     }
 
-    fn run_report<'a, I, R>(&self, reporter: R, transactions: I) -> Value
+    fn filter_report_only_owners<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
-        match (&self.skip_tags, self.only_type) {
-            (&Some(ref tags), Some(t)) => self.inner_run_report(
-                reporter.only_type(t).excluding_tags(tags.clone()),
-                transactions,
-            ),
-            (&Some(ref tags), None) => {
-                self.inner_run_report(reporter.excluding_tags(tags.clone()), transactions)
-            },
-            (&None, Some(t)) => self.inner_run_report(reporter.only_type(t), transactions),
-            (&None, None) => self.inner_run_report(reporter, transactions),
+        if let Some(ref only_owners) = self.only_owners {
+            self.inner_run_report(&reporter.only_owners(only_owners.clone()), transactions)
+        } else {
+            self.inner_run_report(reporter, transactions)
         }
+    }
+
+    fn filter_report_only_type<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        if let Some(only_type) = self.only_type {
+            self.filter_report_only_owners(&reporter.only_type(only_type), transactions)
+        } else {
+            self.filter_report_only_owners(reporter, transactions)
+        }
+    }
+
+    fn filter_report_only_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        if let Some(ref only_tags) = self.only_tags {
+            self.filter_report_only_type(&reporter.only_tags(only_tags.clone()), transactions)
+        } else {
+            self.filter_report_only_type(reporter, transactions)
+        }
+    }
+
+    fn filter_report_skip_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        if let Some(ref skip_tags) = self.skip_tags {
+            self.filter_report_only_tags(&reporter.excluding_tags(skip_tags.clone()), transactions)
+        } else {
+            self.filter_report_only_tags(reporter, transactions)
+        }
+    }
+
+    fn run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    where
+        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        R: Reporter,
+    {
+        self.filter_report_skip_tags(reporter, transactions)
     }
 }
 
@@ -102,7 +202,7 @@ impl Reporter for ConfiguredReports {
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
-        let mut retval = serde_json::map::Map::new();
+        let mut retval = Vec::new();
         for report_config in &self.report {
             let report_key = report_config
                 .name
@@ -115,27 +215,47 @@ impl Reporter for ConfiguredReports {
                     start_date,
                     ref split,
                     ref amounts,
+                    ref options,
                 } => report_config.run_report(
-                    RollingBudget::new_param(start_date, split.clone(), amounts.clone()),
+                    &RollingBudget::new_param(
+                        start_date,
+                        split.clone(),
+                        amounts.clone(),
+                        (*options).clone(),
+                    ),
                     transactions.clone(),
                 ),
-                ReportType::Cashflow => report_config.run_report(Cashflow, transactions.clone()),
-                ReportType::Categories => {
-                    report_config.run_report(Categories, transactions.clone())
-                },
+                ReportType::Cashflow { ref options } => report_config.run_report(
+                    &Cashflow::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
+                ReportType::Categories { ref options } => report_config.run_report(
+                    &Categories::with_options((*options).clone()),
+                    transactions.clone(),
+                ),
+                ReportType::IncomeExpenseRatio {
+                    ref income_tags,
+                    ref expense_tags,
+                    ..
+                } => report_config.run_report(
+                    &IncomeExpenseRatio::new(income_tags, expense_tags),
+                    transactions.clone(),
+                ),
             };
+
             let mut report_data = serde_json::map::Map::new();
             report_data.insert("data".to_string(), value);
             report_data.insert(
-                "config".to_string(),
+                "report".to_string(),
                 serde_json::to_value(report_config).expect("Could not write config"),
             );
-            retval.insert(report_key, Value::Object(report_data));
+            report_data.insert("key".to_string(), Value::String(report_key));
+            retval.push(Value::Object(report_data));
         }
-        Value::Object(retval)
+        Value::Array(retval)
     }
 
     fn key(&self) -> Option<String> {
-        None
+        Some("reports".to_owned())
     }
 }

@@ -1,6 +1,7 @@
 [package]
 name = "budgetron"
 version = "2.0.0-0.0.3"
+edition = "2018"
 authors = ["Zachary Bush <zach@zmbush.com>"]
 
 [[bin]]
@@ -26,5 +27,6 @@ env_logger = "*"
 iron = "*"
 mount = "*"
 staticfile = "*"
+toml = "*"
 
 [workspace]

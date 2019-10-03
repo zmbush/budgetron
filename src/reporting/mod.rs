@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::loading::{Transaction, TransactionType};
+use crate::reporting::by_account::ByAccount;
+use crate::reporting::by_timeframe::ByTimeframe;
 use budgetronlib::fintime::Timeframe;
-use loading::{Transaction, TransactionType};
-use reporting::by_account::ByAccount;
-use reporting::by_timeframe::ByTimeframe;
 use serde;
 use serde_json::Value;
 use std::borrow::Cow;
@@ -50,32 +50,49 @@ pub trait Reporter: Sized {
         ExcludingTags::new(self, tags)
     }
 
+    fn only_tags(&self, tags: Vec<String>) -> OnlyTags<Self> {
+        OnlyTags::new(self, tags)
+    }
+
     fn only_type(&self, t: TransactionType) -> OnlyType<Self> {
         OnlyType::new(self, t)
+    }
+
+    fn only_owners(&self, t: Vec<String>) -> OnlyOwners<Self> {
+        OnlyOwners::new(self, t)
     }
 }
 
 pub trait Report: fmt::Display + serde::Serialize {}
 
-mod config;
 mod by_account;
 mod by_timeframe;
-mod excluding_tags;
-mod categories;
 mod cashflow;
+mod categories;
+mod config;
 mod database;
+mod excluding_tags;
+mod income_expense_ratio;
+mod list;
 mod multi;
 mod net_worth;
-mod rolling_budget;
+mod only_owners;
+mod only_tags;
 mod only_type;
+mod rolling_budget;
+mod timeseries;
 
-pub use reporting::by_account::ByAccountReport;
-pub use reporting::by_timeframe::ByTimeframeReport;
-pub use reporting::cashflow::Cashflow;
-pub use reporting::database::Database;
-pub use reporting::net_worth::NetWorth;
-pub use reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};
-pub use reporting::excluding_tags::ExcludingTags;
-pub use reporting::config::ConfiguredReports;
-pub use reporting::categories::Categories;
-pub use reporting::only_type::OnlyType;
+pub use crate::reporting::by_account::ByAccountReport;
+pub use crate::reporting::by_timeframe::ByTimeframeReport;
+pub use crate::reporting::cashflow::Cashflow;
+pub use crate::reporting::categories::Categories;
+pub use crate::reporting::config::ConfiguredReports;
+pub use crate::reporting::database::Database;
+pub use crate::reporting::excluding_tags::ExcludingTags;
+pub use crate::reporting::income_expense_ratio::IncomeExpenseRatio;
+pub use crate::reporting::list::List;
+pub use crate::reporting::net_worth::NetWorth;
+pub use crate::reporting::only_owners::OnlyOwners;
+pub use crate::reporting::only_tags::OnlyTags;
+pub use crate::reporting::only_type::OnlyType;
+pub use crate::reporting::rolling_budget::{RollingBudget, RollingBudgetConfig};

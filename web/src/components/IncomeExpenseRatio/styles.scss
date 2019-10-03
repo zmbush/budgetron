@@ -1,0 +1,14 @@
+.category {
+  display: inline-block;
+  padding: 10px
+}
+
+.reportSection {
+  display: inline-block;
+  border-right: 1px solid black;
+  padding: 10px;
+
+  &:last-of-type {
+    border-right: none;
+  }
+}
