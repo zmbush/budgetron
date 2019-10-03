@@ -12,7 +12,7 @@ use crate::loading::logix;
 use crate::loading::mint;
 use budgetronlib::error::{BResult, BudgetError};
 use csv::Reader;
-use log::{info, log};
+use log::info;
 use serde::de::DeserializeOwned;
 use std::cmp::min;
 use std::fmt::Display;

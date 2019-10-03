@@ -10,7 +10,7 @@
 
 use budgetron::loading;
 use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};
-use budgetron::reporting::{ConfiguredReports, Database, List, Reporter};
+use budgetron::reporting::{ConfiguredReports, List, Reporter};
 use budgetronlib::config;
 use clap::{App, Arg};
 use iron::prelude::*;
@@ -19,8 +19,11 @@ use serde::Serialize;
 use std::borrow::Cow;
 use std::path::Path;
 
+#[cfg(feature = "db")]
+use budgetron::reporting::Database;
+
 fn main() {
-    env_logger::init().expect("Unable to set up env_logger");
+    env_logger::init();
 
     let matches = App::new("Collator")
         .version(env!("CARGO_PKG_VERSION"))
@@ -74,7 +77,11 @@ fn main() {
         .iter()
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
+    #[cfg(feature = "db")]
     let transaction_list = (List, Database).report(cow_transactions.into_iter());
+
+    #[cfg(not(feature = "db"))]
+    let transaction_list = List.report(cow_transactions.into_iter());
 
     if matches.is_present("serve") {
         let mut mount = Mount::new();

@@ -70,6 +70,7 @@ mod by_timeframe;
 mod cashflow;
 mod categories;
 mod config;
+#[cfg(feature = "db")]
 mod database;
 mod excluding_tags;
 mod income_expense_ratio;
@@ -87,6 +88,7 @@ pub use crate::reporting::by_timeframe::ByTimeframeReport;
 pub use crate::reporting::cashflow::Cashflow;
 pub use crate::reporting::categories::Categories;
 pub use crate::reporting::config::ConfiguredReports;
+#[cfg(feature = "db")]
 pub use crate::reporting::database::Database;
 pub use crate::reporting::excluding_tags::ExcludingTags;
 pub use crate::reporting::income_expense_ratio::IncomeExpenseRatio;

@@ -9,6 +9,7 @@
 use serde::de::{self, Deserialize, Deserializer, Visitor};
 use serde::ser::{Serialize, Serializer};
 use serde_json;
+use std::convert::TryInto;
 use std::fmt;
 use std::iter;
 use std::ops;
@@ -163,20 +164,6 @@ impl<'de> Visitor<'de> for MoneyVisitor {
         formatter.write_str("a valid money amount")
     }
 
-    fn visit_i8<E>(self, value: i8) -> Result<Money, E>
-    where
-        E: de::Error,
-    {
-        Ok(Money::from_i64(i64::from(value)))
-    }
-
-    fn visit_i32<E>(self, value: i32) -> Result<Money, E>
-    where
-        E: de::Error,
-    {
-        Ok(Money::from_i64(i64::from(value)))
-    }
-
     fn visit_i64<E>(self, value: i64) -> Result<Money, E>
     where
         E: de::Error,
@@ -184,11 +171,20 @@ impl<'de> Visitor<'de> for MoneyVisitor {
         Ok(Money::from_i64(value))
     }
 
-    fn visit_f32<E>(self, value: f32) -> Result<Money, E>
+    fn visit_u32<E>(self, value: u32) -> Result<Money, E>
     where
         E: de::Error,
     {
-        Ok(Money::from_f64(f64::from(value)))
+        Ok(Money::from_i64(i64::from(value)))
+    }
+
+    fn visit_u64<E>(self, value: u64) -> Result<Money, E>
+    where
+        E: de::Error,
+    {
+        Ok(Money::from_i64(
+            value.try_into().map_err(|_| E::custom("Too much money!"))?,
+        ))
     }
 
     fn visit_f64<E>(self, value: f64) -> Result<Money, E>
@@ -198,7 +194,7 @@ impl<'de> Visitor<'de> for MoneyVisitor {
         Ok(Money::from_f64(value))
     }
 
-    fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Money, E>
+    fn visit_str<E>(self, v: &str) -> Result<Money, E>
     where
         E: de::Error,
     {
@@ -212,20 +208,6 @@ impl<'de> Visitor<'de> for MoneyVisitor {
 
         self.visit_f64(parsed)
     }
-
-    fn visit_str<E>(self, v: &str) -> Result<Money, E>
-    where
-        E: de::Error,
-    {
-        self.visit_borrowed_str(v)
-    }
-
-    fn visit_string<E>(self, v: String) -> Result<Money, E>
-    where
-        E: de::Error,
-    {
-        self.visit_borrowed_str(&v)
-    }
 }
 
 impl<'de> Deserialize<'de> for Money {
@@ -233,7 +215,7 @@ impl<'de> Deserialize<'de> for Money {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_str(MoneyVisitor)
+        deserializer.deserialize_any(MoneyVisitor)
     }
 }
 
@@ -283,7 +265,7 @@ mod tests {
             #[test]
             fn $name() {
                 $(
-                    let money_str = format!(r#""{}""#, $s);
+                    let money_str = format!(r#"{}"#, $s);
                     let parsed_money: Money = serde_json::from_str(&money_str).unwrap();
                     assert_eq!(parsed_money, Money::from_f64($o));
                  )+
@@ -293,16 +275,23 @@ mod tests {
 
     test_conversion!(
         parse_complex_numbers,
-        "($100.0)" => -100.0,
-        "$100.0" => 100.0,
-        "-$100.0" => -100.0
-        );
+        r#""($100.0)""# => -100.0,
+        r#""$100.0""# => 100.0,
+        r#""-$100.0""# => -100.0
+    );
 
     test_conversion!(
         parse_simpler_numbers,
-        "$150.0" => 150.0,
-        "-125.50" => -125.50
-        );
+        r#""$150.0""# => 150.0,
+        r#""-125.50""# => -125.50
+    );
+
+    test_conversion!(
+        plain_numbers,
+        "100" => 100.0,
+        "100.0" => 100.0,
+        "0" => 0.0
+    );
 }
 
 impl fmt::Display for Money {
