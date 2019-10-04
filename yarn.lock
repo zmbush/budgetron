@@ -2867,10 +2867,10 @@ eslint-module-utils@^2.4.0:
     debug "^2.6.8"
     pkg-dir "^2.0.0"
 
-eslint-plugin-flow-header@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-flow-header/-/eslint-plugin-flow-header-0.1.1.tgz#8d9f4a4ffe9eddc83cca892651acccd63bef2789"
-  integrity sha1-jZ9KT/6e3cg8yokmUazM1jvvJ4k=
+eslint-plugin-flow-header@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-flow-header/-/eslint-plugin-flow-header-0.2.0.tgz#eeb95c7b44c3e6b1ea650e3ac3ec30081b22c06e"
+  integrity sha512-ZVzn3ZxylHBWJTRomRcVddpuPRsJt8wgFH4HlJfAv5RP/j7mMJl9O0YyKBd0InXQH5IvDasHB5s4M59Wki0agQ==
   dependencies:
     requireindex "~1.1.0"
 
