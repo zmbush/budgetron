@@ -50,7 +50,7 @@
     "material-ui": "^0.20.2",
     "moment": "^2.24.0",
     "node-sass": "^4.5.2",
-    "normalize.css": "^7.0.0",
+    "normalize.css": "^8.0.1",
     "prop-types": "^15.5.8",
     "prop-types-exact": "^1.1.1",
     "react": "^16.0.0",
