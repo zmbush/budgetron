@@ -6,10 +6,8 @@ pull_request_rules:
 
   - name: automatic merge when reviewed and CI passes
     conditions:
-      - status-success=Travis CI - Branch
-      - status-success=Travis CI - Pull Request
-      - status-success=codecov/patch
-      - status-success=codecov/project
+      - status-success=continuous-integration/travis-ci/push
+      - status-success=continuous-integration/travis-ci/pr
       - '#approved-reviews-by>=1'
       - '#review-requested=0'
       - '#changes-requested-reviews-by=0'
