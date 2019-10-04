@@ -117,15 +117,15 @@ impl fmt::Display for Date {
 }
 
 impl Date {
-    pub fn month(&self) -> u32 {
+    pub fn month(self) -> u32 {
         self.date.month()
     }
 
-    pub fn day(&self) -> u32 {
+    pub fn day(self) -> u32 {
         self.date.day()
     }
 
-    pub fn uid(&self) -> String {
+    pub fn uid(self) -> String {
         format!(
             "{:04}{:02}{:02}",
             self.date.year(),
@@ -175,7 +175,7 @@ impl Date {
         *self -= Months(months);
     }
 
-    pub fn day_of_week(&self) -> i64 {
+    pub fn day_of_week(self) -> i64 {
         i64::from(self.date.weekday().num_days_from_monday())
     }
 
@@ -195,7 +195,7 @@ impl Date {
         }
     }
 
-    pub fn year(&self) -> i32 {
+    pub fn year(self) -> i32 {
         self.date.year() as i32
     }
 }

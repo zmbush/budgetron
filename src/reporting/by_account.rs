@@ -64,7 +64,6 @@ where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let (transactions, _): (Vec<_>, Vec<_>) = transactions
-            .into_iter()
             .map(|t| {
                 if let TransactionType::Transfer = t.transaction_type {
                     if t.account_name == self.account {
