@@ -53,7 +53,7 @@
     "normalize.css": "^8.0.1",
     "prop-types": "^15.5.8",
     "prop-types-exact": "^1.1.1",
-    "react": "^16.0.0",
+    "react": "^16.10.2",
     "react-d3": "^0.4.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.0.0",
