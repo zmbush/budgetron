@@ -20,10 +20,8 @@ pull_request_rules:
 
   - name: automatic merge when author is zmbush and CI passes
     conditions:
-      - status-success=Travis CI - Branch
-      - status-success=Travis CI - Pull Request
-      - status-success=codecov/patch
-      - status-success=codecov/project
+      - status-success=continuous-integration/travis-ci/push
+      - status-success=continuous-integration/travis-ci/pr
       - author=zmbush
     actions:
       comment:
