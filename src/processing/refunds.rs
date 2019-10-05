@@ -6,12 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::Transaction;
-use crate::processing::Collate;
-use budgetronlib::error::BResult;
-use std::cmp::min;
-use std::collections::HashSet;
-use std::i64;
+use {
+    crate::{loading::Transaction, processing::Collate},
+    budgetronlib::error::BResult,
+    std::{cmp::min, collections::HashSet, i64},
+};
 
 pub struct RefundCollator {
     pub horizon: usize,

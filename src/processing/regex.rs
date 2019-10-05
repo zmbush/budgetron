@@ -6,9 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use regex::{self, Captures};
-use serde::de::{self, Deserialize, Deserializer, Visitor};
-use std::fmt;
+use {
+    regex::{self, Captures},
+    serde::de::{self, Deserialize, Deserializer, Visitor},
+    std::fmt,
+};
 
 #[derive(Debug)]
 pub struct Regex(pub regex::Regex);

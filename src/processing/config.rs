@@ -6,14 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::{Money, Transaction};
-use crate::processing::regex::Regex;
-use crate::processing::Collate;
-use crate::processing::RefundCollator;
-use crate::processing::TransferCollator;
-use budgetronlib::error::BResult;
-use serde_derive::Deserialize;
-use std::collections::HashMap;
+use {
+    crate::{
+        loading::{Money, Transaction},
+        processing::{regex::Regex, Collate, RefundCollator, TransferCollator},
+    },
+    budgetronlib::error::BResult,
+    serde_derive::Deserialize,
+    std::collections::HashMap,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct ConfiguredProcessors {

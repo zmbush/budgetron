@@ -6,8 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::Transaction;
-use budgetronlib::error::BResult;
+use {crate::loading::Transaction, budgetronlib::error::BResult};
 
 pub mod config;
 mod refunds;
@@ -20,9 +19,9 @@ pub enum Collator {
     Config(config::ConfiguredProcessors),
 }
 
-pub use crate::processing::config::ConfiguredProcessors;
-pub use crate::processing::refunds::RefundCollator;
-pub use crate::processing::transfers::TransferCollator;
+pub use crate::processing::{
+    config::ConfiguredProcessors, refunds::RefundCollator, transfers::TransferCollator,
+};
 
 pub trait Collate {
     fn collate(&self, transactions: Vec<Transaction>) -> BResult<Vec<Transaction>>;

@@ -6,10 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::money::Money;
-use budgetronlib::error::BResult;
-use budgetronlib::fintime::Date;
-use serde_derive::{Deserialize, Serialize};
+use {
+    crate::loading::money::Money,
+    budgetronlib::{error::BResult, fintime::Date},
+    serde_derive::{Deserialize, Serialize},
+};
 
 #[derive(Debug, Serialize, Copy, Deserialize, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub enum TransactionType {

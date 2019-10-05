@@ -6,14 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use error::{BResult, BudgetError};
-use serde::de::DeserializeOwned;
-use std::collections::HashMap;
-use std::env;
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
-use toml;
+use {
+    crate::error::{BResult, BudgetError},
+    serde::de::DeserializeOwned,
+    serde_derive::Deserialize,
+    std::{collections::HashMap, env, fs::File, io::Read, path::PathBuf},
+    toml,
+};
 
 #[derive(Deserialize)]
 pub struct EmailAccount {

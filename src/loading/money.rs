@@ -6,14 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use serde::de::{self, Deserialize, Deserializer, Visitor};
-use serde::ser::{Serialize, Serializer};
-use serde_json;
-use std::convert::TryInto;
-use std::fmt;
-use std::iter;
-use std::ops;
-use std::str::FromStr;
+use {
+    serde::{
+        de::{self, Deserialize, Deserializer, Visitor},
+        ser::{Serialize, Serializer},
+    },
+    serde_json,
+    std::{convert::TryInto, fmt, iter, ops, str::FromStr},
+};
 
 #[derive(Debug, Copy, PartialEq, Clone, Eq, PartialOrd, Ord, Default)]
 pub struct Money(i64);

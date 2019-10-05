@@ -6,12 +6,18 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::{Transaction, TransactionType};
-use crate::processing::Collate;
-use budgetronlib::error::BResult;
-use std::cmp::min;
-use std::collections::{HashMap, HashSet};
-use std::i64;
+use {
+    crate::{
+        loading::{Transaction, TransactionType},
+        processing::Collate,
+    },
+    budgetronlib::error::BResult,
+    std::{
+        cmp::min,
+        collections::{HashMap, HashSet},
+        i64,
+    },
+};
 
 pub struct TransferCollator {
     pub horizon: usize,

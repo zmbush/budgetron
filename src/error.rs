@@ -6,8 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use serde_json;
-use std::io;
+use {serde_json, std::io};
 
 #[derive(Debug)]
 pub enum Error {

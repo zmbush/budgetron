@@ -6,12 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::Transaction;
-use crate::loading::TransactionType;
-use crate::reporting::Reporter;
-use data_store;
-use serde_json::Value;
-use std::borrow::Cow;
+use {
+    crate::{
+        loading::{Transaction, TransactionType},
+        reporting::Reporter,
+    },
+    data_store,
+    serde_json::Value,
+    std::borrow::Cow,
+};
 
 pub struct Database;
 impl Reporter for Database {

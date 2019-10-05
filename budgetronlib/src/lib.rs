@@ -6,14 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(unused, unused_extern_crates)]
-
-extern crate chrono;
-extern crate csv;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate toml;
+#![deny(unused)]
 
 pub mod config;
 pub mod error;

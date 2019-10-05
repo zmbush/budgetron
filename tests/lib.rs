@@ -6,12 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate budgetron;
-extern crate budgetronlib;
-
-use budgetron::processing::ConfiguredProcessors;
-use budgetron::reporting::ConfiguredReports;
-use budgetronlib::config;
+use {
+    budgetron::{processing::ConfiguredProcessors, reporting::ConfiguredReports},
+    budgetronlib::config,
+};
 
 #[test]
 fn test_loading_budgetronrc_example() {

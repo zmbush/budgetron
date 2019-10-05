@@ -6,13 +6,16 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::{Money, Transaction, TransactionType};
-use crate::reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget};
-use budgetronlib::fintime::Date;
-use serde_derive::{Deserialize, Serialize};
-use serde_json::{self, Value};
-use std::borrow::Cow;
-use std::collections::HashMap;
+use {
+    crate::{
+        loading::{Money, Transaction, TransactionType},
+        reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget},
+    },
+    budgetronlib::fintime::Date,
+    serde_derive::{Deserialize, Serialize},
+    serde_json::{self, Value},
+    std::{borrow::Cow, collections::HashMap},
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {

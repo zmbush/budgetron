@@ -6,10 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::{Transaction, TransactionType};
-use crate::reporting::Reporter;
-use serde_json::Value;
-use std::borrow::Cow;
+use {
+    crate::{
+        loading::{Transaction, TransactionType},
+        reporting::Reporter,
+    },
+    serde_json::Value,
+    std::borrow::Cow,
+};
 
 pub struct OnlyType<'a, T>
 where
