@@ -12,12 +12,25 @@ use budgetron::loading;
 use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};
 use budgetron::reporting::{ConfiguredReports, List, Reporter};
 use budgetronlib::config;
-use clap::{App, Arg};
 use iron::prelude::*;
 use mount::Mount;
 use serde::Serialize;
 use std::borrow::Cow;
 use std::path::Path;
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = "Budgetron", about = "Processes transactions into reports")]
+struct Opt {
+    #[structopt(short = "f", long = "file")]
+    input_files: Vec<String>,
+
+    #[structopt(short, long)]
+    serve: bool,
+
+    #[structopt(short, long, default_value = "3000")]
+    port: u32,
+}
 
 #[cfg(feature = "db")]
 use budgetron::reporting::Database;
@@ -25,40 +38,10 @@ use budgetron::reporting::Database;
 fn main() {
     env_logger::init();
 
-    let matches = App::new("Collator")
-        .version(env!("CARGO_PKG_VERSION"))
-        .author("Zachary Bush <zach@zmbush.com>")
-        .about("Parse exports and convert to standard format")
-        .arg(
-            Arg::with_name("file")
-                .short("f")
-                .long("file")
-                .value_name("FILE")
-                .help("Export from a supported institution")
-                .takes_value(true)
-                .multiple(true),
-        )
-        .arg(
-            Arg::with_name("serve")
-                .long("serve")
-                .help("Start server to view reports"),
-        )
-        .arg(
-            Arg::with_name("port")
-                .short("p")
-                .value_name("PORT")
-                .long("port")
-                .help("Port to host the server at")
-                .default_value("3000")
-                .takes_value(true),
-        )
-        .get_matches();
+    let opt = Opt::from_args();
 
-    let transactions = if let Some(files) = matches.values_of("file") {
-        loading::load_from_files(files).expect("Unable to load files")
-    } else {
-        Vec::new()
-    };
+    let transactions =
+        loading::load_from_files(opt.input_files.into_iter()).expect("Unable to load files");
 
     let processors: ConfiguredProcessors =
         config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
@@ -83,7 +66,7 @@ fn main() {
     #[cfg(not(feature = "db"))]
     let transaction_list = List.report(cow_transactions.into_iter());
 
-    if matches.is_present("serve") {
+    if opt.serve {
         let mut mount = Mount::new();
         mount.mount("/", staticfile::Static::new(Path::new("web/static")));
         mount.mount("__/data.json", JsonHandler { data: report });
@@ -93,8 +76,9 @@ fn main() {
                 data: transaction_list,
             },
         );
-        let port = matches.value_of("port").unwrap();
-        Iron::new(mount).http(format!("0.0.0.0:{}", port)).unwrap();
+        Iron::new(mount)
+            .http(format!("0.0.0.0:{}", opt.port))
+            .unwrap();
     }
 }
 
