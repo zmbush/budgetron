@@ -1,24 +1,17 @@
+import Money from "components/Money";
 import * as React from "react";
 import {
   IncomeExpenseRatioData,
-  ReportInfo,
-  IncomeExpenseRatioDatum
+  IncomeExpenseRatioDatum,
+  ReportInfo
 } from "util/data";
-import Money from "components/Money";
+
 import * as styles from "./styles.scss";
 
-type Props = {
+interface IProps {
   data: IncomeExpenseRatioData;
   report: ReportInfo;
-};
-
-const total = (data: IncomeExpenseRatioDatum) => {
-  let retval = parseInt(data.other, 10);
-  for (const amount of data.byTag.values()) {
-    retval += parseInt(amount, 10);
-  }
-  return retval;
-};
+}
 
 const parseFloatIfNeeded = (amount: string | number): number => {
   if (typeof amount === "string") {
@@ -29,7 +22,7 @@ const parseFloatIfNeeded = (amount: string | number): number => {
 
 const MoneyPerc = ({
   amount,
-  total
+  total,
 }: {
   amount: string | number;
   total: string | number;
@@ -48,14 +41,14 @@ function titleCase(str: string) {
   return str
     .toLowerCase()
     .split(" ")
-    .map(word => word.replace(word[0], word[0].toUpperCase()))
+    .map((word) => word.replace(word[0], word[0].toUpperCase()))
     .join(" ");
 }
 
 const Category = ({
   amount,
   name,
-  total
+  total,
 }: {
   amount: string | number;
   name: string;
@@ -75,7 +68,7 @@ const Ratios = (props: {
   datum: IncomeExpenseRatioDatum;
 }) => {
   const { totalCredit, datum } = props;
-  let data = [];
+  const data = [];
   for (const [name, amount] of datum.byTag.entries()) {
     data.push(<Category name={name} amount={amount} total={totalCredit} />);
   }
@@ -83,10 +76,10 @@ const Ratios = (props: {
   return <div>{data}</div>;
 };
 
-const IncomeExpenseRatio = (props: Props) => {
+const IncomeExpenseRatio = (props: IProps) => {
   const { credit, debit } = props.data;
-  const totalCredit = total(credit);
-  const totalDebit = total(debit);
+  const totalCredit = credit.total();
+  const totalDebit = debit.total();
   return (
     <div>
       <div className={styles.reportSection}>

@@ -1,14 +1,14 @@
-import * as React from "react";
-import { CashflowData, ReportInfo } from "util/data";
 import Money from "components/Money";
 import TimeseriesChart from "components/TimeseriesChart";
+import * as React from "react";
+import { CashflowData, ReportInfo } from "util/data";
 
-type Props = {
+interface IProps {
   data: CashflowData;
   report: ReportInfo;
-};
+}
 
-const Cashflow = (props: Props) => {
+const Cashflow = (props: IProps) => {
   const { credit, debit } = props.data;
   const delta = parseInt(credit, 10) - parseInt(debit, 10);
   if (props.report.uiConfig.expensesOnly) {

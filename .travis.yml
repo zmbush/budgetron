@@ -18,6 +18,8 @@ before_script:
   - cargo build
 script:
   - yarn run webpack
+  - yarn tslint -c tslint.json 'web/src/**/*.ts{,x}' --exclude '**/*.scss.d.ts'
+  - yarn tsfmt --verify
   - cargo clippy --all -- -D clippy::all
   - cargo fmt --all -- --check
   - cargo test

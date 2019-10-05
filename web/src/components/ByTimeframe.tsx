@@ -1,8 +1,8 @@
-import * as React from "react";
-import { ReportInfo, ReportData, Transaction } from "util/data";
-import Page from "components/Page";
 import Money from "components/Money";
+import Page from "components/Page";
 import * as moment from "moment";
+import * as React from "react";
+import { ReportData, ReportInfo, Transaction } from "util/data";
 
 const monthNames = [
   "January",
@@ -16,10 +16,10 @@ const monthNames = [
   "September",
   "October",
   "November",
-  "December"
+  "December",
 ];
 
-type Props = {
+interface IProps {
   timeframe: "Year" | "Quarter" | "Month";
   data: Map<Date, ReportData>;
   title: string;
@@ -28,42 +28,42 @@ type Props = {
   className?: string;
   count?: number;
   Component:
-    | string
-    | React.ComponentType<{
-        data: ReportData;
-        transactions: Map<string, Transaction>;
-        report: ReportInfo;
-        showGraph: boolean;
-      }>;
-};
+  | string
+  | React.ComponentType<{
+    data: ReportData;
+    transactions: Map<string, Transaction>;
+    report: ReportInfo;
+    showGraph: boolean;
+  }>;
+}
 
-type State = {
+interface IState {
   expanded: boolean;
   showGraph: Map<Date, boolean>;
-};
+}
 
-export default class ByTimeframe extends React.Component<Props, State> {
-  static defaultProps = {
+export default class ByTimeframe extends React.Component<IProps, IState> {
+  public static defaultProps = {
     className: null,
-    count: 1
+    count: 1,
   };
 
-  constructor(props: Props) {
+  constructor(props: IProps) {
     super(props);
 
     this.state = {
       expanded: false,
-      showGraph: new Map()
+      showGraph: new Map(),
     };
   }
 
-  getMostRecent(): Date {
+  public getMostRecent(): Date {
     return [...this.props.data.keys()]
       .sort((a, b) => a.getTime() - b.getTime())
       .reverse()[0];
   }
 
-  getAverageStartDate(): Date {
+  public getAverageStartDate(): Date {
     const mostRecent = this.getMostRecent();
     switch (this.props.timeframe) {
       case "Year":
@@ -83,16 +83,16 @@ export default class ByTimeframe extends React.Component<Props, State> {
     }
   }
 
-  getDateAgo(
+  public getDateAgo(
     count: moment.DurationInputArg1,
-    unit: moment.DurationInputArg2
+    unit: moment.DurationInputArg2,
   ): Date {
     return moment(this.getMostRecent())
       .subtract(count, unit)
       .toDate();
   }
 
-  printDate(date: Date): string | number {
+  public printDate(date: Date): string | number {
     switch (this.props.timeframe) {
       case "Year":
         return date.getFullYear();
@@ -105,9 +105,9 @@ export default class ByTimeframe extends React.Component<Props, State> {
     }
   }
 
-  stats(
+  public stats(
     count: moment.DurationInputArg1,
-    unit: moment.DurationInputArg2
+    unit: moment.DurationInputArg2,
   ): { mean: number; median: number } {
     const start = this.getDateAgo(count, unit);
     const dataPoints = [...this.props.data.entries()]
@@ -121,29 +121,29 @@ export default class ByTimeframe extends React.Component<Props, State> {
       .sort((a, b) => a[1] - b[1]);
     const medianIndex = Math.min(
       Math.round(dataPoints.length / 2),
-      dataPoints.length - 1
+      dataPoints.length - 1,
     );
     const median = dataPoints[medianIndex][1];
     const [meanCount, meanSum] = dataPoints.reduce(
       ([c1, a1], [c2, a2]) => [c1 + c2, a1 + a2],
-      [0, 0.0]
+      [0, 0.0],
     );
     const mean = meanSum / meanCount;
 
     return { median, mean };
   }
 
-  toggleExpanded = () => {
+  public toggleExpanded = () => {
     this.setState({ expanded: !this.state.expanded });
-  };
+  }
 
-  toggleGraph = (date: Date) => {
+  public toggleGraph = (date: Date) => {
     const { showGraph } = this.state;
     showGraph.set(date, !showGraph.get(date));
     this.setState({ showGraph });
-  };
+  }
 
-  render() {
+  public render() {
     if (this.props.data) {
       let timeframes = [...this.props.data.entries()]
         .sort((a, b) => a[0].getTime() - b[0].getTime())

@@ -1,9 +1,0 @@
-extends: "airbnb"
-parser: "babel-eslint"
-plugins:
-  - react
-  - flowtype
-settings:
-  import/resolver: "webpack"
-env:
-  browser: true
