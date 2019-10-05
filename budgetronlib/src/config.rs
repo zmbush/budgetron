@@ -59,7 +59,7 @@ where
             }
             contents
         } else {
-            let path = env::home_dir()
+            let path = dirs::home_dir()
                 .unwrap_or_else(|| PathBuf::from("/"))
                 .join(fname);
             let ret: String = if let Ok(mut f) = File::open(path) {
