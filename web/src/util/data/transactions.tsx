@@ -1,64 +1,10 @@
-import * as React from "react";
 import Money from "components/Money";
 import Chip from "material-ui/Chip";
+import * as React from "react";
 
 export class Transaction {
-  accountName: string;
-  amount: string | number;
-  category: string;
-  date: Date;
-  description: string;
-  labels: string;
-  notes: string;
-  originalCategory: string;
-  originalDescription: string;
-  person: string;
-  tags: Array<string>;
-  transactionType: string;
-  transferDestinationAccount?: string;
 
-  constructor(
-    accountName: string,
-    amount: string | number,
-    category: string,
-    date: Date,
-    description: string,
-    labels: string,
-    notes: string,
-    originalCategory: string,
-    originalDescription: string,
-    person: string,
-    tags: Array<any>,
-    transactionType: string,
-    data?: { transferDestinationAccount?: any }
-  ) {
-    this.accountName = accountName;
-    this.amount = amount;
-    this.category = category;
-    this.date = date;
-    this.description = description;
-    this.labels = labels;
-    this.notes = notes;
-    this.originalCategory = originalCategory;
-    this.originalDescription = originalDescription;
-    this.person = person;
-    this.tags = [];
-    tags.forEach(t => {
-      if (typeof t === "string") {
-        this.tags.push(t);
-      }
-    });
-    this.transactionType = transactionType;
-    if (
-      data &&
-      data.transferDestinationAccount &&
-      typeof data.transferDestinationAccount === "string"
-    ) {
-      this.transferDestinationAccount = data.transferDestinationAccount;
-    }
-  }
-
-  static parse(data: any): Transaction | null {
+  public static parse(data: any): Transaction | null {
     if (
       data &&
       typeof data === "object" &&
@@ -88,14 +34,73 @@ export class Transaction {
         data.person,
         data.tags,
         data.transaction_type,
-        data
+        data,
       );
     }
 
     return null;
   }
 
-  render(name: string): null | string | React.ReactNode {
+  public static transactionName(name: string): string {
+    const result = name.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1);
+  }
+  public accountName: string;
+  public amount: string | number;
+  public category: string;
+  public date: Date;
+  public description: string;
+  public labels: string;
+  public notes: string;
+  public originalCategory: string;
+  public originalDescription: string;
+  public person: string;
+  public tags: string[];
+  public transactionType: string;
+  public transferDestinationAccount?: string;
+
+  constructor(
+    accountName: string,
+    amount: string | number,
+    category: string,
+    date: Date,
+    description: string,
+    labels: string,
+    notes: string,
+    originalCategory: string,
+    originalDescription: string,
+    person: string,
+    tags: any[],
+    transactionType: string,
+    data?: { transferDestinationAccount?: any },
+  ) {
+    this.accountName = accountName;
+    this.amount = amount;
+    this.category = category;
+    this.date = date;
+    this.description = description;
+    this.labels = labels;
+    this.notes = notes;
+    this.originalCategory = originalCategory;
+    this.originalDescription = originalDescription;
+    this.person = person;
+    this.tags = [];
+    tags.forEach((t) => {
+      if (typeof t === "string") {
+        this.tags.push(t);
+      }
+    });
+    this.transactionType = transactionType;
+    if (
+      data &&
+      data.transferDestinationAccount &&
+      typeof data.transferDestinationAccount === "string"
+    ) {
+      this.transferDestinationAccount = data.transferDestinationAccount;
+    }
+  }
+
+  public render(name: string): null | string | React.ReactNode {
     switch (name) {
       case "accountName":
         if (this.transferDestinationAccount) {
@@ -126,16 +131,11 @@ export class Transaction {
       case "person":
         return this.person;
       case "tags":
-        return this.tags.map(tag => <Chip key={tag}>{tag}</Chip>);
+        return this.tags.map((tag) => <Chip key={tag}>{tag}</Chip>);
       case "transactionType":
       default:
         return null;
     }
-  }
-
-  static transactionName(name: string): string {
-    const result = name.replace(/([A-Z])/g, " $1");
-    return result.charAt(0).toUpperCase() + result.slice(1);
   }
 }
 
@@ -145,7 +145,7 @@ export function parseTransactions(transactions: {}): Map<string, Transaction> {
   Object.entries(transactions).forEach(([uid, transaction]) => {
     if (typeof uid === "string") {
       const t = Transaction.parse(transaction);
-      if (t) parsedTransactions.set(uid, t);
+      if (t) { parsedTransactions.set(uid, t); }
     }
   });
 

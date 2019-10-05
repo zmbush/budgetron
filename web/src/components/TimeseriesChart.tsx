@@ -1,45 +1,45 @@
-import * as React from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  ReferenceLine,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from "recharts";
-import { Timeseries } from "util/data";
-import * as moment from "moment";
 import Money from "components/Money";
 import * as d3 from "d3-scale-chromatic";
+import * as moment from "moment";
+import * as React from "react";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Timeseries } from "util/data";
 
-type Props<T> = {
+interface IProps<T> {
   timeseries: Timeseries<T>;
   className?: string;
-  lineNames: (string | null)[];
+  lineNames: Array<string | null>;
 
   formatDate?: (timestamp: number) => string;
   gridDasharray?: string;
   height?: string | number;
   lineType?:
-    | "monotone"
-    | "linear"
-    | "basis"
-    | "basisClosed"
-    | "basisOpen"
-    | "linearClosed"
-    | "natural"
-    | "monotoneX"
-    | "monotoneY"
-    | "step"
-    | "stepBefore"
-    | "stepAfter";
+  | "monotone"
+  | "linear"
+  | "basis"
+  | "basisClosed"
+  | "basisOpen"
+  | "linearClosed"
+  | "natural"
+  | "monotoneX"
+  | "monotoneY"
+  | "step"
+  | "stepBefore"
+  | "stepAfter";
   width?: string | number;
-};
+}
 
-export default function TimeseriesChart<T>(props: Props<T>) {
+export default function TimeseriesChart<T>(props: IProps<T>) {
   const {
     className,
     formatDate,
@@ -48,10 +48,10 @@ export default function TimeseriesChart<T>(props: Props<T>) {
     lineNames,
     lineType,
     timeseries,
-    width
+    width,
   } = props;
   const { data } = timeseries;
-  let category = d3.schemeCategory10;
+  const category = d3.schemeCategory10;
   if (data.length === 0) {
     return <div>No Data</div>;
   }
@@ -99,5 +99,5 @@ TimeseriesChart.defaultProps = {
   gridDasharray: "3 3",
   height: 200,
   lineType: "monotone",
-  width: "95%"
+  width: "95%",
 };

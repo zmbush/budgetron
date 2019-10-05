@@ -1,38 +1,33 @@
-import * as React from "react";
 import Money from "components/Money";
-import {
-  RollingBudgetData,
-  RollingBudgetConfig,
-  ReportInfo,
-  Transaction
-} from "util/data";
-import Transactions from "components/Transactions";
 import TimeseriesChart from "components/TimeseriesChart";
+import Transactions from "components/Transactions";
+import * as React from "react";
+import { ReportInfo, RollingBudgetConfig, RollingBudgetData, Transaction } from "util/data";
 
 import * as style from "./style.scss";
 
-type Props = {
+interface IProps {
   data: RollingBudgetData;
   report: ReportInfo & {
     config: RollingBudgetConfig;
   };
   transactions: Map<string, Transaction>;
-};
+}
 
-type State = {
+interface IState {
   show: string;
-};
+}
 
-export default class RollingBudget extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class RollingBudget extends React.Component<IProps, IState> {
+  constructor(props: IProps) {
     super(props);
 
     this.state = {
-      show: ""
+      show: "",
     };
   }
 
-  toggleTable(person: string) {
+  public toggleTable(person: string) {
     if (this.state.show === person) {
       this.setState({ show: "" });
     } else {
@@ -40,9 +35,9 @@ export default class RollingBudget extends React.Component<Props, State> {
     }
   }
 
-  proportions(): { [name: string]: number } {
-    const parts: [string, number][] = [
-      ...this.props.report.config.amounts.entries()
+  public proportions(): { [name: string]: number } {
+    const parts: Array<[string, number]> = [
+      ...this.props.report.config.amounts.entries(),
     ].map(([name, amount]) => [name, parseFloat(amount)]);
 
     const total = parts.map(([, amount]) => amount).reduce((s, v) => s + v, 0);
@@ -51,11 +46,11 @@ export default class RollingBudget extends React.Component<Props, State> {
         acc[name] = v / total;
         return acc;
       },
-      {} as { [name: string]: number }
+      {} as { [name: string]: number },
     );
   }
 
-  renderBudgets() {
+  public renderBudgets() {
     return [...this.props.data.budgets.entries()].map(
       ([person, budget]: [string, string]) => (
         <div key={person}>
@@ -91,21 +86,21 @@ export default class RollingBudget extends React.Component<Props, State> {
             />
           ) : null}
         </div>
-      )
+      ),
     );
   }
 
-  renderTimeseries() {
+  public renderTimeseries() {
     const { timeseries } = this.props.data;
     if (!timeseries) {
       return null;
     }
 
-    let lineNames: (string | null)[] = [
-      ...this.props.report.config.amounts.keys()
+    let lineNames: Array<string | null> = [
+      ...this.props.report.config.amounts.keys(),
     ];
     if (this.state.show !== "") {
-      lineNames = [...this.props.report.config.amounts.keys()].map(k => {
+      lineNames = [...this.props.report.config.amounts.keys()].map((k) => {
         if (k === this.state.show) {
           return k;
         }
@@ -121,7 +116,7 @@ export default class RollingBudget extends React.Component<Props, State> {
     );
   }
 
-  render() {
+  public render() {
     return (
       <div className={style.main}>
         <div className={style.data}>{this.renderBudgets()}</div>

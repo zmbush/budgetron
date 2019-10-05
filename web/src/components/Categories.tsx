@@ -1,8 +1,8 @@
-import * as React from "react";
 import Money from "components/Money";
-import { ReportInfo, CategoriesData, Transaction } from "util/data";
-import Transactions from "components/Transactions";
 import TimeseriesChart from "components/TimeseriesChart";
+import Transactions from "components/Transactions";
+import * as React from "react";
+import { CategoriesData, ReportInfo, Transaction } from "util/data";
 
 const CategoryEntry = (props: {
   onClick: () => void;
@@ -13,51 +13,51 @@ const CategoryEntry = (props: {
   transaction_ids: string[];
   transactions: Map<string, Transaction>;
 }) => (
-  <>
-    <tr key="row">
-      <td>
-        <button onClick={props.onClick}>{props.category}</button>
-      </td>
-      <td>
-        <Money amount={props.amount} invert={props.invert} />
-      </td>
-    </tr>
-    <tr key="transactions">
-      {props.expanded ? <Transactions {...props} /> : null}
-    </tr>
-  </>
-);
+    <>
+      <tr key="row">
+        <td>
+          <button onClick={props.onClick}>{props.category}</button>
+        </td>
+        <td>
+          <Money amount={props.amount} invert={props.invert} />
+        </td>
+      </tr>
+      <tr key="transactions">
+        {props.expanded ? <Transactions {...props} /> : null}
+      </tr>
+    </>
+  );
 
-type Props = {
+interface IProps {
   report: ReportInfo;
   data: CategoriesData;
   transactions: Map<string, Transaction>;
   showGraph: boolean;
-};
+}
 
-type State = {
+interface IState {
   expanded: { [category: string]: boolean };
-};
+}
 
-export default class Categories extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class Categories extends React.Component<IProps, IState> {
+  constructor(props: IProps) {
     super(props);
 
     this.state = {
-      expanded: {}
+      expanded: {},
     };
   }
 
-  toggleExpanded(category: string) {
+  public toggleExpanded(category: string) {
     const { expanded } = this.state;
     expanded[category] = !expanded[category];
     this.setState({ expanded });
   }
 
-  render() {
+  public render() {
     const reverse = this.props.report.onlyType !== "Debit";
     let categories = [...this.props.data.categories.entries()].sort(
-      (a, b) => parseFloat(a[1].amount) - parseFloat(b[1].amount)
+      (a, b) => parseFloat(a[1].amount) - parseFloat(b[1].amount),
     );
 
     if (reverse) {

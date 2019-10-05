@@ -1,42 +1,42 @@
-import * as React from "react";
-import { Card, CardTitle, CardText } from "material-ui/Card";
+import { Card, CardText, CardTitle } from "material-ui/Card";
 import Toggle from "material-ui/Toggle";
+import * as React from "react";
 
 import * as style from "./style.scss";
 
-type Props = {
+interface IProps {
   title: string;
   onClick?: (e: React.MouseEvent) => void;
   expanded?: boolean;
   children: React.ReactNode;
   className?: string;
-};
+}
 
-type State = {
+interface IState {
   expanded: boolean;
-};
+}
 
-class Page extends React.Component<Props, State> {
-  static defaultProps = {
+class Page extends React.Component<IProps, IState> {
+  public static defaultProps = {
+    expanded: null,
     onClick: null,
-    expanded: null
   };
 
-  constructor(props: Props) {
+  constructor(props: IProps) {
     super(props);
 
     this.state = {
-      expanded: false
+      expanded: false,
     };
   }
 
-  render() {
+  public render() {
     return (
       <Card
         className={style.page}
         expanded={this.state.expanded}
         expandable
-        onExpandChange={expanded => this.setState({ expanded })}
+        onExpandChange={(expanded) => this.setState({ expanded })}
       >
         <CardTitle title={this.props.title} actAsExpander />
         {this.props.onClick ? (

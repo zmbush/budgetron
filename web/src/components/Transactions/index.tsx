@@ -16,17 +16,17 @@ const COLUMNS = [
   "accountName",
   "labels",
   "notes",
-  "tags"
+  "tags",
 ];
 
-type DetailsTableProps = {
+interface IDetailsTableIProps {
   show?: boolean;
   colSpan?: number;
   transaction: Transaction;
-};
+}
 
-const DetailsTable = (props: DetailsTableProps) => {
-  if (!props.show) return null;
+const DetailsTable = (props: IDetailsTableIProps) => {
+  if (!props.show) { return null; }
   return (
     <tr>
       <td colSpan={props.colSpan}>
@@ -38,9 +38,9 @@ const DetailsTable = (props: DetailsTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {COLUMNS.map(c => {
+            {COLUMNS.map((c) => {
               const data = props.transaction.render(c);
-              if (!data) return null;
+              if (!data) { return null; }
               return (
                 <tr key={c} className={style.normal_row}>
                   <td>{Transaction.transactionName(c)}</td>
@@ -56,47 +56,47 @@ const DetailsTable = (props: DetailsTableProps) => {
 };
 
 DetailsTable.defaultProps = {
+  colSpan: 1,
   show: false,
-  colSpan: 1
 };
 
-type Props = {
-  columns: Array<string>;
-  transaction_ids: Array<string>;
+interface IProps {
+  columns: string[];
+  transaction_ids: string[];
   transactions: Map<string, Transaction>;
 
   filter: (entry: [string, Transaction]) => boolean;
   transform: (t: Transaction) => Transaction;
-};
+}
 
-type State = {
+interface IState {
   show: { [uid: string]: boolean };
-};
+}
 
-export default class Transactions extends React.Component<Props, State> {
-  static defaultProps = {
+export default class Transactions extends React.Component<IProps, IState> {
+  public static defaultProps = {
     columns: ["date", "amount", "person", "description"],
     filter: () => true,
-    transform: (t: Transaction) => t
+    transform: (t: Transaction) => t,
   };
 
-  constructor(props: Props) {
+  constructor(props: IProps) {
     super(props);
 
     this.state = {
-      show: {}
+      show: {},
     };
   }
 
-  toggleDetails(tid: string) {
+  public toggleDetails(tid: string) {
     const { show } = this.state;
     show[tid] = !show[tid];
     this.setState({ show });
   }
 
-  fetchTransactionDetails(tid: string): Transaction {
+  public fetchTransactionDetails(tid: string): Transaction {
     const transaction = this.props.transactions.get(tid);
-    if (transaction) return transaction;
+    if (transaction) { return transaction; }
 
     const year = tid.slice(0, 4);
     const month = tid.slice(4, 6);
@@ -123,26 +123,26 @@ export default class Transactions extends React.Component<Props, State> {
       "UNKNOWN",
       "unknown",
       ["details not exported"],
-      type
+      type,
     );
   }
 
-  renderHeaders() {
-    return this.props.columns.map(id => (
+  public renderHeaders() {
+    return this.props.columns.map((id) => (
       <th key={id}>{Transaction.transactionName(id)}</th>
     ));
   }
 
-  renderRowCells(t: Transaction) {
-    return this.props.columns.map(id => <td key={id}>{t.render(id)}</td>);
+  public renderRowCells(t: Transaction) {
+    return this.props.columns.map((id) => <td key={id}>{t.render(id)}</td>);
   }
 
-  render() {
+  public render() {
     const transactions = this.props.transaction_ids
       .sort()
       .map((tid): [string, Transaction] => [
         tid,
-        this.fetchTransactionDetails(tid)
+        this.fetchTransactionDetails(tid),
       ])
       .filter(this.props.filter)
       .map(([tid, t]): [string, Transaction] => [tid, this.props.transform(t)])
@@ -166,7 +166,7 @@ export default class Transactions extends React.Component<Props, State> {
               key={`${tid} details`}
               show={this.state.show[tid]}
               transaction={transaction}
-            />
+            />,
           ])}
         </tbody>
       </table>

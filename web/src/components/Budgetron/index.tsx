@@ -1,25 +1,25 @@
+import ByTimeframe from "components/ByTimeframe";
 import Cashflow from "components/Cashflow";
 import Categories from "components/Categories";
-import * as React from "react";
-import RollingBudget from "components/RollingBudget";
-import ByTimeframe from "components/ByTimeframe";
 import IncomeExpenseRatio from "components/IncomeExpenseRatio";
-import { Report, TimedReportData, Transaction } from "util/data";
+import RollingBudget from "components/RollingBudget";
 import Chip from "material-ui/Chip";
+import * as React from "react";
+import { Report, TimedReportData, Transaction } from "util/data";
 
 import Page from "components/Page";
 
 import * as style from "./style.scss";
 
 const componentConfig = (
-  type: "RollingBudget" | "Cashflow" | "Categories" | "IncomeExpenseRatio"
+  type: "RollingBudget" | "Cashflow" | "Categories" | "IncomeExpenseRatio",
 ) => {
   const config: {
     Component: string | React.ComponentType<any>;
     count: number;
   } = {
     Component: "div",
-    count: 1
+    count: 1,
   };
   if (type === "RollingBudget") {
     config.Component = RollingBudget;
@@ -36,14 +36,14 @@ const componentConfig = (
   return config;
 };
 
-type TimeframeReportsProps = {
-  data: Array<Report>;
+interface ITimeframeReportsProps {
+  data: Report[];
   timeframe: "Year" | "Quarter" | "Month";
   transactions: Map<string, Transaction>;
   display: boolean;
-};
+}
 
-const TimeframeReports = (props: TimeframeReportsProps) => {
+const TimeframeReports = (props: ITimeframeReportsProps) => {
   if (props.display) {
     return (
       <>
@@ -73,14 +73,16 @@ const TimeframeReports = (props: TimeframeReportsProps) => {
   return null;
 };
 
-type SimpleReportsProps = {
-  data: Array<Report>;
-};
+interface ISimpleReportsProps {
+  data: Report[];
+}
 
-const SimpleReports = (props: SimpleReportsProps) => (
+const SimpleReports = (props: ISimpleReportsProps) => (
   <>
     {props.data.map(({ data, report, key }) => {
-      if (data instanceof TimedReportData) return null;
+      if (data instanceof TimedReportData) {
+        return null;
+      }
       const cfg = componentConfig(report.config.type);
       return (
         <Page key={key} className={style.report} title={report.name}>
@@ -96,30 +98,30 @@ const SimpleReports = (props: SimpleReportsProps) => (
   </>
 );
 
-type BudgetronProps = {
-  data: Array<Report>;
+interface IBudgetronProps {
+  data: Report[];
   transactions: Map<string, Transaction>;
-};
+}
 
-type BudgetronState = {
+interface IBudgetronState {
   month: boolean;
   quarter: boolean;
   year: boolean;
-};
+}
 
-class Budgetron extends React.Component<BudgetronProps, BudgetronState> {
-  constructor(props: BudgetronProps) {
+class Budgetron extends React.Component<IBudgetronProps, IBudgetronState> {
+  constructor(props: IBudgetronProps) {
     super(props);
 
     this.state = {
       month: false,
       quarter: false,
-      year: false
+      year: false,
     };
   }
 
-  getChip(period: "month" | "quarter" | "year", description: string) {
-    let bg = undefined;
+  public getChip(period: "month" | "quarter" | "year", description: string) {
+    let bg;
     if (this.state[period]) {
       bg = "#00FF00";
     }
@@ -130,17 +132,17 @@ class Budgetron extends React.Component<BudgetronProps, BudgetronState> {
     );
   }
 
-  toggle(period: "month" | "quarter" | "year") {
-    const newState: Pick<BudgetronState, typeof period> = {
+  public toggle(period: "month" | "quarter" | "year") {
+    const newState: Pick<IBudgetronState, typeof period> = {
       month: this.state.month,
       quarter: this.state.quarter,
-      year: this.state.year
+      year: this.state.year,
     };
     newState[period] = !newState[period];
     this.setState(newState);
   }
 
-  render() {
+  public render() {
     return (
       <div className={style.mainContent}>
         <div className={style.chipBag}>

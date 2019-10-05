@@ -1,23 +1,23 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import Budgetron from "components/Budgetron";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import "normalize.css";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 import {
   parseReports,
   parseTransactions,
   Report,
-  Transaction
+  Transaction,
 } from "util/data";
-import "normalize.css";
 
 const App = (props: {
-  data: Array<Report>;
+  data: Report[];
   transactions: Map<string, Transaction>;
 }) => (
-  <MuiThemeProvider>
-    <Budgetron {...props} />
-  </MuiThemeProvider>
-);
+    <MuiThemeProvider>
+      <Budgetron {...props} />
+    </MuiThemeProvider>
+  );
 
 let data: Report[] = [];
 let transactions = new Map();
@@ -28,17 +28,17 @@ const render = () => {
   }
 };
 
-fetch("/__/data.json").then(reports =>
-  reports.json().then(json => {
+fetch("/__/data.json").then((reports) =>
+  reports.json().then((json) => {
     data = parseReports(json);
     render();
-  })
+  }),
 );
 
-fetch("/__/transactions.json").then(reports =>
-  reports.json().then(json => {
-    transactions = parseTransactions(json.transactions);
+fetch("/__/transactions.json").then((reports) =>
+  reports.json().then((json) => {
+    transactions = parseTransactions(json);
     render();
-  })
+  }),
 );
 render();

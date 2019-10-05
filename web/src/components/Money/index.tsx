@@ -1,14 +1,14 @@
 import * as React from "react";
 import * as styles from "./style.scss";
 
-type Props = {
+interface IProps {
   invert?: boolean;
   amount: string | number;
-};
+}
 
-const Money = (props: Props) => {
+const Money = (props: IProps) => {
   let amount;
-  if (typeof props.amount == "number") {
+  if (typeof props.amount === "number") {
     amount = props.amount;
   } else {
     amount = parseFloat(props.amount);
@@ -18,14 +18,14 @@ const Money = (props: Props) => {
   }
   const className = amount > 0 ? "positive" : "negative";
   const dollars = amount.toLocaleString("en-US", {
+    currency: "USD",
     style: "currency",
-    currency: "USD"
   });
   return <span className={styles[className]}>{dollars}</span>;
 };
 
 Money.defaultProps = {
-  invert: false
+  invert: false,
 };
 
 export default Money;
