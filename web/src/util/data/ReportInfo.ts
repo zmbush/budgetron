@@ -14,7 +14,7 @@ import {
   RollingBudgetConfig,
   RollingBudgetData,
   TimedReportData,
-  UIConfig
+  UIConfig,
 } from "util/data";
 
 export class ReportInfo {

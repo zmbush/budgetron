@@ -3,7 +3,7 @@ import * as React from "react";
 import {
   IncomeExpenseRatioData,
   IncomeExpenseRatioDatum,
-  ReportInfo
+  ReportInfo,
 } from "util/data";
 
 import * as styles from "./styles.scss";
