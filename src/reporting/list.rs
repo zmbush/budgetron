@@ -1,10 +1,9 @@
-use crate::loading::Transaction;
-use crate::reporting::Reporter;
-use budgetronlib::fintime::Timeframe;
-use serde_json::{self, Value};
-
-use std::borrow::Cow;
-use std::collections::HashMap;
+use {
+    crate::{loading::Transaction, reporting::Reporter},
+    budgetronlib::fintime::Timeframe,
+    serde_json::{self, Value},
+    std::{borrow::Cow, collections::HashMap},
+};
 
 pub struct List;
 impl Reporter for List {

@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use self::Timeframe::*;
-use chrono;
-use chrono::offset::TimeZone;
-use chrono::Datelike;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use std::ops;
+use {
+    self::Timeframe::*,
+    chrono::{self, offset::TimeZone, Datelike},
+    serde::{de, Deserialize, Deserializer, Serialize, Serializer},
+    serde_derive::Serialize,
+    std::{fmt, ops},
+};
 
 pub fn is_leap_year(year: i64) -> bool {
     (year % 4 == 0) || ((year % 100 != 0) && (year % 400 == 0))

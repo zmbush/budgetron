@@ -6,10 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use csv;
-use std::convert::From;
-use std::io;
-use toml;
+use {
+    csv,
+    std::{convert::From, io},
+    toml,
+};
 
 #[derive(Debug)]
 pub enum BudgetError {

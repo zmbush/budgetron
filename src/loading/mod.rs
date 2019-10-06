@@ -13,6 +13,8 @@ pub mod mint;
 mod money;
 mod util;
 
-pub use self::generic::{Transaction, TransactionType};
-pub use self::money::Money;
-pub use self::util::load_from_files;
+pub use self::{
+    generic::{Transaction, TransactionType},
+    money::Money,
+    util::load_from_files,
+};

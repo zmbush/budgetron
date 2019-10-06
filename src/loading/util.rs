@@ -6,20 +6,24 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::alliant;
-use crate::loading::generic::{Genericize, Transaction};
-use crate::loading::logix;
-use crate::loading::mint;
-use budgetronlib::error::{BResult, BudgetError};
-use csv::Reader;
-use log::info;
-use serde::de::DeserializeOwned;
-use std::cmp::min;
-use std::fmt::Display;
-use std::fs::File;
-use std::io;
-use std::io::{Read, Seek, Stdin, StdinLock};
-use std::path::Path;
+use {
+    crate::loading::{
+        alliant,
+        generic::{Genericize, Transaction},
+        logix, mint,
+    },
+    budgetronlib::error::{BResult, BudgetError},
+    csv::Reader,
+    log::info,
+    serde::de::DeserializeOwned,
+    std::{
+        cmp::min,
+        fmt::Display,
+        fs::File,
+        io::{self, Read, Seek, Stdin, StdinLock},
+        path::Path,
+    },
+};
 
 fn from_reader<TransactionType, R>(file: &mut R) -> BResult<Vec<Transaction>>
 where

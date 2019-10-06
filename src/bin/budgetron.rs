@@ -8,16 +8,19 @@
 
 #![deny(unused)]
 
-use budgetron::loading;
-use budgetron::processing::{collate_all, Collator, ConfiguredProcessors};
-use budgetron::reporting::{ConfiguredReports, List, Reporter};
-use budgetronlib::config;
-use iron::prelude::*;
-use mount::Mount;
-use serde::Serialize;
-use std::borrow::Cow;
-use std::path::Path;
-use structopt::StructOpt;
+use {
+    budgetron::{
+        loading,
+        processing::{collate_all, Collator, ConfiguredProcessors},
+        reporting::{ConfiguredReports, List, Reporter},
+    },
+    budgetronlib::config,
+    iron::prelude::*,
+    mount::Mount,
+    serde::Serialize,
+    std::{borrow::Cow, path::Path},
+    structopt::StructOpt,
+};
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "Budgetron", about = "Processes transactions into reports")]

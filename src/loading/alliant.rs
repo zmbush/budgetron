@@ -6,11 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::loading::generic::{Genericize, Transaction, TransactionType};
-use crate::loading::money::Money;
-use budgetronlib::error::BResult;
-use budgetronlib::fintime::Date;
-use serde_derive::Deserialize;
+use {
+    crate::loading::{
+        generic::{Genericize, Transaction, TransactionType},
+        money::Money,
+    },
+    budgetronlib::{error::BResult, fintime::Date},
+    serde_derive::Deserialize,
+};
 
 // "id","account_id","reference_id","transaction_type","amount","posted_at",
 // "created_at","nickname","original_name","merchant_id","updated_at",

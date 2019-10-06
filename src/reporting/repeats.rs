@@ -6,13 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use loading::Transaction;
-use num_traits::Float;
-use ordered_float::NotNaN;
-use reporting::Reporter;
-use serde_json::{self, Value};
-use std::borrow::Cow;
-use std::collections::BTreeMap;
+use {
+    loading::Transaction,
+    num_traits::Float,
+    ordered_float::NotNaN,
+    reporting::Reporter,
+    serde_json::{self, Value},
+    std::{borrow::Cow, collections::BTreeMap},
+};
 
 pub struct RepeatedTransactions {
     threshold: f64,
@@ -26,14 +27,14 @@ impl RepeatedTransactions {
 
 #[derive(Debug, Serialize)]
 struct Report {
-    transactions:       Vec<Transaction>,
+    transactions: Vec<Transaction>,
     average_date_delta: i64,
 }
 
 #[derive(Debug)]
 struct NearbyFloatsBucket<F: Float> {
     high: NotNaN<F>,
-    low:  NotNaN<F>,
+    low: NotNaN<F>,
 }
 
 impl<F: Float> NearbyFloatsBucket<F> {
@@ -43,14 +44,14 @@ impl<F: Float> NearbyFloatsBucket<F> {
 }
 
 struct NearbyFloatsBuilder<F: Float> {
-    margin:  F,
+    margin: F,
     buckets: Vec<(NotNaN<F>, NotNaN<F>)>,
 }
 
 impl<F: Float> NearbyFloatsBuilder<F> {
     fn new() -> NearbyFloatsBuilder<F> {
         NearbyFloatsBuilder {
-            margin:  F::epsilon(),
+            margin: F::epsilon(),
             buckets: Vec::new(),
         }
     }
@@ -80,7 +81,8 @@ impl<F: Float> NearbyFloatsBuilder<F> {
 
     fn build(self) -> NearbyFloats<F> {
         NearbyFloats {
-            buckets: self.buckets
+            buckets: self
+                .buckets
                 .into_iter()
                 .map(|(low, high)| NearbyFloatsBucket::from(low, high))
                 .collect(),
@@ -109,13 +111,16 @@ impl Reporter for RepeatedTransactions {
             if transaction.amount < self.threshold {
                 continue;
             }
-            (*seen.entry((
-                transaction.description.clone(),
-                transaction.transaction_type,
-            )).or_insert_with(|| Vec::new()))
-                .push(transaction);
+            (*seen
+                .entry((
+                    transaction.description.clone(),
+                    transaction.transaction_type,
+                ))
+                .or_insert_with(|| Vec::new()))
+            .push(transaction);
         }
-        let seen = seen.into_iter()
+        let seen = seen
+            .into_iter()
             .filter_map(|((amt, transaction_type), transactions)| {
                 if transactions.len() > 2 {
                     let (count, total) = transactions
