@@ -22,7 +22,7 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-flow-react-proptypes": "^25.1.0",
     "babel-polyfill": "^6.23.0",
-    "copy-webpack-plugin": "^4.0.1",
+    "copy-webpack-plugin": "^5.0.4",
     "css-loader": "^3.2.0",
     "css-modules-typescript-loader": "^3.0.1",
     "d3-scale": "^3.1.0",
