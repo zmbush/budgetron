@@ -12,7 +12,7 @@ use {
         processing::{regex::Regex, Collate, RefundCollator, TransferCollator},
     },
     budgetronlib::error::BResult,
-    serde_derive::Deserialize,
+    serde::Deserialize,
     std::collections::HashMap,
 };
 

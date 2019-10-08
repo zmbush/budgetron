@@ -12,7 +12,7 @@ use {
         reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
     },
     budgetronlib::fintime::Date,
-    serde_derive::{Deserialize, Serialize},
+    serde::{Deserialize, Serialize},
     serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
 };

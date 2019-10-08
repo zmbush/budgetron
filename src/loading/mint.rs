@@ -12,7 +12,7 @@ use {
         money::Money,
     },
     budgetronlib::{error::BResult, fintime::Date},
-    serde_derive::Deserialize,
+    serde::Deserialize,
 };
 
 #[derive(Debug, Deserialize)]
