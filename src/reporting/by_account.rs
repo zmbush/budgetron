@@ -11,7 +11,7 @@ use {
         loading::{Transaction, TransactionType},
         reporting::Reporter,
     },
-    serde_derive::Serialize,
+    serde::Serialize,
     serde_json::{self, Value},
     std::{borrow::Cow, fmt},
 };

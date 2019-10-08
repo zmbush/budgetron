@@ -9,7 +9,7 @@
 use {
     crate::{loading::Transaction, reporting::Reporter},
     budgetronlib::fintime::{Date, Timeframe},
-    serde_derive::Serialize,
+    serde::Serialize,
     serde_json::{self, Value},
     std::{borrow::Cow, collections::BTreeMap, fmt},
 };

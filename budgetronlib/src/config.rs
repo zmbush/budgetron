@@ -8,8 +8,7 @@
 
 use {
     crate::error::{BResult, BudgetError},
-    serde::de::DeserializeOwned,
-    serde_derive::Deserialize,
+    serde::{de::DeserializeOwned, Deserialize},
     std::{collections::HashMap, env, fs::File, io::Read, path::PathBuf},
     toml,
 };

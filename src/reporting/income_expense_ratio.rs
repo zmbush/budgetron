@@ -11,7 +11,7 @@ use {
         loading::{Money, Transaction, TransactionType},
         reporting::Reporter,
     },
-    serde_derive::Serialize,
+    serde::Serialize,
     serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
 };
