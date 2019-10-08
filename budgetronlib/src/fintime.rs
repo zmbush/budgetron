@@ -10,7 +10,6 @@ use {
     self::Timeframe::*,
     chrono::{self, offset::TimeZone, Datelike},
     serde::{de, Deserialize, Deserializer, Serialize, Serializer},
-    serde_derive::Serialize,
     std::{fmt, ops},
 };
 
