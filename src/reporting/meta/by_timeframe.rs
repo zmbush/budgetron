@@ -9,69 +9,28 @@
 use {
     crate::{loading::Transaction, reporting::Reporter},
     budgetronlib::fintime::{Date, Timeframe},
-    serde::Serialize,
-    serde_json::{self, Value},
-    std::{borrow::Cow, collections::BTreeMap, fmt},
+    std::{borrow::Cow, collections::BTreeMap},
 };
 
-pub struct ByTimeframe<'a, T>
-where
-    T: 'a + Reporter,
-{
-    inner: &'a T,
+pub struct ByTimeframe<'i, T> {
+    inner: &'i T,
     timeframe: Timeframe,
 }
 
-impl<'a, T> ByTimeframe<'a, T>
-where
-    T: 'a + Reporter,
-{
-    pub fn new(inner: &'a T, timeframe: Timeframe) -> Self {
+impl<'i, T> ByTimeframe<'i, T> {
+    pub fn new(inner: &'i T, timeframe: Timeframe) -> Self {
         ByTimeframe { inner, timeframe }
     }
 }
 
-#[derive(Debug, Serialize)]
-pub struct ByTimeframeReport<T> {
-    timeframe: Timeframe,
-    by_timeframe: BTreeMap<Date, T>,
-}
-
-impl<T> ByTimeframeReport<T>
-where
-    T: fmt::Display,
-{
-    pub fn print(&self) {
-        println!("{}", self)
-    }
-}
-
-impl<T> fmt::Display for ByTimeframeReport<T>
-where
-    T: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (key, value) in &self.by_timeframe {
-            writeln!(
-                f,
-                "For the transactions in {}-{}",
-                key,
-                key + self.timeframe - Timeframe::Days(1)
-            )?;
-            writeln!(f, "{}", value)?;
-        }
-        Ok(())
-    }
-}
-
-impl<'a, T> Reporter for ByTimeframe<'a, T>
+impl<'i, T> ByTimeframe<'i, T>
 where
     T: Reporter,
 {
-    fn report<'b, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'b, Transaction>>,
-    {
+    pub fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>> + Clone,
+    ) -> BTreeMap<Date, crate::reporting::data::ConcreteReport> {
         let mut transactions: Vec<_> = transactions.collect();
         let mut date = transactions
             .get(0)
@@ -96,17 +55,6 @@ where
             date += self.timeframe;
         }
 
-        serde_json::to_value(by_timeframe).expect("Unable to serialize by_timeframe")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some(
-            self.timeframe
-                .ly()
-                .to_lowercase()
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join("_"),
-        )
+        by_timeframe
     }
 }

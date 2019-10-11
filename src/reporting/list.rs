@@ -1,33 +1,28 @@
 use {
-    crate::{loading::Transaction, reporting::Reporter},
+    crate::loading::Transaction,
     budgetronlib::fintime::Timeframe,
-    serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
 };
 
 pub struct List;
-impl Reporter for List {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+
+impl List {
+    pub fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> HashMap<String, Transaction> {
         let transactions = transactions.collect::<Vec<_>>();
         let start_date =
             transactions.last().map(|t| t.date).unwrap_or_default() - Timeframe::Years(3);
-        let transaction_map = transactions
+        transactions
             .into_iter()
             .filter_map(|t| {
                 if t.date >= start_date {
-                    Some((t.uid(), t))
+                    Some((t.uid(), t.into_owned()))
                 } else {
                     None
                 }
             })
-            .collect::<HashMap<_, _>>();
-        serde_json::to_value(&transaction_map).expect("Couldn't serialize")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some("transactions".to_owned())
+            .collect()
     }
 }

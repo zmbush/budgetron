@@ -12,7 +12,7 @@ use {
     budgetron::{
         loading,
         processing::{collate_all, Collator, ConfiguredProcessors},
-        reporting::{ConfiguredReports, List, Reporter},
+        reporting::{ConfiguredReports, List},
     },
     budgetronlib::config,
     iron::prelude::*,
@@ -43,11 +43,13 @@ fn main() {
 
     let opt = Opt::from_args();
 
+    log::info!("Starting load");
     let transactions =
         loading::load_from_files(opt.input_files.into_iter()).expect("Unable to load files");
 
     let processors: ConfiguredProcessors =
         config::load_cfg("budgetronrc.toml").expect("Configured Processors failed to load");
+    log::info!("Starting collation");
     let transactions =
         collate_all(transactions, &[Collator::Config(processors)]).expect("Unable to collate");
     let cow_transactions = transactions
@@ -57,7 +59,10 @@ fn main() {
 
     let reports: ConfiguredReports =
         config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
+    log::info!("Starting reports");
     let report = reports.report(cow_transactions.into_iter());
+
+    println!("{:?}", serde_json::to_string(&report));
 
     let cow_transactions = transactions
         .iter()

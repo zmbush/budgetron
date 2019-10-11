@@ -9,10 +9,11 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
+        reporting::{
+            config::ReportOptions, data::ConcreteReport, timeseries::Timeseries, Reporter,
+        },
     },
-    serde::Serialize,
-    serde_json::{self, Value},
+    serde::{Deserialize, Serialize},
     std::{borrow::Cow, fmt},
 };
 
@@ -20,7 +21,7 @@ pub struct Cashflow {
     options: ReportOptions,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Deserialize, Debug)]
 pub struct CashflowReport {
     credit: Money,
     debit: Money,
@@ -28,7 +29,7 @@ pub struct CashflowReport {
     timeseries: Option<Timeseries<CashflowDatum>>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Deserialize, Debug)]
 pub struct CashflowDatum {
     credit: Money,
     debit: Money,
@@ -52,10 +53,10 @@ impl CashflowReport {
 }
 
 impl Reporter for Cashflow {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+    fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> ConcreteReport {
         let report = CashflowReport {
             timeseries: if self.options.include_graph {
                 Some(Timeseries::new())
@@ -84,11 +85,7 @@ impl Reporter for Cashflow {
             report
         });
 
-        serde_json::to_value(&cashflow).expect("could not calculate cashflow report")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some("cashflow".to_owned())
+        cashflow.into()
     }
 }
 

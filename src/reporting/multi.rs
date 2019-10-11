@@ -8,7 +8,6 @@
 
 use {
     crate::{loading::Transaction, reporting::Reporter},
-    serde_json::{map::Map, Value},
     std::borrow::Cow,
 };
 
@@ -20,30 +19,13 @@ macro_rules! tuple_impls {
     )+) => {
         $(
             impl<$($T:Reporter),+> Reporter for ($($T),+) {
-                fn report<'a, It>(&self, transactions: It) -> Value
-                    where It: Iterator<Item = Cow<'a, Transaction>> + Clone {
-                        let mut retval = Map::new();
-                        $(
-                            if let Some(v) = self.$idx.key() {
-                                retval.insert(v.to_owned(), self.$idx.report(transactions.clone()));
-                            } else {
-                                match self.$idx.report(transactions.clone()) {
-                                    Value::Object(o) => for (k, v) in o {
-                                        retval.insert(k, v);
-                                    },
-                                    Value::Null => {},
-                                    other => {
-                                        retval.insert("UNNAMED".to_owned(), other);
-                                    }
-                                }
-                            }
-                        )+
-                        Value::Object(retval)
+                fn report<'t>(
+                    &self,
+                    transactions: impl Iterator<Item = Cow<'t, Transaction>> + Clone,
+                ) -> crate::reporting::data::ReportData {
+                        vec![$(self.$idx.report(transactions.clone())),+].into()
                 }
 
-                fn key(&self) -> Option<String> {
-                    None
-                }
             }
         )+
     }

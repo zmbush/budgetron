@@ -52,8 +52,4 @@ impl Reporter for Database {
 
         Value::Null
     }
-
-    fn key(&self) -> Option<String> {
-        None
-    }
 }

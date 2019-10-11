@@ -25,7 +25,7 @@ pub fn days_in_month(month: i64, year: i64) -> i64 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[allow(unused)]
 pub enum Timeframe {
     Days(i64),

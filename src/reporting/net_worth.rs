@@ -9,19 +9,22 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::Reporter,
+        reporting::{data::ConcreteReport, Reporter},
     },
-    serde_json::{self, Value},
+    serde::{Deserialize, Serialize},
     std::{borrow::Cow, collections::BTreeMap},
 };
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct NetWorthReport(BTreeMap<String, Money>);
 
 pub struct NetWorth;
 
 impl Reporter for NetWorth {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+    fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> ConcreteReport {
         let mut worth = BTreeMap::new();
         for transaction in transactions {
             *worth
@@ -42,10 +45,6 @@ impl Reporter for NetWorth {
             }
         }
 
-        serde_json::to_value(worth).expect("Could not convert networth")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some("net_worth".to_owned())
+        NetWorthReport(worth).into()
     }
 }

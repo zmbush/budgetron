@@ -9,21 +9,26 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget},
+        reporting::{
+            filters::IterExt, meta::by_timeframe::ByTimeframe, Cashflow, Categories,
+            IncomeExpenseRatio, Reporter, RollingBudget,
+        },
     },
-    budgetronlib::fintime::Date,
+    budgetronlib::fintime::{Date, Timeframe},
     serde::{Deserialize, Serialize},
-    serde_json::{self, Value},
-    std::{borrow::Cow, collections::HashMap},
+    std::{
+        borrow::Cow,
+        collections::{BTreeMap, HashMap},
+    },
 };
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfiguredReports {
-    report: Vec<Report>,
+    report: Vec<ReportConfig>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Report {
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ReportConfig {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     only_type: Option<TransactionType>,
@@ -54,13 +59,13 @@ fn is_false(value: &bool) -> bool {
     !value
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct HistoricalConfig {
     end_date: Date,
     config: ReportType,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(tag = "type")]
 pub enum ReportType {
     RollingBudget {
@@ -93,7 +98,7 @@ pub struct ReportOptions {
     pub include_graph: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UIConfig {
     #[serde(default = "default_true")]
     show_diff: bool,
@@ -114,107 +119,92 @@ fn default_true() -> bool {
     true
 }
 
-impl Report {
-    fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+impl ReportConfig {
+    fn run_report<'r, 't, I, R>(
+        &self,
+        reporter: &'r R,
+        transactions: I,
+    ) -> Vec<ConfiguredReportDataInner>
     where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
+        I: Iterator<Item = Cow<'t, Transaction>>,
         R: Reporter,
     {
-        let mut retval = serde_json::map::Map::new();
+        let mut transactions: Box<dyn Iterator<Item = Cow<'t, Transaction>>> =
+            Box::new(transactions);
+
+        if let Some(ref skip_tags) = self.skip_tags {
+            transactions = Box::new(transactions.excluding_tags(skip_tags.clone()));
+        }
+
+        if let Some(ref only_tags) = self.only_tags {
+            transactions = Box::new(transactions.only_tags(only_tags.clone()));
+        }
+
+        if let Some(only_type) = self.only_type {
+            transactions = Box::new(transactions.only_type(only_type));
+        }
+
+        if let Some(ref only_owners) = self.only_owners {
+            transactions = Box::new(transactions.only_owners(only_owners.clone()));
+        }
+
+        let transactions = transactions.collect::<Vec<_>>().into_iter();
 
         macro_rules! check_by {
-            ($($name:ident),*) => {
+            ($($name:ident => $timeframe:expr),*) => {
+                let mut retval = Vec::new();
                 $(if self.$name {
-                    retval.insert(
-                        stringify!($name).to_owned(),
-                        reporter.$name().report(transactions.clone()),
-                    );
+                    retval.push(ConfiguredReportDataInner::ByTimeframe {
+                        timeframe: $timeframe,
+                        data: ByTimeframe::new(reporter, $timeframe).report(transactions.clone())
+                    });
                 })*
 
                 if !($(self.$name)||*) {
-                    reporter.report(transactions)
+                    vec![ConfiguredReportDataInner::Simple(reporter.report(transactions))]
                 } else {
-                    Value::Object(retval)
+                    retval
                 }
             }
         }
 
         check_by! {
-            by_week, by_month, by_quarter, by_year
+            by_week => Timeframe::Weeks(1),
+            by_month => Timeframe::Months(1),
+            by_quarter => Timeframe::Quarters(1),
+            by_year => Timeframe::Years(1)
         }
-    }
-
-    fn filter_report_only_owners<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-        R: Reporter,
-    {
-        if let Some(ref only_owners) = self.only_owners {
-            self.inner_run_report(&reporter.only_owners(only_owners.clone()), transactions)
-        } else {
-            self.inner_run_report(reporter, transactions)
-        }
-    }
-
-    fn filter_report_only_type<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-        R: Reporter,
-    {
-        if let Some(only_type) = self.only_type {
-            self.filter_report_only_owners(&reporter.only_type(only_type), transactions)
-        } else {
-            self.filter_report_only_owners(reporter, transactions)
-        }
-    }
-
-    fn filter_report_only_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-        R: Reporter,
-    {
-        if let Some(ref only_tags) = self.only_tags {
-            self.filter_report_only_type(&reporter.only_tags(only_tags.clone()), transactions)
-        } else {
-            self.filter_report_only_type(reporter, transactions)
-        }
-    }
-
-    fn filter_report_skip_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-        R: Reporter,
-    {
-        if let Some(ref skip_tags) = self.skip_tags {
-            self.filter_report_only_tags(&reporter.excluding_tags(skip_tags.clone()), transactions)
-        } else {
-            self.filter_report_only_tags(reporter, transactions)
-        }
-    }
-
-    fn run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-        R: Reporter,
-    {
-        self.filter_report_skip_tags(reporter, transactions)
     }
 }
 
-impl Reporter for ConfiguredReports {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>> + Clone,
-    {
+trait SizedSerialize: Serialize + Sized {}
+impl<T: Serialize + Sized> SizedSerialize for T {}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "format")]
+pub enum ConfiguredReportDataInner {
+    ByTimeframe {
+        timeframe: budgetronlib::fintime::Timeframe,
+        data: BTreeMap<Date, super::data::ConcreteReport>,
+    },
+
+    Simple(super::data::ConcreteReport),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConfiguredReportData {
+    config: ReportConfig,
+    data: ConfiguredReportDataInner,
+}
+
+impl ConfiguredReports {
+    pub fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>> + Clone,
+    ) -> Vec<ConfiguredReportData> {
         let mut retval = Vec::new();
         for report_config in &self.report {
-            let report_key = report_config
-                .name
-                .to_lowercase()
-                .split(' ')
-                .collect::<Vec<_>>()
-                .join("_");
-            let value = match report_config.config {
+            let results = match report_config.config {
                 ReportType::RollingBudget {
                     start_date,
                     ref split,
@@ -247,19 +237,14 @@ impl Reporter for ConfiguredReports {
                 ),
             };
 
-            let mut report_data = serde_json::map::Map::new();
-            report_data.insert("data".to_string(), value);
-            report_data.insert(
-                "report".to_string(),
-                serde_json::to_value(report_config).expect("Could not write config"),
-            );
-            report_data.insert("key".to_string(), Value::String(report_key));
-            retval.push(Value::Object(report_data));
+            for data in results {
+                retval.push(ConfiguredReportData {
+                    data,
+                    config: (*report_config).clone(),
+                });
+            }
         }
-        Value::Array(retval)
-    }
 
-    fn key(&self) -> Option<String> {
-        Some("reports".to_owned())
+        retval
     }
 }

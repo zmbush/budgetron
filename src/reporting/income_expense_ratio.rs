@@ -9,10 +9,9 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::Reporter,
+        reporting::{data::ConcreteReport, Reporter},
     },
-    serde::Serialize,
-    serde_json::{self, Value},
+    serde::{Deserialize, Serialize},
     std::{borrow::Cow, collections::HashMap},
 };
 
@@ -21,19 +20,47 @@ pub struct IncomeExpenseRatio {
     expense_tags: Vec<String>,
 }
 
-#[derive(Serialize, Default)]
-pub struct IncomeExpenseData<'a> {
+#[derive(Default)]
+struct IncomeExpenseData<'a> {
     by_tag: HashMap<String, Money>,
     other: Money,
 
-    #[serde(skip)]
     tags: &'a [String],
 }
 
-#[derive(Serialize)]
-pub struct IncomeExpenseReport<'a> {
+struct IncomeExpenseReport<'a> {
     credit: IncomeExpenseData<'a>,
     debit: IncomeExpenseData<'a>,
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+pub struct IncomeExpenseReportData {
+    by_tag: HashMap<String, Money>,
+    other: Money,
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+pub struct IncomeExpenseReportType {
+    credit: IncomeExpenseReportData,
+    debit: IncomeExpenseReportData,
+}
+
+impl<'a> From<IncomeExpenseData<'a>> for IncomeExpenseReportData {
+    fn from(rep: IncomeExpenseData<'a>) -> Self {
+        Self {
+            by_tag: rep.by_tag,
+            other: rep.other,
+        }
+    }
+}
+
+impl<'a> From<IncomeExpenseReport<'a>> for IncomeExpenseReportType {
+    fn from(rep: IncomeExpenseReport) -> Self {
+        Self {
+            credit: rep.credit.into(),
+            debit: rep.debit.into(),
+        }
+    }
 }
 
 impl IncomeExpenseRatio {
@@ -85,10 +112,10 @@ impl<'a> IncomeExpenseData<'a> {
 }
 
 impl Reporter for IncomeExpenseRatio {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+    fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> ConcreteReport {
         let mut report = IncomeExpenseReport::new(&self.income_tags, &self.expense_tags);
 
         for transaction in transactions {
@@ -99,10 +126,6 @@ impl Reporter for IncomeExpenseRatio {
             }
         }
 
-        serde_json::to_value(report).expect("Couldn't calculate income_expense_ratio")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some("income_expense_ratio".to_owned())
+        IncomeExpenseReportType::from(report).into()
     }
 }

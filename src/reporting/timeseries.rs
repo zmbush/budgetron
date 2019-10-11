@@ -6,12 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use {budgetronlib::fintime::Date, serde::Serialize};
+use {
+    budgetronlib::fintime::Date,
+    serde::{Deserialize, Serialize},
+};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Timeseries<V>(Vec<TimeseriesDatum<V>>);
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TimeseriesDatum<V> {
     date: Date,
     value: V,

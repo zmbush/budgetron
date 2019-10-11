@@ -9,10 +9,11 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
+        reporting::{
+            config::ReportOptions, data::ConcreteReport, timeseries::Timeseries, Reporter,
+        },
     },
-    serde::Serialize,
-    serde_json::{self, Value},
+    serde::{Deserialize, Serialize},
     std::{borrow::Cow, collections::HashMap},
 };
 
@@ -26,13 +27,13 @@ impl Categories {
     }
 }
 
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Debug, Deserialize)]
 pub struct CategoryEntry {
     amount: Money,
     transactions: Vec<String>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Debug, Deserialize)]
 pub struct CategoriesReport {
     categories: HashMap<String, CategoryEntry>,
     timeseries: Option<Timeseries<HashMap<String, Money>>>,
@@ -48,10 +49,10 @@ impl CategoriesReport {
 }
 
 impl Reporter for Categories {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+    fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> ConcreteReport {
         let mut report = CategoriesReport {
             timeseries: if self.options.include_graph {
                 Some(Timeseries::new())
@@ -79,10 +80,6 @@ impl Reporter for Categories {
             }
         }
 
-        serde_json::to_value(report).expect("Unable to serialize categories")
-    }
-
-    fn key(&self) -> Option<String> {
-        Some("categories".to_string())
+        report.into()
     }
 }

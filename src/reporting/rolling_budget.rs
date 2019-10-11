@@ -9,11 +9,12 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
+        reporting::{
+            config::ReportOptions, data::ConcreteReport, timeseries::Timeseries, Reporter,
+        },
     },
     budgetronlib::fintime::Date,
     serde::{Deserialize, Serialize},
-    serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
 };
 
@@ -50,13 +51,13 @@ impl RollingBudget {
     }
 }
 
-#[derive(Debug, Serialize, Default)]
+#[derive(Debug, Serialize, Default, Deserialize)]
 pub struct ExpenseBreakdown {
     split_transactions: Money,
     personal_transactions: Money,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RollingBudgetReport {
     budgets: HashMap<String, Money>,
     breakdown: HashMap<String, ExpenseBreakdown>,
@@ -99,10 +100,10 @@ impl RollingBudget {
 }
 
 impl Reporter for RollingBudget {
-    fn report<'a, I>(&self, transactions: I) -> Value
-    where
-        I: Iterator<Item = Cow<'a, Transaction>>,
-    {
+    fn report<'t>(
+        &self,
+        transactions: impl Iterator<Item = Cow<'t, Transaction>>,
+    ) -> ConcreteReport {
         let mut report = RollingBudgetReport {
             budgets: self.amounts.clone(),
             breakdown: HashMap::new(),
@@ -170,10 +171,7 @@ impl Reporter for RollingBudget {
                 }
             }
         }
-        serde_json::to_value(&report).expect("Couldn't serialize")
-    }
 
-    fn key(&self) -> Option<String> {
-        Some("rolling_budget".to_owned())
+        report.into()
     }
 }

@@ -141,8 +141,4 @@ impl Reporter for RepeatedTransactions {
             .collect::<BTreeMap<_, _>>();
         serde_json::to_value(seen).expect("couldn't convert")
     }
-
-    fn key(&self) -> Option<String> {
-        Some("repeated_transactions".to_owned())
-    }
 }
