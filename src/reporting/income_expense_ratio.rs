@@ -15,6 +15,9 @@ use {
     std::{borrow::Cow, collections::HashMap},
 };
 
+#[cfg(target_arch = "wasm32")]
+use {crate::reporting::web::ConfiguredReportDataUi, yew::prelude::*};
+
 pub struct IncomeExpenseRatio {
     income_tags: Vec<String>,
     expense_tags: Vec<String>,
@@ -33,16 +36,26 @@ struct IncomeExpenseReport<'a> {
     debit: IncomeExpenseData<'a>,
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Debug, Deserialize, Clone)]
 pub struct IncomeExpenseReportData {
     by_tag: HashMap<String, Money>,
     other: Money,
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Debug, Deserialize, Clone)]
 pub struct IncomeExpenseReportType {
     credit: IncomeExpenseReportData,
     debit: IncomeExpenseReportData,
+}
+
+#[cfg(target_arch = "wasm32")]
+impl IncomeExpenseReportType {
+    pub fn view(
+        &self,
+        _transactions: &HashMap<String, Transaction>,
+    ) -> Html<ConfiguredReportDataUi> {
+        html! {}
+    }
 }
 
 impl<'a> From<IncomeExpenseData<'a>> for IncomeExpenseReportData {

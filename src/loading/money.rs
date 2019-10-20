@@ -299,3 +299,25 @@ impl fmt::Display for Money {
         write!(f, "{:.02}", self.to_f64())
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+mod web {
+    use {super::*, yew::prelude::*};
+
+    impl<T: Component> Renderable<T> for Money {
+        fn view(&self) -> Html<T> {
+            let classes = if *self < Money::zero() {
+                "red-text"
+            } else {
+                ""
+            };
+            html! {
+                <span class={classes}>
+                  { if *self < Money::zero() { "-" } else {""} }
+                  {"$"}
+                  { format!("{:.02}", self.to_f64().abs()) }
+                </span>
+            }
+        }
+    }
+}

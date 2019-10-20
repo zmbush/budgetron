@@ -15,8 +15,21 @@ use {
     std::{borrow::Cow, collections::BTreeMap},
 };
 
-#[derive(Serialize, Deserialize, Debug)]
+#[cfg(target_arch = "wasm32")]
+use {crate::reporting::web::ConfiguredReportDataUi, std::collections::HashMap, yew::prelude::*};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NetWorthReport(BTreeMap<String, Money>);
+
+#[cfg(target_arch = "wasm32")]
+impl NetWorthReport {
+    pub fn view(
+        &self,
+        _transactions: &HashMap<String, Transaction>,
+    ) -> Html<ConfiguredReportDataUi> {
+        html! {}
+    }
+}
 
 pub struct NetWorth;
 

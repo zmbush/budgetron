@@ -6,6 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[cfg(target_arch = "wasm32")]
+use {
+    crate::{loading::Transaction, reporting::web::ConfiguredReportDataUi},
+    std::collections::HashMap,
+    yew::prelude::*,
+};
+
 pub enum ReportData {
     List(Vec<ReportData>),
 
@@ -14,7 +21,7 @@ pub enum ReportData {
 
 macro_rules! make_concrete_report {
     ($($variant:ident($type:ty)),*) => {
-        #[derive(Debug, serde::Serialize, serde::Deserialize)]
+        #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
         #[serde(tag = "report_type")]
         pub enum ConcreteReport {
             $($variant($type)),*
@@ -27,6 +34,15 @@ macro_rules! make_concrete_report {
                 }
             }
         )*
+
+        #[cfg(target_arch = "wasm32")]
+        impl ConcreteReport {
+            pub fn view(&self, transactions: &std::rc::Rc<HashMap<String, Transaction>>) -> Html<ConfiguredReportDataUi> {
+                match self {
+                    $(ConcreteReport::$variant(inner) => inner.view(transactions)),*
+                }
+            }
+        }
     };
 
     ($($variant:ident($type:ty)),*,) => {

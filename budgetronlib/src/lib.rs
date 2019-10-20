@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//#![recursion_limit = "20000"]
 #![deny(unused)]
 
 pub mod config;

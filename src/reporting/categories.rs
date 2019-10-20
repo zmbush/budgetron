@@ -17,6 +17,9 @@ use {
     std::{borrow::Cow, collections::HashMap},
 };
 
+#[cfg(target_arch = "wasm32")]
+use {crate::reporting::web::ConfiguredReportDataUi, yew::prelude::*};
+
 pub struct Categories {
     options: ReportOptions,
 }
@@ -27,16 +30,26 @@ impl Categories {
     }
 }
 
-#[derive(Default, Serialize, Debug, Deserialize)]
+#[derive(Default, Serialize, Debug, Deserialize, Clone)]
 pub struct CategoryEntry {
     amount: Money,
     transactions: Vec<String>,
 }
 
-#[derive(Default, Serialize, Debug, Deserialize)]
+#[derive(Default, Serialize, Debug, Deserialize, Clone)]
 pub struct CategoriesReport {
     categories: HashMap<String, CategoryEntry>,
     timeseries: Option<Timeseries<HashMap<String, Money>>>,
+}
+
+#[cfg(target_arch = "wasm32")]
+impl CategoriesReport {
+    pub fn view(
+        &self,
+        _transactions: &HashMap<String, Transaction>,
+    ) -> Html<ConfiguredReportDataUi> {
+        html! {}
+    }
 }
 
 impl CategoriesReport {

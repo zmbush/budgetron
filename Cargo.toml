@@ -3,6 +3,7 @@ name = "budgetron"
 version = "2.0.0-0.0.3"
 edition = "2018"
 authors = ["Zachary Bush <zach@zmbush.com>"]
+default-run = "budgetron"
 
 [[bin]]
 name = "budgetron"
@@ -27,6 +28,11 @@ iron = "0.6.1"
 mount = "0.4.0"
 staticfile = "0.5.0"
 toml = "0.5.3"
+
+# Web UI
+yew = "0.9.0"
+failure = "0.1.6"
+web_logger = "0.2.0"
 
 [workspace]
 

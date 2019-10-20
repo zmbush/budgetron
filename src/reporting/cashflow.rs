@@ -17,11 +17,14 @@ use {
     std::{borrow::Cow, fmt},
 };
 
+#[cfg(target_arch = "wasm32")]
+use {crate::reporting::web::ConfiguredReportDataUi, std::collections::HashMap, yew::prelude::*};
+
 pub struct Cashflow {
     options: ReportOptions,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CashflowReport {
     credit: Money,
     debit: Money,
@@ -29,11 +32,21 @@ pub struct CashflowReport {
     timeseries: Option<Timeseries<CashflowDatum>>,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CashflowDatum {
     credit: Money,
     debit: Money,
     net: Money,
+}
+
+#[cfg(target_arch = "wasm32")]
+impl CashflowReport {
+    pub fn view(
+        &self,
+        _transactions: &HashMap<String, Transaction>,
+    ) -> Html<ConfiguredReportDataUi> {
+        html! {}
+    }
 }
 
 impl Cashflow {

@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//#![recursion_limit = "20000"]
 #![deny(unused)]
 
 use {
@@ -15,7 +16,7 @@ use {
         reporting::{ConfiguredReports, List},
     },
     budgetronlib::config,
-    iron::prelude::*,
+    iron::{headers::AccessControlAllowOrigin, prelude::*},
     mount::Mount,
     serde::Serialize,
     std::{borrow::Cow, path::Path},
@@ -62,8 +63,6 @@ fn main() {
     log::info!("Starting reports");
     let report = reports.report(cow_transactions.into_iter());
 
-    println!("{:?}", serde_json::to_string(&report));
-
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
@@ -96,9 +95,13 @@ struct JsonHandler<T: Serialize> {
 
 impl<T: Serialize + Send + Sync + 'static> iron::middleware::Handler for JsonHandler<T> {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
-        Ok(Response::with((
+        let mut resp = Response::with((
             iron::status::Ok,
-            serde_json::to_string(&self.data).unwrap(),
-        )))
+            serde_json::to_string_pretty(&self.data).unwrap(),
+        ));
+        resp.headers.set(AccessControlAllowOrigin::Value(
+            "http://127.0.0.1:8000".to_owned(),
+        ));
+        Ok(resp)
     }
 }

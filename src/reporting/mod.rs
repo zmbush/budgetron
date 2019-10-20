@@ -42,9 +42,38 @@ pub use crate::reporting::database::Database;
 pub use crate::reporting::{
     cashflow::Cashflow,
     categories::Categories,
-    config::ConfiguredReports,
+    config::{ConfiguredReportData, ConfiguredReports},
     income_expense_ratio::IncomeExpenseRatio,
     list::List,
     net_worth::NetWorth,
     rolling_budget::{RollingBudget, RollingBudgetConfig},
 };
+
+#[cfg(target_arch = "wasm32")]
+pub mod web {
+    use yew::prelude::*;
+
+    pub use crate::reporting::config::web::*;
+
+    #[derive(Properties, Copy, Clone, Default, Debug)]
+    pub struct DisplayProps {
+        pub by_week: bool,
+        pub by_month: bool,
+        pub by_quarter: bool,
+        pub by_year: bool,
+    }
+
+    impl DisplayProps {
+        pub fn is_set(&self, display_mode: DisplayMode) -> bool {
+            use DisplayMode::*;
+
+            match display_mode {
+                Simple => false,
+                ByWeek => self.by_week,
+                ByMonth => self.by_month,
+                ByQuarter => self.by_quarter,
+                ByYear => self.by_year,
+            }
+        }
+    }
+}

@@ -51,13 +51,13 @@ impl RollingBudget {
     }
 }
 
-#[derive(Debug, Serialize, Default, Deserialize)]
+#[derive(Debug, Serialize, Default, Deserialize, Copy, Clone)]
 pub struct ExpenseBreakdown {
     split_transactions: Money,
     personal_transactions: Money,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RollingBudgetReport {
     budgets: HashMap<String, Money>,
     breakdown: HashMap<String, ExpenseBreakdown>,
@@ -65,6 +65,142 @@ pub struct RollingBudgetReport {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     timeseries: Option<Timeseries<HashMap<String, Money>>>,
+}
+
+#[cfg(target_arch = "wasm32")]
+mod web {
+    use {super::*, crate::reporting::web::ConfiguredReportDataUi, std::rc::Rc, yew::prelude::*};
+
+    impl RollingBudgetReport {
+        pub fn view(
+            &self,
+            transactions: &Rc<HashMap<String, Transaction>>,
+        ) -> Html<ConfiguredReportDataUi> {
+            html! {
+                <RollingBudgetUi report={self} transactions={Rc::clone(transactions)} />
+            }
+        }
+    }
+
+    #[derive(Properties)]
+    struct RollingBudgetUiProps {
+        #[props(required)]
+        pub report: RollingBudgetReport,
+
+        #[props(required)]
+        pub transactions: Rc<HashMap<String, Transaction>>,
+    }
+
+    struct RollingBudgetUi {
+        report: RollingBudgetReport,
+        transactions: Rc<HashMap<String, Transaction>>,
+        focus: Option<String>,
+    }
+
+    enum Msg {
+        Focus(String),
+    }
+
+    impl Component for RollingBudgetUi {
+        type Message = Msg;
+        type Properties = RollingBudgetUiProps;
+
+        fn create(props: RollingBudgetUiProps, _: ComponentLink<Self>) -> Self {
+            RollingBudgetUi {
+                report: props.report,
+                transactions: props.transactions,
+                focus: None,
+            }
+        }
+
+        fn update(&mut self, msg: Self::Message) -> ShouldRender {
+            use Msg::*;
+            match msg {
+                Focus(new_focus) => {
+                    self.focus = if let Some(focus) = &self.focus {
+                        if focus == &new_focus {
+                            None
+                        } else {
+                            Some(new_focus)
+                        }
+                    } else {
+                        Some(new_focus)
+                    };
+                }
+            }
+            true
+        }
+    }
+
+    impl RollingBudgetUi {
+        fn render_table_row(&self, name: &str, value: &Money) -> Html<Self> {
+            let highlight = if let Some(focus) = &self.focus {
+                focus == name
+            } else {
+                false
+            };
+
+            let owned_name = name.to_owned();
+
+            html! {
+                <>
+                    <tr
+                        onclick=|_| Msg::Focus(owned_name.clone())
+                        class={if highlight { "teal" } else { "" }}
+                    >
+                        <td>{ name }</td>
+                        <td>{ value.view() }</td>
+                    </tr>
+                    {
+                        if highlight {
+                            self.transactions_for(name)
+                        } else {
+                            html! {}
+                        }
+                    }
+                </>
+            }
+        }
+
+        fn transactions_for(&self, name: &str) -> Html<Self> {
+            html! {
+                <>{
+                    for self.report.transactions.iter()
+                        .filter_map(|t| {
+                            self.transactions.get(t)
+                        })
+                        .filter(|t| t.person == name || t.person == "joint")
+                        .map(Transaction::view)
+                }</>
+            }
+        }
+    }
+
+    impl Renderable<RollingBudgetUi> for RollingBudgetUi {
+        fn view(&self) -> Html<RollingBudgetUi> {
+            let _ = self.transactions;
+
+            html! {
+                <div class="row">
+                    <div class="col c1">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{"Who"}</th>
+                                    <th>{"Budget"}</th>
+                                </tr>
+                            </thead>
+                            <tbody>{
+                                for self.report.budgets.iter().map(|(name, value)| {
+                                    self.render_table_row(name, value)
+                                })
+                            }</tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+    }
 }
 
 impl RollingBudget {

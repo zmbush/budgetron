@@ -3,3 +3,4 @@ tslint: rg --files | grep ^web/ | entr -d -r yarn tslint -c tslint.json 'web/src
 
 webpack: yarn run webpack -- --color -w
 budgetron: cargo watch --no-gitignore -w .trigger -s "cargo run --color=always --release -- -f data/`\ls data | tail -n1`/*.csv --serve --port $PORT"
+webui: cargo watch --ignore '*/web/*' -s 'cargo web start --release --bin web-ui'

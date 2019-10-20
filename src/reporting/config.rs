@@ -180,21 +180,170 @@ impl ReportConfig {
 trait SizedSerialize: Serialize + Sized {}
 impl<T: Serialize + Sized> SizedSerialize for T {}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "format")]
 pub enum ConfiguredReportDataInner {
     ByTimeframe {
-        timeframe: budgetronlib::fintime::Timeframe,
+        timeframe: Timeframe,
         data: BTreeMap<Date, super::data::ConcreteReport>,
     },
 
     Simple(super::data::ConcreteReport),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ConfiguredReportData {
     config: ReportConfig,
     data: ConfiguredReportDataInner,
+}
+
+#[cfg(target_arch = "wasm32")]
+pub mod web {
+    use {super::*, std::rc::Rc, yew::*};
+
+    #[derive(Debug, Copy, Clone, PartialEq)]
+    pub enum DisplayMode {
+        Simple,
+        ByWeek,
+        ByMonth,
+        ByQuarter,
+        ByYear,
+    }
+
+    impl std::fmt::Display for DisplayMode {
+        fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+            use DisplayMode::*;
+            write!(
+                fmt,
+                "{}",
+                match self {
+                    Simple => "Simple",
+                    ByWeek => "By Week",
+                    ByMonth => "By Month",
+                    ByQuarter => "By Quarter",
+                    ByYear => "By Year",
+                }
+            )
+        }
+    }
+
+    #[derive(yew::Properties)]
+    pub struct ConfiguredReportDataUiProps {
+        #[props(required)]
+        pub data: Rc<ConfiguredReportData>,
+
+        #[props(required)]
+        pub display: DisplayMode,
+
+        #[props(required)]
+        pub transactions: Rc<HashMap<String, Transaction>>,
+    }
+
+    pub struct ConfiguredReportDataUi {
+        data: Rc<ConfiguredReportData>,
+        display: DisplayMode,
+        transactions: Rc<HashMap<String, Transaction>>,
+    }
+
+    impl Component for ConfiguredReportDataUi {
+        type Message = ();
+        type Properties = ConfiguredReportDataUiProps;
+
+        fn create(s: Self::Properties, _: ComponentLink<Self>) -> Self {
+            Self {
+                data: s.data,
+                display: s.display,
+                transactions: s.transactions,
+            }
+        }
+
+        fn update(&mut self, _: ()) -> ShouldRender {
+            true
+        }
+    }
+
+    impl Renderable<ConfiguredReportDataUi> for ConfiguredReportDataUi {
+        fn view(&self) -> Html<ConfiguredReportDataUi> {
+            use ConfiguredReportDataInner::*;
+
+            match (&self.data.data, self.display) {
+                (Simple(_), DisplayMode::Simple)
+                | (
+                    ByTimeframe {
+                        timeframe: Timeframe::Weeks(1),
+                        ..
+                    },
+                    DisplayMode::ByWeek,
+                )
+                | (
+                    ByTimeframe {
+                        timeframe: Timeframe::Months(1),
+                        ..
+                    },
+                    DisplayMode::ByMonth,
+                )
+                | (
+                    ByTimeframe {
+                        timeframe: Timeframe::Quarters(1),
+                        ..
+                    },
+                    DisplayMode::ByQuarter,
+                )
+                | (
+                    ByTimeframe {
+                        timeframe: Timeframe::Years(1),
+                        ..
+                    },
+                    DisplayMode::ByYear,
+                ) => self.data.view(&self.transactions),
+
+                _ => html! {},
+            }
+        }
+    }
+
+    impl ConfiguredReportData {
+        fn view(
+            &self,
+            transactions: &Rc<HashMap<String, Transaction>>,
+        ) -> Html<ConfiguredReportDataUi> {
+            html! {
+                <div class="row">
+                    <div class="col s12">
+                        <div class="card">
+                            <div class="card-content">
+                                <span class="card-title">{ &self.config.name }</span>
+                                { self.data.view(transactions) }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+
+    impl ConfiguredReportDataInner {
+        fn view(
+            &self,
+            transactions: &Rc<HashMap<String, Transaction>>,
+        ) -> Html<ConfiguredReportDataUi> {
+            match self {
+                ConfiguredReportDataInner::Simple(concrete) => concrete.view(transactions),
+                ConfiguredReportDataInner::ByTimeframe {
+                    data: concrete_map, ..
+                } => html! {
+                    {
+                        for concrete_map.iter().map(|(date, concrete)| html! {
+                            <>
+                                { date }
+                                { concrete.view(transactions) }
+                            </>
+                        })
+                    }
+                },
+            }
+        }
+    }
 }
 
 impl ConfiguredReports {

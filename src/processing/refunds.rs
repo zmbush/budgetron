@@ -79,7 +79,7 @@ impl Collate for RefundCollator {
         to_delete.reverse();
 
         for i in to_delete {
-            println!("Deleting refunded transaction {:?}", transactions[i]);
+            //println!("Deleting refunded transaction {:?}", transactions[i]);
             transactions.remove(i);
         }
 

@@ -82,3 +82,18 @@ impl Transaction {
         )
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+mod web {
+    use {super::*, yew::prelude::*};
+
+    impl<T: Component> Renderable<T> for Transaction {
+        fn view(&self) -> Html<T> {
+            html! {
+                <div>
+                    <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
+                </div>
+            }
+        }
+    }
+}
