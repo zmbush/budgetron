@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![deny(unused)]
+#![recursion_limit = "256"]
 
 pub mod error;
 pub mod loading;

@@ -69,15 +69,24 @@ pub struct RollingBudgetReport {
 
 #[cfg(target_arch = "wasm32")]
 mod web {
-    use {super::*, crate::reporting::web::ConfiguredReportDataUi, std::rc::Rc, yew::prelude::*};
+    use {
+        super::*,
+        crate::reporting::{
+            config::{ReportConfig, ReportType},
+            web::ConfiguredReportDataUi,
+        },
+        std::rc::Rc,
+        yew::prelude::*,
+    };
 
     impl RollingBudgetReport {
         pub fn view(
             &self,
+            config: &ReportConfig,
             transactions: &Rc<HashMap<String, Transaction>>,
         ) -> Html<ConfiguredReportDataUi> {
             html! {
-                <RollingBudgetUi report={self} transactions={Rc::clone(transactions)} />
+                <RollingBudgetUi report={self} config={config.clone()} transactions={Rc::clone(transactions)} />
             }
         }
     }
@@ -88,11 +97,15 @@ mod web {
         pub report: RollingBudgetReport,
 
         #[props(required)]
+        pub config: ReportConfig,
+
+        #[props(required)]
         pub transactions: Rc<HashMap<String, Transaction>>,
     }
 
     struct RollingBudgetUi {
         report: RollingBudgetReport,
+        config: ReportConfig,
         transactions: Rc<HashMap<String, Transaction>>,
         focus: Option<String>,
     }
@@ -105,12 +118,47 @@ mod web {
         type Message = Msg;
         type Properties = RollingBudgetUiProps;
 
-        fn create(props: RollingBudgetUiProps, _: ComponentLink<Self>) -> Self {
+        fn create(props: RollingBudgetUiProps, _link: ComponentLink<Self>) -> Self {
             RollingBudgetUi {
                 report: props.report,
+                config: props.config,
                 transactions: props.transactions,
                 focus: None,
             }
+        }
+
+        fn mounted(&mut self) -> ShouldRender {
+            if let Some(timeseries) = &self.report.timeseries {
+                let (max_y, min_y) = timeseries.0.iter().map(|d| d.value);
+                let min_x = format!("{}", timeseries.0[0].date);
+                let max_x = format!("{}", timeseries.0[timeseries.0.len() - 1].date);
+
+                stdweb::js! { @(no_return)
+                    var root = d3.select("#" + @{ self.graph_id() });
+                    // Jank
+                    var realWidth = root.node().parentNode.parentNode.getBoundingClientRect().width;
+
+                    var graph = root.append("svg")
+                        .attr("width", realWidth)
+                        .attr("height", "300");
+
+                    var xScale = d3.scaleLinear()
+                        .domain([new Date(@{min_x}), new Date(@{max_x})])
+                        .range([0, realWidth]);
+
+                    var yScale = d3.scaleLinear();
+
+                    graph.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + 300 + ")")
+                        .call(d3.axisBottom(xScale));
+
+                    graph.append("g")
+                        .attr("class", "y axis")
+                        .call(d3.axisLeft(yScale));
+                }
+            }
+            true
         }
 
         fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -163,16 +211,39 @@ mod web {
         }
 
         fn transactions_for(&self, name: &str) -> Html<Self> {
+            let split = if let ReportType::RollingBudget { split, .. } = &self.config.config {
+                split
+            } else {
+                "NOBODY"
+            };
             html! {
-                <>{
-                    for self.report.transactions.iter()
-                        .filter_map(|t| {
-                            self.transactions.get(t)
-                        })
-                        .filter(|t| t.person == name || t.person == "joint")
-                        .map(Transaction::view)
-                }</>
+                <tr>
+                    <td span=2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{ "Date" }</th>
+                                    <th>{ "Amount" }</th>
+                                    <th>{ "Person" }</th>
+                                    <th>{ "Description" }</th>
+                                </tr>
+                            </thead>
+                            <tbody>{
+                                for self.report.transactions.iter()
+                                    .filter_map(|t| {
+                                        self.transactions.get(t)
+                                    })
+                                    .filter(|t| t.person == name || t.person == split)
+                                    .map(Transaction::view)
+                            }</tbody>
+                        </table>
+                    </td>
+                </tr>
             }
+        }
+
+        fn graph_id(&self) -> String {
+            self.config.name.replace(" ", "_") + "-graph"
         }
     }
 
@@ -182,7 +253,7 @@ mod web {
 
             html! {
                 <div class="row">
-                    <div class="col c1">
+                    <div class="col c2">
                         <table>
                             <thead>
                                 <tr>
@@ -196,6 +267,9 @@ mod web {
                                 })
                             }</tbody>
                         </table>
+                    </div>
+                    <div class="col c10">
+                        <div id={ self.graph_id() } />
                     </div>
                 </div>
             }

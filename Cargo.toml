@@ -30,9 +30,10 @@ staticfile = "0.5.0"
 toml = "0.5.3"
 
 # Web UI
-yew = "0.9.0"
+yew = "0.9.2"
 failure = "0.1.6"
 web_logger = "0.2.0"
+stdweb = "0.4.20"
 
 [workspace]
 

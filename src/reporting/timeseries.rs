@@ -12,12 +12,12 @@ use {
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Timeseries<V>(Vec<TimeseriesDatum<V>>);
+pub struct Timeseries<V>(pub Vec<TimeseriesDatum<V>>);
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TimeseriesDatum<V> {
-    date: Date,
-    value: V,
+    pub date: Date,
+    pub value: V,
 }
 
 impl<V> Timeseries<V> {

@@ -37,9 +37,13 @@ macro_rules! make_concrete_report {
 
         #[cfg(target_arch = "wasm32")]
         impl ConcreteReport {
-            pub fn view(&self, transactions: &std::rc::Rc<HashMap<String, Transaction>>) -> Html<ConfiguredReportDataUi> {
+            pub fn view(
+                &self,
+                config: &crate::reporting::config::ReportConfig,
+                transactions: &std::rc::Rc<HashMap<String, Transaction>>
+            ) -> Html<ConfiguredReportDataUi> {
                 match self {
-                    $(ConcreteReport::$variant(inner) => inner.view(transactions)),*
+                    $(ConcreteReport::$variant(inner) => inner.view(config, transactions)),*
                 }
             }
         }

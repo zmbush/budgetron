@@ -52,6 +52,7 @@ pub struct IncomeExpenseReportType {
 impl IncomeExpenseReportType {
     pub fn view(
         &self,
+        _config: &crate::reporting::config::ReportConfig,
         _transactions: &HashMap<String, Transaction>,
     ) -> Html<ConfiguredReportDataUi> {
         html! {}

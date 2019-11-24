@@ -29,7 +29,7 @@ pub struct ConfiguredReports {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ReportConfig {
-    name: String,
+    pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     only_type: Option<TransactionType>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -38,7 +38,7 @@ pub struct ReportConfig {
     only_tags: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     only_owners: Option<Vec<String>>,
-    config: ReportType,
+    pub config: ReportType,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     old_configs: Vec<HistoricalConfig>,
     #[serde(default)]
@@ -313,7 +313,7 @@ pub mod web {
                         <div class="card">
                             <div class="card-content">
                                 <span class="card-title">{ &self.config.name }</span>
-                                { self.data.view(transactions) }
+                                { self.data.view(&self.config, transactions) }
                             </div>
                         </div>
                     </div>
@@ -325,10 +325,11 @@ pub mod web {
     impl ConfiguredReportDataInner {
         fn view(
             &self,
+            config: &ReportConfig,
             transactions: &Rc<HashMap<String, Transaction>>,
         ) -> Html<ConfiguredReportDataUi> {
             match self {
-                ConfiguredReportDataInner::Simple(concrete) => concrete.view(transactions),
+                ConfiguredReportDataInner::Simple(concrete) => concrete.view(config, transactions),
                 ConfiguredReportDataInner::ByTimeframe {
                     data: concrete_map, ..
                 } => html! {
@@ -336,7 +337,7 @@ pub mod web {
                         for concrete_map.iter().map(|(date, concrete)| html! {
                             <>
                                 { date }
-                                { concrete.view(transactions) }
+                                { concrete.view(config, transactions) }
                             </>
                         })
                     }

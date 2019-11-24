@@ -90,9 +90,18 @@ mod web {
     impl<T: Component> Renderable<T> for Transaction {
         fn view(&self) -> Html<T> {
             html! {
-                <div>
-                    <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
-                </div>
+                <tr>
+                    <td>{ self.date }</td>
+                    <td>{
+                        if self.transaction_type == TransactionType::Debit {
+                            (-self.amount).view()
+                        } else {
+                            self.amount.view()
+                        }
+                    }</td>
+                    <td>{ &self.person }</td>
+                    <td>{ &self.description }</td>
+                </tr>
             }
         }
     }

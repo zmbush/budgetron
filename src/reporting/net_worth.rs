@@ -25,6 +25,7 @@ pub struct NetWorthReport(BTreeMap<String, Money>);
 impl NetWorthReport {
     pub fn view(
         &self,
+        _config: &crate::reporting::config::ReportConfig,
         _transactions: &HashMap<String, Transaction>,
     ) -> Html<ConfiguredReportDataUi> {
         html! {}
