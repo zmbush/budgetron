@@ -55,7 +55,7 @@
     "tslint": "^5.20.0",
     "typescript": "^3.6.3",
     "typescript-formatter": "^7.2.2",
-    "webpack": "^4.41.0"
+    "webpack": "^4.41.3"
   },
   "devDependencies": {
     "webpack-cli": "^3.3.9"
