@@ -9,7 +9,7 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget},
+        reporting::{rolling_budget, Cashflow, Categories, IncomeExpenseRatio, Reporter},
     },
     budgetronlib::fintime::Date,
     serde::{Deserialize, Serialize},
@@ -34,8 +34,8 @@ pub struct Report {
     #[serde(skip_serializing_if = "Option::is_none")]
     only_owners: Option<Vec<String>>,
     config: ReportType,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    old_configs: Vec<HistoricalConfig>,
+    //#[serde(default, skip_serializing_if = "Vec::is_empty")]
+    //old_configs: Vec<HistoricalConfig>,
     #[serde(default)]
     ui_config: UIConfig,
 
@@ -63,13 +63,7 @@ pub struct HistoricalConfig {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "type")]
 pub enum ReportType {
-    RollingBudget {
-        start_date: Date,
-        split: String,
-        amounts: HashMap<String, Money>,
-        #[serde(default)]
-        options: ReportOptions,
-    },
+    RollingBudget(rolling_budget::RollingBudget),
     Cashflow {
         #[serde(default)]
         options: ReportOptions,
@@ -86,6 +80,15 @@ pub enum ReportType {
         #[serde(default)]
         options: ReportOptions,
     },
+}
+
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+pub struct RollingBudgetConfig {
+    start_date: Date,
+    split: String,
+    amounts: HashMap<String, Money>,
+    #[serde(default)]
+    options: ReportOptions,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
@@ -115,7 +118,7 @@ fn default_true() -> bool {
 }
 
 impl Report {
-    fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn inner_run_report<'a, I, R>(&self, reporter: &R, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
@@ -127,12 +130,12 @@ impl Report {
                 $(if self.$name {
                     retval.insert(
                         stringify!($name).to_owned(),
-                        reporter.$name().report(transactions.clone()),
+                        reporter.$name().report(transactions.clone(), end_date),
                     );
                 })*
 
                 if !($(self.$name)||*) {
-                    reporter.report(transactions)
+                    reporter.report(transactions, end_date)
                 } else {
                     Value::Object(retval)
                 }
@@ -144,65 +147,97 @@ impl Report {
         }
     }
 
-    fn filter_report_only_owners<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn filter_report_only_owners<'a, I, R>(
+        &self,
+        reporter: &R,
+        transactions: I,
+        end_date: Date,
+    ) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
         if let Some(ref only_owners) = self.only_owners {
-            self.inner_run_report(&reporter.only_owners(only_owners.clone()), transactions)
+            self.inner_run_report(
+                &reporter.only_owners(only_owners.clone()),
+                transactions,
+                end_date,
+            )
         } else {
-            self.inner_run_report(reporter, transactions)
+            self.inner_run_report(reporter, transactions, end_date)
         }
     }
 
-    fn filter_report_only_type<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn filter_report_only_type<'a, I, R>(
+        &self,
+        reporter: &R,
+        transactions: I,
+        end_date: Date,
+    ) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
         if let Some(only_type) = self.only_type {
-            self.filter_report_only_owners(&reporter.only_type(only_type), transactions)
+            self.filter_report_only_owners(&reporter.only_type(only_type), transactions, end_date)
         } else {
-            self.filter_report_only_owners(reporter, transactions)
+            self.filter_report_only_owners(reporter, transactions, end_date)
         }
     }
 
-    fn filter_report_only_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn filter_report_only_tags<'a, I, R>(
+        &self,
+        reporter: &R,
+        transactions: I,
+        end_date: Date,
+    ) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
         if let Some(ref only_tags) = self.only_tags {
-            self.filter_report_only_type(&reporter.only_tags(only_tags.clone()), transactions)
+            self.filter_report_only_type(
+                &reporter.only_tags(only_tags.clone()),
+                transactions,
+                end_date,
+            )
         } else {
-            self.filter_report_only_type(reporter, transactions)
+            self.filter_report_only_type(reporter, transactions, end_date)
         }
     }
 
-    fn filter_report_skip_tags<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn filter_report_skip_tags<'a, I, R>(
+        &self,
+        reporter: &R,
+        transactions: I,
+        end_date: Date,
+    ) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
         if let Some(ref skip_tags) = self.skip_tags {
-            self.filter_report_only_tags(&reporter.excluding_tags(skip_tags.clone()), transactions)
+            self.filter_report_only_tags(
+                &reporter.excluding_tags(skip_tags.clone()),
+                transactions,
+                end_date,
+            )
         } else {
-            self.filter_report_only_tags(reporter, transactions)
+            self.filter_report_only_tags(reporter, transactions, end_date)
         }
     }
 
-    fn run_report<'a, I, R>(&self, reporter: &R, transactions: I) -> Value
+    fn run_report<'a, I, R>(&self, reporter: &R, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
         R: Reporter,
     {
-        self.filter_report_skip_tags(reporter, transactions)
+        self.filter_report_skip_tags(reporter, transactions, end_date)
     }
 }
 
 impl Reporter for ConfiguredReports {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone,
     {
@@ -215,27 +250,18 @@ impl Reporter for ConfiguredReports {
                 .collect::<Vec<_>>()
                 .join("_");
             let value = match report_config.config {
-                ReportType::RollingBudget {
-                    start_date,
-                    ref split,
-                    ref amounts,
-                    ref options,
-                } => report_config.run_report(
-                    &RollingBudget::new_param(
-                        start_date,
-                        split.clone(),
-                        amounts.clone(),
-                        (*options).clone(),
-                    ),
-                    transactions.clone(),
-                ),
+                ReportType::RollingBudget(ref rolling_budget) => {
+                    report_config.run_report(rolling_budget, transactions.clone(), end_date)
+                }
                 ReportType::Cashflow { ref options } => report_config.run_report(
                     &Cashflow::with_options((*options).clone()),
                     transactions.clone(),
+                    end_date,
                 ),
                 ReportType::Categories { ref options } => report_config.run_report(
                     &Categories::with_options((*options).clone()),
                     transactions.clone(),
+                    end_date,
                 ),
                 ReportType::IncomeExpenseRatio {
                     ref income_tags,
@@ -244,6 +270,7 @@ impl Reporter for ConfiguredReports {
                 } => report_config.run_report(
                     &IncomeExpenseRatio::new(income_tags, expense_tags),
                     transactions.clone(),
+                    end_date,
                 ),
             };
 

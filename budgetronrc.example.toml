@@ -43,9 +43,10 @@ skip_tags = ['essential', 'recurring', 'ach']
 
 [report.config]
   type = "RollingBudget"
-  start_date = '10/01/2017'
   split = 'joint'
-  amounts = { Person1 = 100, Person2 = 100 }
+
+  [report.config.amounts]
+  '10/01/2017' = { Person1 = 100, Person2 = 100 }
 
 [[report]]
 name = "Cashflow"

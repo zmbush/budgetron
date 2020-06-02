@@ -11,7 +11,7 @@ use {
         loading::{Money, Transaction},
         processing::{regex::Regex, Collate, RefundCollator, TransferCollator},
     },
-    budgetronlib::error::BResult,
+    budgetronlib::{error::BResult, fintime::Date},
     serde::Deserialize,
     std::collections::HashMap,
 };
@@ -36,6 +36,9 @@ pub enum Processor {
     AddTags {
         tags: HashMap<String, TransactionMatcher>,
     },
+    OwnersForTag {
+        tag_owner: HashMap<String, String>,
+    },
     HideAccount {
         hide_accounts: Vec<String>,
     },
@@ -57,10 +60,25 @@ pub struct TransactionMatcher {
     category: Option<Vec<Regex>>,
     note: Option<Vec<Regex>>,
     range: Option<MoneyRange>,
+
+    only_before: Option<Date>,
+    only_after: Option<Date>,
 }
 
 impl TransactionMatcher {
     fn matches(&self, t: &Transaction) -> bool {
+        if let Some(only_before) = self.only_before {
+            if t.date > only_before {
+                return false;
+            }
+        }
+
+        if let Some(only_after) = self.only_after {
+            if t.date < only_after {
+                return false;
+            }
+        }
+
         if let Some(ref description) = self.description {
             if description
                 .iter()
@@ -149,6 +167,15 @@ impl Collate for Processor {
                     }
                 }
             }
+            OwnersForTag { ref tag_owner } => {
+                for transaction in &mut transactions {
+                    for (tag, owner) in tag_owner {
+                        if transaction.tags.contains(tag) {
+                            transaction.person = owner.to_owned();
+                        }
+                    }
+                }
+            }
             HideAccount { ref hide_accounts } => {
                 transactions.retain(|t| !hide_accounts.contains(&t.account_name))
             }
@@ -157,7 +184,6 @@ impl Collate for Processor {
             } => transactions.retain(|t| {
                 for d in hide_description {
                     if d.is_match(&t.description) {
-                        println!("Deleting transaction because it matches regex: {:?}", t);
                         return false;
                     }
                 }

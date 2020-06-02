@@ -55,19 +55,25 @@ fn main() {
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
 
+    let end_date = cow_transactions
+        .iter()
+        .map(|t| t.date)
+        .max()
+        .expect("No end date found");
+
     let reports: ConfiguredReports =
         config::load_cfg("budgetronrc.toml").expect("Configured Reports failed to load");
-    let report = reports.report(cow_transactions.into_iter());
+    let report = reports.report(cow_transactions.into_iter(), end_date);
 
     let cow_transactions = transactions
         .iter()
         .map(|t| Cow::Borrowed(t))
         .collect::<Vec<_>>();
     #[cfg(feature = "db")]
-    let transaction_list = (List, Database).report(cow_transactions.into_iter());
+    let transaction_list = (List, Database).report(cow_transactions.into_iter(), end_date);
 
     #[cfg(not(feature = "db"))]
-    let transaction_list = List.report(cow_transactions.into_iter());
+    let transaction_list = List.report(cow_transactions.into_iter(), end_date);
 
     if opt.serve {
         let mut mount = Mount::new();

@@ -11,14 +11,14 @@ use {
         loading::{Transaction, TransactionType},
         reporting::{by_account::ByAccount, by_timeframe::ByTimeframe},
     },
-    budgetronlib::fintime::Timeframe,
+    budgetronlib::fintime::{Date, Timeframe},
     serde,
     serde_json::Value,
     std::{borrow::Cow, fmt},
 };
 
 pub trait Reporter: Sized {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 
@@ -88,17 +88,9 @@ mod timeseries;
 #[cfg(feature = "db")]
 pub use crate::reporting::database::Database;
 pub use crate::reporting::{
-    by_account::ByAccountReport,
-    by_timeframe::ByTimeframeReport,
-    cashflow::Cashflow,
-    categories::Categories,
-    config::ConfiguredReports,
-    excluding_tags::ExcludingTags,
-    income_expense_ratio::IncomeExpenseRatio,
-    list::List,
-    net_worth::NetWorth,
-    only_owners::OnlyOwners,
-    only_tags::OnlyTags,
-    only_type::OnlyType,
-    rolling_budget::{RollingBudget, RollingBudgetConfig},
+    by_account::ByAccountReport, by_timeframe::ByTimeframeReport, cashflow::Cashflow,
+    categories::Categories, config::ConfiguredReports, excluding_tags::ExcludingTags,
+    income_expense_ratio::IncomeExpenseRatio, list::List, net_worth::NetWorth,
+    only_owners::OnlyOwners, only_tags::OnlyTags, only_type::OnlyType,
+    rolling_budget::RollingBudget,
 };
