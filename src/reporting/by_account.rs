@@ -97,10 +97,7 @@ where
         let mut retval = serde_json::map::Map::new();
         retval.insert("account".to_owned(), Value::String(self.account.clone()));
         if let Some(v) = self.inner.key() {
-            retval.insert(
-                v.to_owned(),
-                self.inner.report(transactions.into_iter(), end_date),
-            );
+            retval.insert(v, self.inner.report(transactions.into_iter(), end_date));
         } else {
             match self.inner.report(transactions.into_iter(), end_date) {
                 Value::Object(o) => {
