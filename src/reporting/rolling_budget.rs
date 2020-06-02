@@ -177,7 +177,14 @@ impl Reporter for RollingBudget {
             last_date.align_to_month();
             last_date += Timeframe::Months(1);
 
-            while last_date < end_date {
+            while end_date >= last_date {
+                if start_dates.len() > amount_index + 1
+                    && last_date >= *start_dates[amount_index + 1]
+                {
+                    amount_index += 1;
+                    amounts = &self.amounts[start_dates[amount_index]];
+                }
+
                 for (name, amount) in amounts {
                     let entry = report
                         .budgets
@@ -191,9 +198,11 @@ impl Reporter for RollingBudget {
                         }
                     }
                 }
+
                 if let Some(ref mut ts) = report.timeseries {
                     ts.add(last_date, report.budgets.clone());
                 }
+
                 last_date += Timeframe::Months(1);
             }
         }
