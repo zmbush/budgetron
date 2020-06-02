@@ -96,12 +96,20 @@ impl ops::Mul<f64> for Money {
     }
 }
 
-impl ops::Mul<i32> for Money {
-    type Output = Money;
-    fn mul(self, other: i32) -> Money {
-        self * f64::from(other)
-    }
+macro_rules! impl_mul {
+    ($($i:ident),*) => {
+        $(
+            impl ops::Mul<$i> for Money {
+                type Output = Money;
+                fn mul(self, other:$i) -> Money {
+                    self * f64::from(other)
+                }
+            }
+        )*
+    };
 }
+
+impl_mul! {u8, i8, u16, i16, u32, i32}
 
 impl ops::Div<Money> for Money {
     type Output = Money;

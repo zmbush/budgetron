@@ -17,37 +17,13 @@ use {
     std::{borrow::Cow, collections::HashMap},
 };
 
-#[derive(Debug, Deserialize)]
-pub struct RollingBudgetConfig {
-    rolling_budget: RollingBudget,
-}
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RollingBudget {
-    start_date: Date,
     split: String,
-    amounts: HashMap<String, Money>,
+    rollover_months: Option<u8>,
+    amounts: HashMap<Date, HashMap<String, Money>>,
+    #[serde(default)]
     options: ReportOptions,
-}
-
-impl RollingBudget {
-    pub fn new_param(
-        start_date: Date,
-        split: String,
-        amounts: HashMap<String, Money>,
-        options: ReportOptions,
-    ) -> RollingBudget {
-        RollingBudget {
-            start_date,
-            split,
-            amounts,
-            options,
-        }
-    }
-
-    pub fn new(cfg: RollingBudgetConfig) -> RollingBudget {
-        cfg.rolling_budget
-    }
 }
 
 #[derive(Debug, Serialize, Default)]
@@ -72,21 +48,25 @@ impl RollingBudget {
     }
 
     fn should_include(&self, transaction: &Transaction) -> bool {
-        transaction.date >= self.start_date
+        self.amounts.keys().any(|&k| transaction.date >= k)
             && TransactionType::Transfer != transaction.transaction_type
     }
 
-    fn proportions(&self) -> HashMap<&str, f64> {
-        let total = self.amounts.values().sum::<Money>().to_f64();
-        self.amounts
+    fn proportions(amounts: &HashMap<String, Money>) -> HashMap<&str, f64> {
+        let total = amounts.values().sum::<Money>().to_f64();
+        amounts
             .iter()
             .map(|(k, v)| (k.as_ref(), v.to_f64() / total))
             .collect()
     }
 
-    fn split_transaction(&self, transaction: &Transaction) -> HashMap<String, Money> {
+    fn split_transaction(
+        &self,
+        transaction: &Transaction,
+        amounts: &HashMap<String, Money>,
+    ) -> HashMap<String, Money> {
         if self.should_split(transaction) {
-            self.proportions()
+            RollingBudget::proportions(amounts)
                 .into_iter()
                 .map(|(k, v)| (k.to_string(), transaction.amount * v))
                 .collect()
@@ -103,8 +83,17 @@ impl Reporter for RollingBudget {
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {
+        let start_dates = {
+            let mut sd = self.amounts.keys().collect::<Vec<_>>();
+            sd.sort();
+            sd
+        };
+
+        let mut amount_index = 0;
+        let mut amounts = &self.amounts[start_dates[amount_index]];
+
         let mut report = RollingBudgetReport {
-            budgets: self.amounts.clone(),
+            budgets: amounts.clone(),
             breakdown: HashMap::new(),
             transactions: Vec::new(),
             timeseries: if self.options.include_graph {
@@ -113,29 +102,41 @@ impl Reporter for RollingBudget {
                 None
             },
         };
-        let mut month = self.start_date.month();
+        let mut month = start_dates[amount_index].month();
 
         if let Some(ref mut ts) = report.timeseries {
-            ts.add(self.start_date, self.amounts.clone());
+            ts.add(start_dates[amount_index].clone(), amounts.clone());
         }
         for transaction in transactions {
             if self.should_include(&transaction) {
+                if start_dates.len() > amount_index + 1
+                    && transaction.date >= *start_dates[amount_index + 1]
+                {
+                    amount_index += 1;
+                    amounts = &self.amounts[start_dates[amount_index]];
+                }
                 if transaction.date.month() != month {
                     let mut count = transaction.date.month() as i32 - month as i32;
                     if count < 0 {
                         count += 12;
                     }
-                    println!("Count: '{}'", count);
                     month = transaction.date.month();
-                    for (name, amount) in &self.amounts {
-                        *report
+                    for (name, amount) in amounts {
+                        let entry = report
                             .budgets
                             .entry(name.to_string())
-                            .or_insert_with(Money::zero) += (*amount) * count;
+                            .or_insert_with(Money::zero);
+                        *entry += (*amount) * count;
+                        if let Some(rollover_months) = self.rollover_months {
+                            let max_saved = *amount * rollover_months;
+                            if *entry > max_saved {
+                                *entry = max_saved;
+                            }
+                        }
                     }
                 }
                 let split = self.should_split(&transaction);
-                for (name, amount) in self.split_transaction(&transaction) {
+                for (name, amount) in self.split_transaction(&transaction, &amounts) {
                     let entry = report
                         .budgets
                         .entry(name.to_string())

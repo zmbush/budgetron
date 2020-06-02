@@ -35,9 +35,9 @@ export default class RollingBudget extends React.Component<IProps, IState> {
     }
   }
 
-  public proportions(): { [name: string]: number } {
+  public proportions(amounts: Map<string, string>): { [name: string]: number } {
     const parts: Array<[string, number]> = [
-      ...this.props.report.config.amounts.entries(),
+      ...amounts.entries(),
     ].map(([name, amount]) => [name, parseFloat(amount)]);
 
     const total = parts.map(([, amount]) => amount).reduce((s, v) => s + v, 0);
@@ -66,7 +66,7 @@ export default class RollingBudget extends React.Component<IProps, IState> {
               }
               transform={(t: Transaction) => {
                 if (t.person === this.props.report.config.split) {
-                  const proportion = this.proportions()[person];
+                  const proportion = this.proportions(this.amounts(t.date))[person];
                   let amount: number;
                   if (typeof t.amount === "string") {
                     amount = parseFloat(t.amount);
@@ -97,10 +97,10 @@ export default class RollingBudget extends React.Component<IProps, IState> {
     }
 
     let lineNames: Array<string | null> = [
-      ...this.props.report.config.amounts.keys(),
+      ...this.props.report.config.amounts.values().next().value.keys(),
     ];
     if (this.state.show !== "") {
-      lineNames = [...this.props.report.config.amounts.keys()].map((k) => {
+      lineNames = [...this.props.report.config.amounts.values().next().value.keys()].map((k) => {
         if (k === this.state.show) {
           return k;
         }
@@ -123,5 +123,15 @@ export default class RollingBudget extends React.Component<IProps, IState> {
         {this.renderTimeseries()}
       </div>
     );
+  }
+
+  private amounts(currentDate: Date): Map<string, string> {
+    let map = this.props.report.config.amounts.values().next().value;
+    for (const date of this.props.report.config.amounts.keys()) {
+      if (currentDate >= date) {
+        map = this.props.report.config.amounts.get(date);
+      }
+    }
+    return map;
   }
 }

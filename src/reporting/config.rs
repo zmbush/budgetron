@@ -9,7 +9,7 @@
 use {
     crate::{
         loading::{Money, Transaction, TransactionType},
-        reporting::{Cashflow, Categories, IncomeExpenseRatio, Reporter, RollingBudget},
+        reporting::{rolling_budget, Cashflow, Categories, IncomeExpenseRatio, Reporter},
     },
     budgetronlib::fintime::Date,
     serde::{Deserialize, Serialize},
@@ -34,8 +34,8 @@ pub struct Report {
     #[serde(skip_serializing_if = "Option::is_none")]
     only_owners: Option<Vec<String>>,
     config: ReportType,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    old_configs: Vec<HistoricalConfig>,
+    //#[serde(default, skip_serializing_if = "Vec::is_empty")]
+    //old_configs: Vec<HistoricalConfig>,
     #[serde(default)]
     ui_config: UIConfig,
 
@@ -63,13 +63,7 @@ pub struct HistoricalConfig {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(tag = "type")]
 pub enum ReportType {
-    RollingBudget {
-        start_date: Date,
-        split: String,
-        amounts: HashMap<String, Money>,
-        #[serde(default)]
-        options: ReportOptions,
-    },
+    RollingBudget(rolling_budget::RollingBudget),
     Cashflow {
         #[serde(default)]
         options: ReportOptions,
@@ -86,6 +80,15 @@ pub enum ReportType {
         #[serde(default)]
         options: ReportOptions,
     },
+}
+
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
+pub struct RollingBudgetConfig {
+    start_date: Date,
+    split: String,
+    amounts: HashMap<String, Money>,
+    #[serde(default)]
+    options: ReportOptions,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
@@ -215,20 +218,9 @@ impl Reporter for ConfiguredReports {
                 .collect::<Vec<_>>()
                 .join("_");
             let value = match report_config.config {
-                ReportType::RollingBudget {
-                    start_date,
-                    ref split,
-                    ref amounts,
-                    ref options,
-                } => report_config.run_report(
-                    &RollingBudget::new_param(
-                        start_date,
-                        split.clone(),
-                        amounts.clone(),
-                        (*options).clone(),
-                    ),
-                    transactions.clone(),
-                ),
+                ReportType::RollingBudget(ref rolling_budget) => {
+                    report_config.run_report(rolling_budget, transactions.clone())
+                }
                 ReportType::Cashflow { ref options } => report_config.run_report(
                     &Cashflow::with_options((*options).clone()),
                     transactions.clone(),

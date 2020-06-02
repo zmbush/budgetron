@@ -184,7 +184,6 @@ impl Collate for Processor {
             } => transactions.retain(|t| {
                 for d in hide_description {
                     if d.is_match(&t.description) {
-                        println!("Deleting transaction because it matches regex: {:?}", t);
                         return false;
                     }
                 }
