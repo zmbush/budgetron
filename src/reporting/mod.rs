@@ -11,14 +11,14 @@ use {
         loading::{Transaction, TransactionType},
         reporting::{by_account::ByAccount, by_timeframe::ByTimeframe},
     },
-    budgetronlib::fintime::Timeframe,
+    budgetronlib::fintime::{Date, Timeframe},
     serde,
     serde_json::Value,
     std::{borrow::Cow, fmt},
 };
 
 pub trait Reporter: Sized {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>> + Clone;
 

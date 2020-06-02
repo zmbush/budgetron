@@ -11,6 +11,7 @@ use {
         loading::{Money, Transaction, TransactionType},
         reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
     },
+    budgetronlib::fintime::Date,
     serde::Serialize,
     serde_json::{self, Value},
     std::{borrow::Cow, fmt},
@@ -52,7 +53,7 @@ impl CashflowReport {
 }
 
 impl Reporter for Cashflow {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, _: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {

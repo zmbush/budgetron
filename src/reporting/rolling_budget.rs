@@ -11,7 +11,7 @@ use {
         loading::{Money, Transaction, TransactionType},
         reporting::{config::ReportOptions, timeseries::Timeseries, Reporter},
     },
-    budgetronlib::fintime::Date,
+    budgetronlib::fintime::{Date, Timeframe},
     serde::{Deserialize, Serialize},
     serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
@@ -79,7 +79,7 @@ impl RollingBudget {
 }
 
 impl Reporter for RollingBudget {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {
@@ -91,6 +91,7 @@ impl Reporter for RollingBudget {
 
         let mut amount_index = 0;
         let mut amounts = &self.amounts[start_dates[amount_index]];
+        let mut last_date = None;
 
         let mut report = RollingBudgetReport {
             budgets: amounts.clone(),
@@ -109,6 +110,7 @@ impl Reporter for RollingBudget {
         }
         for transaction in transactions {
             if self.should_include(&transaction) {
+                last_date = Some(transaction.date);
                 if start_dates.len() > amount_index + 1
                     && transaction.date >= *start_dates[amount_index + 1]
                 {
@@ -169,6 +171,30 @@ impl Reporter for RollingBudget {
                 if let Some(ref mut ts) = report.timeseries {
                     ts.add(transaction.date, report.budgets.clone());
                 }
+            }
+        }
+        if let Some(mut last_date) = last_date {
+            last_date.align_to_month();
+            last_date += Timeframe::Months(1);
+
+            while last_date < end_date {
+                for (name, amount) in amounts {
+                    let entry = report
+                        .budgets
+                        .entry(name.to_string())
+                        .or_insert_with(Money::zero);
+                    *entry += *amount;
+                    if let Some(rollover_months) = self.rollover_months {
+                        let max_saved = *amount * rollover_months;
+                        if *entry > max_saved {
+                            *entry = max_saved;
+                        }
+                    }
+                }
+                if let Some(ref mut ts) = report.timeseries {
+                    ts.add(last_date, report.budgets.clone());
+                }
+                last_date += Timeframe::Months(1);
             }
         }
         serde_json::to_value(&report).expect("Couldn't serialize")

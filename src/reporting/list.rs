@@ -1,13 +1,13 @@
 use {
     crate::{loading::Transaction, reporting::Reporter},
-    budgetronlib::fintime::Timeframe,
+    budgetronlib::fintime::{Date, Timeframe},
     serde_json::{self, Value},
     std::{borrow::Cow, collections::HashMap},
 };
 
 pub struct List;
 impl Reporter for List {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, _: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {

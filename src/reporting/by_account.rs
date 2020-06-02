@@ -11,6 +11,7 @@ use {
         loading::{Transaction, TransactionType},
         reporting::Reporter,
     },
+    budgetronlib::fintime::Date,
     serde::Serialize,
     serde_json::{self, Value},
     std::{borrow::Cow, fmt},
@@ -62,7 +63,7 @@ impl<'a, T> Reporter for ByAccount<'a, T>
 where
     T: Reporter,
 {
-    fn report<'b, I>(&self, transactions: I) -> Value
+    fn report<'b, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
@@ -96,9 +97,12 @@ where
         let mut retval = serde_json::map::Map::new();
         retval.insert("account".to_owned(), Value::String(self.account.clone()));
         if let Some(v) = self.inner.key() {
-            retval.insert(v.to_owned(), self.inner.report(transactions.into_iter()));
+            retval.insert(
+                v.to_owned(),
+                self.inner.report(transactions.into_iter(), end_date),
+            );
         } else {
-            match self.inner.report(transactions.into_iter()) {
+            match self.inner.report(transactions.into_iter(), end_date) {
                 Value::Object(o) => {
                     for (k, v) in o {
                         retval.insert(k, v);

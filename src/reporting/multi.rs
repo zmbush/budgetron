@@ -8,6 +8,7 @@
 
 use {
     crate::{loading::Transaction, reporting::Reporter},
+    budgetronlib::fintime::Date,
     serde_json::{map::Map, Value},
     std::borrow::Cow,
 };
@@ -20,14 +21,14 @@ macro_rules! tuple_impls {
     )+) => {
         $(
             impl<$($T:Reporter),+> Reporter for ($($T),+) {
-                fn report<'a, It>(&self, transactions: It) -> Value
+                fn report<'a, It>(&self, transactions: It, end_date: Date) -> Value
                     where It: Iterator<Item = Cow<'a, Transaction>> + Clone {
                         let mut retval = Map::new();
                         $(
                             if let Some(v) = self.$idx.key() {
-                                retval.insert(v.to_owned(), self.$idx.report(transactions.clone()));
+                                retval.insert(v.to_owned(), self.$idx.report(transactions.clone(), end_date));
                             } else {
-                                match self.$idx.report(transactions.clone()) {
+                                match self.$idx.report(transactions.clone(), end_date) {
                                     Value::Object(o) => for (k, v) in o {
                                         retval.insert(k, v);
                                     },

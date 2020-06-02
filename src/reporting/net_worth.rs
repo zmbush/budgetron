@@ -11,6 +11,7 @@ use {
         loading::{Money, Transaction, TransactionType},
         reporting::Reporter,
     },
+    budgetronlib::fintime::Date,
     serde_json::{self, Value},
     std::{borrow::Cow, collections::BTreeMap},
 };
@@ -18,7 +19,7 @@ use {
 pub struct NetWorth;
 
 impl Reporter for NetWorth {
-    fn report<'a, I>(&self, transactions: I) -> Value
+    fn report<'a, I>(&self, transactions: I, _: Date) -> Value
     where
         I: Iterator<Item = Cow<'a, Transaction>>,
     {

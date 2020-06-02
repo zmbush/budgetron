@@ -8,6 +8,7 @@
 
 use {
     crate::{loading::Transaction, reporting::Reporter},
+    budgetronlib::fintime::Date,
     serde_json::Value,
     std::borrow::Cow,
 };
@@ -33,13 +34,13 @@ impl<'a, T> Reporter for OnlyOwners<'a, T>
 where
     T: Reporter,
 {
-    fn report<'b, I>(&self, transactions: I) -> Value
+    fn report<'b, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
         let (transactions, _): (Vec<_>, Vec<_>) =
             transactions.partition(|t| self.owners.iter().any(|owner| t.person == *owner));
-        self.inner.report(transactions.into_iter())
+        self.inner.report(transactions.into_iter(), end_date)
     }
 
     fn key(&self) -> Option<String> {

@@ -68,7 +68,7 @@ impl<'a, T> Reporter for ByTimeframe<'a, T>
 where
     T: Reporter,
 {
-    fn report<'b, I>(&self, transactions: I) -> Value
+    fn report<'b, I>(&self, transactions: I, end_date: Date) -> Value
     where
         I: Iterator<Item = Cow<'b, Transaction>>,
     {
@@ -92,7 +92,7 @@ where
                 .into_iter()
                 .partition(|t| t.date >= date && t.date < date + self.timeframe);
             transactions = remaining;
-            by_timeframe.insert(date, self.inner.report(current.into_iter()));
+            by_timeframe.insert(date, self.inner.report(current.into_iter(), end_date));
             date += self.timeframe;
         }
 
