@@ -17,7 +17,7 @@
     "@types/moment": "^2.13.0",
     "@types/react": "^16.9.5",
     "@types/react-dom": "^16.9.1",
-    "@types/recharts": "^1.1.21",
+    "@types/recharts": "^1.8.13",
     "airbnb-prop-types": "^2.8.1",
     "babel-loader": "^8.0.6",
     "babel-plugin-flow-react-proptypes": "^25.1.0",
