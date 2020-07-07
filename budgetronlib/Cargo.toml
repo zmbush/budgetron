@@ -5,7 +5,7 @@ authors = ["Zach Bush <zach@zmbush.com>"]
 edition = "2018"
 
 [dependencies]
-chrono = "0.4.9"
+chrono = "0.4.13"
 serde = { version = "1.0.101", features = ["derive"] }
 toml = "0.5.3"
 csv = "1.1.1"
