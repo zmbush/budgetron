@@ -858,19 +858,13 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/recharts-scale@*":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/recharts-scale/-/recharts-scale-1.0.0.tgz#348c9220d6d9062c44a9d585d686644a97f7e25d"
-  integrity sha512-HR/PrCcxYb2YHviTqH7CMdL1TUhUZLTUKzfrkMhxm1HTa5mg/QtP8XMiuSPz6dZ6wecazAOu8aYZ5DqkNlgHHQ==
-
-"@types/recharts@^1.1.21":
-  version "1.1.21"
-  resolved "https://registry.yarnpkg.com/@types/recharts/-/recharts-1.1.21.tgz#3095036f0c46b3e35065675223b303184d9a980a"
-  integrity sha512-QLs9hT+ozhtR7PrS+Tm7PvaXDcYYAlv7Rz0xNxC8aJnJS+vyhDB9taR1kOTltgiXLh1YEwrenDIznf/Kka3uiA==
+"@types/recharts@^1.8.14":
+  version "1.8.14"
+  resolved "https://registry.yarnpkg.com/@types/recharts/-/recharts-1.8.14.tgz#7fcbf9346db415d417910f5ce17af4e3e8e42c57"
+  integrity sha512-Q4NR9vgmugOELYY/8lXzs99nf9E1/fDWx6ZTVEjAtOhAbqXYFrepyQKa4+bR4mHl1F2WcYgf96fvWIu7It6rmA==
   dependencies:
     "@types/d3-shape" "*"
     "@types/react" "*"
-    "@types/recharts-scale" "*"
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
