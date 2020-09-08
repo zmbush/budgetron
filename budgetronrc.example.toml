@@ -1,20 +1,41 @@
+# budgetronrc.toml is expected to exist in the home directory of your computer  (~/budgetronrc.toml). This file has two
+# sections Processors, and Reports
+
+# This is the Processors section. This includes configuration details for  hiding transactions, deleting transfers,
+# recategorizing, and adding tags.
+
+# A "Hide Accounts" processor. Use this if you have certain accounts in your  csv exports that you don't want to include
+# in any reports
 [[processor]]
 hide_accounts = ["bad account"]
 
+# A "Transfer Horizon" processor. This is the number of transactions before and  # after a transaction for which an
+ opposite but equal transaction will be  # considered a transfer. These transfers are then merged and converted into a  #
+ "Transfer" transaction.
 [[processor]]
 transfer_horizon = 100
 
+# A "Refund Horizon" processor. This is similar to "Transfer Horizon" except the refunded transactions are deleted,
+# rather than merged.
+[[processor]]
+refund_horizon = 100
+
+# This is the "Categories" processor. There should only be one of these per  config, it includes a mapping from more
+# specific categories to more general  ones.
 [[processor]]
 [processor.categories]
 "Auto Payment" = []
 Automobile = ["Auto & Transport", "Gas & Fuel"]
 Entertainment = ["Movies & DVDs", "Music", "Arts"]
 
+# This is the "Owners" processor. This allows budgetron to support transaction owners. You can map transactions to
+# owners by account name, category, description, or note. A transaction can only have 1 owner.
 [[processor]]
 [processor.owners.joint]
 account = ["Joint.*"]
 category = ["Gas & Fuel"]
 description = ["WASTE MGMT"]
+note = ["Joint"]
 
 [processor.owners.Person1]
 account = ["Person1Account"]
@@ -22,9 +43,14 @@ account = ["Person1Account"]
 [processor.owners.Person3]
 description = ["OWNER 2"]
 
+# This is the "Owner Override" processor. It allows you (by adding a note to a transaction) to override which owner a
+# transaction is assigned to. The override should have a single regex match group that is the new owners name.
 [[processor]]
 owner_override = "Owner: (.*)"
 
+# This is the "Tags" processor. A transaction can have any number of tags, and tags become useful for filtering which
+# transactions are included in reports. The matching of transactions for tags use the same matching logic as the
+# "Owners" processor.
 [[processor]]
 [processor.tags.essential]
 description = ["COMCAST", "COSTCO WHSE"]
@@ -36,19 +62,56 @@ description = ["Hulu", "Google *Music"]
 [processor.tags.ach]
 description = ["ACH"]
 
+# Here is an example method for assigning 'size' tags to all transactions.
+[processor.tags]
+tiny = { range = { low = 0.0, high = 5.0 } }
+small = { range = { low = 5.0, high = 25.0 } }
+medium = { range = { low = 25.0, high = 125.0 } }
+big = { range = { low = 125.0, high = 625.0 } }
+huge = { range = { low = 625.0, high = 3125.0 } }
+massive = { range = { low = 3125.0, high = 15625.0 } }
+colossal = { range = { low = 15625.0, high = 1000000.0 } }
 
+# This begins the Reports section. There are several different types of reports available.
+# These include:
+#   - RollingBudget: A budget that adds a fixed amount of money every month, and any excess rolls over from month to
+#                    month.
+#   - Cashflow: Shows the money in, money out, and net
+#   - Categories: Shows transactions grouped by their category (as categorized by the "Categories" processor)
+
+# A report has several parts. First, the general configuration that is present for all report types.
 [[report]]
-name = "Rolling Budget"
-skip_tags = ['essential', 'recurring', 'ach']
+name = "Rolling Budget"                 # The name to show in the UI.
+only_type = "Debit"                     # Limits a report to a particular transaction type (Debit, Credit, Transfer).
+skip_tags = ['essential', 'recurring']  # Which tags should *not* be included in this report.
+only_tags = ['ach']                     # Limits a report to *only* the specified tags.
+only_owners = ["Person1"]               # Limits a report to *only* the spocified owner.
 
+# These determine for which time periods the report will be run.
+by_week = true
+by_month = true
+by_quarter = true
+by_year = true
+
+# This is the report-specific configuration
 [report.config]
-  type = "RollingBudget"
-  split = 'joint'
+  type = "RollingBudget" # Specifies which type of report (in this case RollingBudget)
+  start_date = "10/01/2017" # The date at which the rolling budget tracking should start
+  split = 'joint' # Which transactions to consider as "split" between various owners. The split is proportional to the
+                  # budget amount.
 
+  # This is how much should be allocated to each person every month. The date specifies when the values start.
   [report.config.amounts]
   '10/01/2017' = { Person1 = 100, Person2 = 100 }
 
+# This is a "Cashflow" report. Much simpler.
 [[report]]
 name = "Cashflow"
 config = { type = "Cashflow" }
 by_month = true
+
+# This is a "Categories" report. Also very simple.
+[[report]]
+name = "Person1 Categories"
+config = { type = "Categories" }
+only_owners = ["Person1"]
