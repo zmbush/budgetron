@@ -10,8 +10,8 @@
 hide_accounts = ["bad account"]
 
 # A "Transfer Horizon" processor. This is the number of transactions before and  # after a transaction for which an
- opposite but equal transaction will be  # considered a transfer. These transfers are then merged and converted into a  #
- "Transfer" transaction.
+# opposite but equal transaction will be considered a transfer. These transfers are then merged and converted into a
+# "Transfer" transaction.
 [[processor]]
 transfer_horizon = 100
 
