@@ -143,7 +143,8 @@ fn from_file_inferred<P: AsRef<Path> + Copy>(filename: P) -> BResult<Vec<Transac
         Transaction,
         mint::MintExport,
         logix::LogixExport,
-        alliant::AlliantExport
+        alliant::AlliantExport1,
+        alliant::AlliantExport2
     );
     Err(BudgetError::Multi(errors))
 }
@@ -154,6 +155,7 @@ pub fn load_from_files<P: AsRef<Path> + Display, Files: Iterator<Item = P>>(
     let mut transactions = Vec::new();
     for filename in filenames {
         info!("Opening file: {}", filename);
+        log::error!("Opening file: {}", filename);
         transactions.append(&mut from_file_inferred(&filename)?);
     }
 

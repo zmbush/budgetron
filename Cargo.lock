@@ -111,6 +111,7 @@ name = "budgetron"
 version = "2.0.0-0.0.3"
 dependencies = [
  "budgetronlib 0.1.0",
+ "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "iron 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
