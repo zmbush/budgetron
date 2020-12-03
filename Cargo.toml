@@ -12,7 +12,7 @@ doc = false
 # Both
 budgetronlib = { path = "budgetronlib" }
 serde = { version = "1.0.101", features = ["derive"] }
-serde_json = "1.0.40"
+serde_json = "1.0.60"
 
 # Library
 csv = "1.1.1"
